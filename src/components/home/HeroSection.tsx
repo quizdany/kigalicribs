@@ -60,7 +60,7 @@ const HeroSection = () => {
             width={1200}
             height={450}
             className="rounded-xl shadow-2xl mx-auto"
-            data-ai-hint="kigali convention"
+            data-ai-hint="kigali convention night"
             priority
           />
         </motion.div>
