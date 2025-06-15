@@ -55,12 +55,12 @@ const HeroSection = () => {
           className="mt-16"
         >
           <Image 
-            src="https://placehold.co/1200x600.png" 
-            alt="Beautiful homes in Kigali"
+            src="https://placehold.co/1200x450.png" 
+            alt="Kigali Convention Centre and city skyline at night"
             width={1200}
-            height={600}
+            height={450}
             className="rounded-xl shadow-2xl mx-auto"
-            data-ai-hint="cityscape kigali"
+            data-ai-hint="kigali convention"
             priority
           />
         </motion.div>
