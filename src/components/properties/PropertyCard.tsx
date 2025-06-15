@@ -17,6 +17,8 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, tenantLoggedIn })
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency, minimumFractionDigits: 0 }).format(amount);
   };
 
+  const googleMapsSearchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(property.location)}`;
+
   return (
     <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col h-full">
       <CardHeader className="p-0 relative">
@@ -56,10 +58,16 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, tenantLoggedIn })
           </div>
         )}
 
-        <div className="text-muted-foreground text-sm mb-3 flex items-center">
+        <a 
+          href={googleMapsSearchUrl} 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="text-muted-foreground text-sm mb-3 flex items-center hover:text-primary transition-colors"
+          aria-label={`View ${property.location} on Google Maps`}
+        >
           <MapPin className="h-4 w-4 mr-1 text-primary" />
           {property.location}
-        </div>
+        </a>
         
         <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm mb-3 text-foreground">
           <span className="flex items-center"><BedDouble className="h-4 w-4 mr-1 text-primary/80" /> {property.bedrooms} beds</span>
