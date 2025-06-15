@@ -8,6 +8,12 @@ export function calculateAverageRating(reviews: Review[] | undefined): number | 
   return parseFloat((totalRating / reviews.length).toFixed(1));
 }
 
+const newImageUrls = [
+  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSvGRkpCStIYEKfz8Uczv2NzkMQONYGGZYKNQ&s',
+  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSN8pnzkXuwnJEhGzd1RAxL7XN3JxRk-gbGYg&s',
+  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_uazvKp_XvizF1fzequ8vRJcm14jfNDzx6g&s'
+];
+
 const initialMockProperties: Omit<Property, 'averageRating' | 'reviews'>[] = [
   {
     id: 'prop1_rem_studio',
@@ -22,8 +28,8 @@ const initialMockProperties: Omit<Property, 'averageRating' | 'reviews'>[] = [
     area: 35,
     amenities: ['WiFi', 'Parking', 'Kitchenette', 'Water Heater'],
     photos: [
-      'https://placehold.co/600x400.png?text=Remera+Studio+Living',
-      'https://placehold.co/600x400.png?text=Remera+Studio+Kitchen',
+      newImageUrls[0],
+      newImageUrls[1],
     ],
     propertyType: 'Apartment',
     listedDate: '2024-07-01T10:00:00Z',
@@ -48,8 +54,8 @@ const initialMockProperties: Omit<Property, 'averageRating' | 'reviews'>[] = [
     area: 55,
     amenities: ['Parking', 'Balcony/Patio', 'Kitchen Appliances', 'Security System', 'WiFi Access'],
     photos: [
-      'https://placehold.co/600x400.png?text=Kimironko+1-Bed+Apt',
-      'https://placehold.co/600x400.png?text=Kimironko+Apt+View',
+      newImageUrls[2],
+      newImageUrls[0], // Re-use image
     ],
     propertyType: 'Apartment',
     listedDate: '2024-06-15T14:30:00Z',
@@ -73,7 +79,10 @@ const initialMockProperties: Omit<Property, 'averageRating' | 'reviews'>[] = [
     bathrooms: 2,
     area: 95,
     amenities: ['Parking', 'Security System', 'Balcony/Patio', 'Water Tank', 'Garden Access'],
-    photos: ['https://placehold.co/600x400.png?text=Gisozi+2-Bed+Living', 'https://placehold.co/600x400.png?text=Gisozi+Bedroom'],
+    photos: [
+        newImageUrls[1], // Re-use image
+        newImageUrls[2], // Re-use image
+    ],
     propertyType: 'Apartment',
     listedDate: '2024-05-20T09:00:00Z',
     agent: { name: 'Gisozi Homes', phone: '+250781234500', email: 'contact@gisozihomes.rw' },
@@ -97,7 +106,7 @@ const initialMockProperties: Omit<Property, 'averageRating' | 'reviews'>[] = [
     area: 50,
     amenities: ['Parking', 'Kitchenette', 'Water Heater'],
     photos: [
-      'https://placehold.co/600x400.png?text=Kicukiro+Overpriced+Flat',
+      newImageUrls[0], // Re-use image
     ],
     propertyType: 'Apartment',
     listedDate: '2024-07-05T11:00:00Z',
