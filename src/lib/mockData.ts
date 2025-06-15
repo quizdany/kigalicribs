@@ -271,5 +271,3 @@ export function addReviewToProperty(propertyId: string, reviewData: Omit<Review,
 
   return newReview;
 }
-
-```
