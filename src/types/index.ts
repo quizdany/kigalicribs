@@ -1,3 +1,4 @@
+
 export interface Property {
   id: string;
   title: string;
@@ -65,3 +66,5 @@ export const kigaliLocations = [
 ];
 
 export const currencies = ["RWF", "USD"];
+
+export const SELECT_ANY_VALUE = "%%ANY%%";

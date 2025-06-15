@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -14,7 +15,7 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { propertyTypes, kigaliLocations, amenityList, currencies } from "@/types";
+import { propertyTypes, kigaliLocations, amenityList, currencies, SELECT_ANY_VALUE } from "@/types";
 import { Filter, RotateCcw } from "lucide-react";
 
 export interface Filters {
@@ -36,13 +37,13 @@ interface PropertyFiltersProps {
 
 const defaultFilters: Filters = {
   searchTerm: "",
-  location: "",
-  propertyType: "",
+  location: "", // Empty string means placeholder will be shown for Select
+  propertyType: "", // Empty string means placeholder will be shown for Select
   minPrice: 0,
-  maxPrice: 5000000, // Default max RWF or equivalent USD
+  maxPrice: 5000000, 
   priceCurrency: "RWF",
-  bedrooms: 0, // 0 means any
-  bathrooms: 0, // 0 means any
+  bedrooms: 0, 
+  bathrooms: 0, 
   amenities: [],
 };
 
@@ -107,7 +108,7 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
                 <SelectValue placeholder="Any Location" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Any Location</SelectItem>
+                <SelectItem value={SELECT_ANY_VALUE}>Any Location</SelectItem>
                 {kigaliLocations.map(loc => <SelectItem key={loc} value={loc}>{loc}</SelectItem>)}
               </SelectContent>
             </Select>
@@ -126,7 +127,7 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
                 <SelectValue placeholder="Any Type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Any Type</SelectItem>
+                <SelectItem value={SELECT_ANY_VALUE}>Any Type</SelectItem>
                 {propertyTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
               </SelectContent>
             </Select>
@@ -201,7 +202,7 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
         <AccordionItem value="amenities">
           <AccordionTrigger className="text-base">Amenities</AccordionTrigger>
           <AccordionContent className="space-y-2 max-h-60 overflow-y-auto">
-            {amenityList.slice(0,10).map(amenity => ( // Show a subset
+            {amenityList.slice(0,10).map(amenity => ( 
               <div key={amenity} className="flex items-center space-x-2">
                 <Checkbox
                   id={`amenity-${amenity}`}

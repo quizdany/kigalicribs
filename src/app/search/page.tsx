@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
@@ -6,6 +7,7 @@ import PropertyList from '@/components/properties/PropertyList';
 import MapViewPlaceholder from '@/components/properties/MapViewPlaceholder';
 import { mockProperties } from '@/lib/mockData';
 import type { Property } from '@/types';
+import { SELECT_ANY_VALUE } from '@/types'; // Import the constant
 import { Button } from '@/components/ui/button';
 import { List, Map } from 'lucide-react';
 
@@ -32,10 +34,10 @@ export default function SearchPage() {
           p.description.toLowerCase().includes(filters.searchTerm!.toLowerCase())
         );
       }
-      if (filters.location) {
+      if (filters.location && filters.location !== SELECT_ANY_VALUE) {
         results = results.filter(p => p.location.includes(filters.location!));
       }
-      if (filters.propertyType) {
+      if (filters.propertyType && filters.propertyType !== SELECT_ANY_VALUE) {
         results = results.filter(p => p.propertyType === filters.propertyType);
       }
       if (filters.bedrooms && filters.bedrooms > 0) {
