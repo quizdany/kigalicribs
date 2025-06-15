@@ -107,7 +107,7 @@ const PropertyInfo: React.FC<PropertyInfoProps> = ({ property }) => {
           <>
             <Separator />
             <div>
-              <h3 className="text-xl font-semibold mb-3">Contact Agent</h3>
+              <h3 className="text-xl font-semibold mb-3">Contact Owner</h3>
               <div className="space-y-2 text-md">
                 <div className="flex items-center"><UserCircle className="h-5 w-5 mr-2 text-primary/80" /> {property.agent.name}</div>
                 {property.agent.email && 
