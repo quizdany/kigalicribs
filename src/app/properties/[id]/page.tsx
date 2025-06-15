@@ -104,14 +104,14 @@ export default async function PropertyDetailsPage({ params }: PropertyDetailsPag
             </CardHeader>
             <CardContent className="space-y-3">
               <p className="text-sm text-muted-foreground">
-                Contact the agent or proceed to lease agreement if available.
+                Contact the owner or proceed to lease agreement if available.
               </p>
               <Button size="lg" className="w-full" asChild>
                 <Link href={`/lease/${property.id}`}>View Lease Options</Link>
               </Button>
               {property.agent?.phone && (
                  <Button variant="outline" size="lg" className="w-full" asChild>
-                    <a href={`tel:${property.agent.phone}`}>Call Agent</a>
+                    <a href={`tel:${property.agent.phone}`}>Call Owner</a>
                  </Button>
               )}
             </CardContent>

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,9 +25,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { amenityList, propertyTypes, kigaliLocations, currencies } from "@/types";
+import { amenityList, propertyTypes, kigaliLocations, currencies, type PropertyFormData } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { createPropertyListing } from "@/lib/actions"; // Assuming server action
+import { createPropertyListing } from "@/lib/actions"; 
+import { addPropertyToMockData } from "@/lib/mockData"; // For prototype: add to client-side mock data
 import { UploadCloud } from "lucide-react";
 
 const formSchema = z.object({
@@ -48,8 +50,6 @@ const formSchema = z.object({
   featuresForAI: z.string().min(10, "Please provide key features for AI analysis.").max(500).optional(),
   marketTrendsForAI: z.string().min(10, "Please provide market context for AI analysis.").max(500).optional(),
 });
-
-export type PropertyFormData = z.infer<typeof formSchema>;
 
 export default function PropertyForm() {
   const { toast } = useToast();
@@ -77,21 +77,26 @@ export default function PropertyForm() {
   });
 
   async function onSubmit(values: PropertyFormData) {
-    // try {
-    //   await createPropertyListing(values); // Server action call
+    try {
+      // For prototype: add to client-side mock data for immediate feedback
+      addPropertyToMockData(values); 
+      
+      // Intended server action call (currently logs to console)
+      await createPropertyListing(values); 
+
       toast({
         title: "Property Listed!",
-        description: "Your property has been successfully listed.",
+        description: "Your property has been successfully listed (in mock data for now).",
       });
       form.reset();
-    // } catch (error) {
-    //   toast({
-    //     title: "Error",
-    //     description: "Failed to list property. Please try again.",
-    //     variant: "destructive",
-    //   });
-    // }
-    console.log(values); // Placeholder
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to list property. Please try again.",
+        variant: "destructive",
+      });
+      console.error("Property listing error:", error);
+    }
   }
 
   return (
@@ -307,7 +312,7 @@ export default function PropertyForm() {
                   <FormDescription>Enter URLs for photos, one per line. (Placeholder for file upload)</FormDescription>
                   <FormControl>
                     <Textarea 
-                      placeholder="https://example.com/photo1.jpg&#x0a;https://example.com/photo2.jpg" 
+                      placeholder="https://example.com/photo1.jpg\nhttps://example.com/photo2.jpg" 
                       {...field}
                       onChange={(e) => field.onChange(e.target.value.split('\n').map(url => url.trim()).filter(url => url))}
                       value={Array.isArray(field.value) ? field.value.join('\n') : ''}
@@ -323,10 +328,10 @@ export default function PropertyForm() {
               )}
             />
 
-            <h3 className="text-lg font-semibold pt-4 border-t">Agent/Owner Information (Optional)</h3>
+            <h3 className="text-lg font-semibold pt-4 border-t">Owner/Contact Information (Optional)</h3>
              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <FormField control={form.control} name="agentName" render={({ field }) => ( <FormItem> <FormLabel>Name</FormLabel> <FormControl><Input placeholder="Agent or Owner Name" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-              <FormField control={form.control} name="agentEmail" render={({ field }) => ( <FormItem> <FormLabel>Email</FormLabel> <FormControl><Input type="email" placeholder="agent@example.com" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+              <FormField control={form.control} name="agentName" render={({ field }) => ( <FormItem> <FormLabel>Name</FormLabel> <FormControl><Input placeholder="Owner or Contact Name" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+              <FormField control={form.control} name="agentEmail" render={({ field }) => ( <FormItem> <FormLabel>Email</FormLabel> <FormControl><Input type="email" placeholder="contact@example.com" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
               <FormField control={form.control} name="agentPhone" render={({ field }) => ( <FormItem> <FormLabel>Phone</FormLabel> <FormControl><Input type="tel" placeholder="+250 7XX XXX XXX" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
             </div>
             

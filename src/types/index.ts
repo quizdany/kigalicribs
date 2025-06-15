@@ -23,7 +23,7 @@ export interface Property {
   photos: string[]; // URLs of photos
   propertyType: 'Apartment' | 'House' | 'Office' | 'Retail' | 'Villa' | 'Commercial';
   listedDate: string; // ISO date string
-  agent?: {
+  agent?: { // Can be agent or owner info
     name: string;
     phone: string;
     email: string;
@@ -63,6 +63,28 @@ export interface TenantProfile {
     additionalNotes?: string; // For AI tenant preferences string
   };
 }
+
+// Corresponds to the Zod schema in PropertyForm.tsx
+export interface PropertyFormData {
+  title: string;
+  description: string;
+  price: number;
+  currency: string;
+  location: string; // This is just the neighborhood, e.g., "Remera"
+  address: string;
+  propertyType: Property['propertyType'];
+  bedrooms: number;
+  bathrooms: number;
+  area: number;
+  amenities?: string[];
+  photos?: string[]; 
+  agentName?: string;
+  agentEmail?: string;
+  agentPhone?: string;
+  featuresForAI?: string;
+  marketTrendsForAI?: string;
+}
+
 
 export const amenityList = [
   "WiFi", "Parking", "Swimming Pool", "Gym", "Security System", "Balcony/Patio", "Garden/Yard", 

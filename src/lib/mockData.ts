@@ -1,5 +1,5 @@
 
-import type { Property, TenantProfile, Review } from '@/types';
+import type { Property, Review, PropertyFormData } from '@/types';
 
 export function calculateAverageRating(reviews: Review[] | undefined): number | undefined {
   if (!reviews || reviews.length === 0) return undefined;
@@ -48,7 +48,7 @@ const initialMockProperties: Omit<Property, 'averageRating' | 'reviews'>[] = [
     bedrooms: 1,
     bathrooms: 1,
     area: 55,
-    amenities: ['Parking', 'Balcony/Patio', 'Kitchen Appliances', 'Security System', 'Tarmac Road Access'],
+    amenities: ['Parking', 'Balcony/Patio', 'Kitchen Appliances', 'Security System', 'Tarmac Road Access', 'Near Bus Station'],
     photos: [newImageUrls[2], newImageUrls[0]],
     propertyType: 'Apartment',
     listedDate: '2024-06-15T14:30:00Z',
@@ -209,4 +209,41 @@ export function addReviewToProperty(propertyId: string, reviewData: Omit<Review,
   propertyReviews[propertyId].push(newReview);
 
   return newReview;
+}
+
+export function addPropertyToMockData(data: PropertyFormData): Property {
+  const newProperty: Property = {
+    id: `prop${Date.now()}`, // Simple unique ID
+    title: data.title,
+    description: data.description,
+    price: data.price,
+    currency: data.currency,
+    location: `Kigali, ${data.location}`, // Combine with "Kigali, "
+    address: data.address,
+    bedrooms: data.bedrooms,
+    bathrooms: data.bathrooms,
+    area: data.area,
+    amenities: data.amenities || [],
+    photos: data.photos && data.photos.length > 0 ? data.photos : ['https://placehold.co/400x250.png?text=New+Property'],
+    propertyType: data.propertyType,
+    listedDate: new Date().toISOString(),
+    agent: data.agentName || data.agentEmail || data.agentPhone ? {
+      name: data.agentName || 'Owner Contact',
+      phone: data.agentPhone || '',
+      email: data.agentEmail || '',
+    } : undefined,
+    features: data.featuresForAI,
+    marketTrends: data.marketTrendsForAI,
+    aiData: {
+      // For a newly listed property, AI data would typically be generated.
+      // For this mock, we can leave it undefined or provide some defaults.
+      fairPrice: undefined, 
+      matchScore: undefined,
+    },
+    reviews: [],
+    averageRating: undefined,
+  };
+
+  mockProperties.unshift(newProperty); // Add to the beginning of the array for easy visibility
+  return newProperty;
 }
