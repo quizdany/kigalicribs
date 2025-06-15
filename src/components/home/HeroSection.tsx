@@ -56,10 +56,10 @@ const HeroSection = () => {
           className="mt-16"
         >
           <Image 
-            src="https://placehold.co/1200x450.png" 
+            src="https://www.blackpast.org/wp-content/uploads/2024/08/Kigali_Convention_Centre_December_1_2018_Courtesy_Raddison__CC_BY-SA_40.jpg" 
             alt="Kigali Convention Centre and city skyline at night"
-            width={1200}
-            height={450}
+            width={1024}
+            height={356}
             className="rounded-xl shadow-2xl mx-auto"
             data-ai-hint="kigali convention night"
             priority
