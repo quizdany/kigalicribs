@@ -39,16 +39,23 @@ const StarRatingDisplay = ({ rating, reviewCount }: { rating?: number; reviewCou
 
 
 const PropertyInfo: React.FC<PropertyInfoProps> = ({ property }) => {
+  const googleMapsSearchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(property.address + ', ' + property.location)}`;
   return (
     <Card className="shadow-lg">
       <CardHeader>
         <div className="flex flex-col sm:flex-row justify-between items-start gap-2">
           <div>
             <CardTitle className="text-3xl font-headline text-primary">{property.title}</CardTitle>
-            <div className="text-muted-foreground text-lg flex items-center mt-1">
+            <a
+              href={googleMapsSearchUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground text-lg flex items-center mt-1 hover:text-primary transition-colors"
+              aria-label={`View ${property.address} on Google Maps`}
+            >
               <MapPin className="h-5 w-5 mr-2 text-primary" />
               {property.location}, {property.address}
-            </div>
+            </a>
           </div>
           {property.averageRating && property.reviews && (
              <div className="mt-2 sm:mt-0">
