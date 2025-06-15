@@ -53,18 +53,18 @@ Propriétaire                     Locataire (Signé Électroniquement)
 `,
   },
   kinyarwanda: {
-    title: "Amasezerano y'Ubucuruzi bw'Inzu yo Guturamo",
-    content: `Aya Masezerano y'Ubucuruzi bw'Inzu yo Guturamo ("Amasezerano") yakozwe kandi yemejwe kuri uyu munsi wa [Itariki] hagati ya [Izina rya Nyir'inzu] ("Nyir'inzu") na [Amazina y'Umukode] ("Umukode").
+    title: "Amasezerano y'ubukode bw'inzu yo Guturamo",
+    content: `Aya Masezerano y'ubukode bw'inzu yo Guturamo ("Amasezerano") yakozwe kandi yemejwe kuri uyu munsi wa [Itariki] hagati ya [Izina rya Nyir'inzu] ("Nyir'inzu") na [Amazina y'Ukodesha] ("Ukodesha").
 
-1.  **Inzu:** Nyir'inzu yemeye gukodesha Umukode, n'Umukode yemeye gukodesha kwa Nyir'inzu, inzu iherereye kuri: ${"{propertyAddress}"} ("Inzu").
+1.  **Inzu:** Nyir'inzu yemeye gukodesha Ukodesha, n'Ukodesha yemeye gukodesha kwa Nyir'inzu, inzu iherereye kuri: ${"{propertyAddress}"} ("Inzu").
 2.  **Igihe:** Igihe cy'aya masezerano kizaba [Igihe cy'Amasezerano, urugero: amezi 12], guhera ku [Itariki yo Gutangira] kugeza ku [Itariki yo Kurangiza].
-3.  **Ubukode:** Umukode azajya yishyura Nyir'inzu ubukode bwa buri kwezi bungana na [Amafaranga y'Ubukode] [Ifaranga], yishyurwa mbere ku munsi wa mbere wa buri kwezi.
-4.  **Ingwate:** Mu gihe cyo gusinya aya Masezerano, Umukode azashyikiriza Nyir'inzu amafaranga angana na [Amafaranga y'Ingwate] [Ifaranga] nk'ingwate y'uko Umukode azubahiriza neza buri ngingo, ibisabwa, n'amasezerano yose ari muri aya Masezerano.
+3.  **Ubukode:** Ukodesha azajya yishyura Nyir'inzu ubukode bwa buri kwezi bungana na [Amafaranga y'Ubukode] [Ifaranga], yishyurwa mbere ku munsi wa mbere wa buri kwezi.
+4.  **Kosiyo:** Mu gihe cyo gusinya aya Masezerano, Ukodesha azashyikiriza Nyir'inzu amafaranga angana na [Amafaranga ya Kosiyo] [Ifaranga] nk'ingwate y'uko Ukodesha azubahiriza neza buri ngingo, ibisabwa, n'amasezerano yose ari muri aya Masezerano.
 ... (izindi ngingo zerekeye ikoreshwa ry'inzu, isuku, amazi n'amashanyarazi, amakosa, n'ibindi) ...
 MU KWEMEZA IBI, impande zombi zashyize umukono kuri aya Masezerano ku itariki yavuzwe haruguru.
 
 _________________________        _________________________
-Nyir'inzu                        Umukode (Yashyizeho Umukono mu Buryo bw'Ikoranabuhanga)
+Nyir'inzu                        Ukodesha (Yashyizeho Umukono mu Buryo bw'Ikoranabuhanga)
 `,
   },
 };
@@ -81,11 +81,16 @@ export default function LeaseAgreementView({ propertyName, propertyAddress }: Le
   useEffect(() => {
     let rawText = leaseTexts[language]?.content || leaseTexts['english'].content;
     rawText = rawText.replace('${"{propertyAddress}"}', propertyAddress);
+    
+    // Replace tenant name placeholder based on signed status
+    const tenantPlaceholder = language === 'kinyarwanda' ? '[Amazina y\'Ukodesha]' : '[Tenant Name(s)]';
     if (isSigned && signedDate) {
-      rawText = rawText.replace('[Tenant Name(s)]', `${tenantName} (Electronically Signed on ${signedDate.toLocaleDateString()})`);
+      const signedTenantName = language === 'kinyarwanda' ? `${tenantName} (Yasinye ku ${signedDate.toLocaleDateString()})` : `${tenantName} (Electronically Signed on ${signedDate.toLocaleDateString()})`;
+      rawText = rawText.replace(tenantPlaceholder, signedTenantName);
     } else {
-      rawText = rawText.replace('[Tenant Name(s)]', `[Tenant Name(s)]`);
+      rawText = rawText.replace(tenantPlaceholder, tenantPlaceholder); // Keep placeholder if not signed
     }
+    
     setCurrentLeaseText(rawText);
   }, [language, propertyAddress, isSigned, signedDate, tenantName]);
 
@@ -181,3 +186,4 @@ export default function LeaseAgreementView({ propertyName, propertyAddress }: Le
     </Card>
   );
 }
+
