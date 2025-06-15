@@ -66,12 +66,7 @@ export default async function PropertyDetailsPage({ params }: PropertyDetailsPag
   // it would typically use a server action that revalidates the path, or router.refresh().
   // Since we're using mockData directly, updates might not be immediate without a page refresh.
   // The `addReviewToProperty` function modifies the mockData array. `noStore()` helps here.
-  const handleReviewSubmitted = () => {
-    // In a real app with server actions, you might call router.refresh() here
-    // or the server action itself would handle revalidation.
-    // For mock data, this is more of a placeholder.
-    console.log('Review submitted, parent page notified (mock).');
-  };
+
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -93,7 +88,7 @@ export default async function PropertyDetailsPage({ params }: PropertyDetailsPag
           {isTenantLoggedIn && (
             <>
               <Separator />
-              <SubmitReviewForm propertyId={property.id} onReviewSubmitted={handleReviewSubmitted} />
+              <SubmitReviewForm propertyId={property.id} />
             </>
           )}
 

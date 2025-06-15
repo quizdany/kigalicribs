@@ -38,10 +38,9 @@ export type ReviewFormData = z.infer<typeof reviewFormSchema>;
 
 interface SubmitReviewFormProps {
   propertyId: string;
-  onReviewSubmitted?: () => void; // Callback to potentially refresh parent state
 }
 
-export default function SubmitReviewForm({ propertyId, onReviewSubmitted }: SubmitReviewFormProps) {
+export default function SubmitReviewForm({ propertyId }: SubmitReviewFormProps) {
   const { toast } = useToast();
   // Mock tenant name - in a real app, this would come from authentication context
   const mockTenantName = "Demo User"; 
@@ -69,9 +68,8 @@ export default function SubmitReviewForm({ propertyId, onReviewSubmitted }: Subm
           description: "Thank you for your feedback.",
         });
         form.reset();
-        if (onReviewSubmitted) {
-          onReviewSubmitted(); // Potentially trigger re-fetch or state update in parent
-        }
+        // In a real app with server actions, revalidation would occur, or router.refresh() could be used here if needed from client.
+        // For mock data and `noStore()` on parent, data should be fresh on next load/refresh.
       } else {
          toast({
           title: "Error",
