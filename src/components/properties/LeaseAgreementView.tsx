@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -11,13 +12,13 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Printer, Download, CheckSquare, Languages } from 'lucide-react';
+import { Printer, Download, CheckSquare, Languages, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 interface LeaseAgreementViewProps {
   propertyName: string;
   propertyAddress: string;
-  // In a real app, more lease details would be passed or fetched
 }
 
 const leaseTexts: Record<string, Record<string, string>> = {
@@ -33,7 +34,7 @@ const leaseTexts: Record<string, Record<string, string>> = {
 IN WITNESS WHEREOF, the parties have executed this Agreement as of the date first above written.
 
 _________________________        _________________________
-Landlord                         Tenant
+Landlord                         Tenant (Electronically Signed)
 `,
   },
   french: {
@@ -48,7 +49,7 @@ Landlord                         Tenant
 EN FOI DE QUOI, les parties ont exécuté ce Contrat à la date mentionnée ci-dessus.
 
 _________________________        _________________________
-Propriétaire                     Locataire
+Propriétaire                     Locataire (Signé Électroniquement)
 `,
   },
   kinyarwanda: {
@@ -63,7 +64,7 @@ Propriétaire                     Locataire
 MU KWEMEZA IBI, impande zombi zashyize umukono kuri aya Masezerano ku itariki yavuzwe haruguru.
 
 _________________________        _________________________
-Nyir'inzu                        Umukode
+Nyir'inzu                        Umukode (Yashyizeho Umukono mu Buryo bw'Ikoranabuhanga)
 `,
   },
 };
@@ -72,18 +73,27 @@ export default function LeaseAgreementView({ propertyName, propertyAddress }: Le
   const [language, setLanguage] = useState('english');
   const [currentLeaseText, setCurrentLeaseText] = useState('');
   const { toast } = useToast();
+  const [isSigned, setIsSigned] = useState(false);
+  const [signedDate, setSignedDate] = useState<Date | null>(null);
+  // In a real app, tenantName would come from user session
+  const [tenantName, setTenantName] = useState<string>("Demo Tenant"); 
 
   useEffect(() => {
-    const rawText = leaseTexts[language]?.content || leaseTexts['english'].content;
-    setCurrentLeaseText(rawText.replace('${"{propertyAddress}"}', propertyAddress));
-  }, [language, propertyAddress]);
+    let rawText = leaseTexts[language]?.content || leaseTexts['english'].content;
+    rawText = rawText.replace('${"{propertyAddress}"}', propertyAddress);
+    if (isSigned && signedDate) {
+      rawText = rawText.replace('[Tenant Name(s)]', `${tenantName} (Electronically Signed on ${signedDate.toLocaleDateString()})`);
+    } else {
+      rawText = rawText.replace('[Tenant Name(s)]', `[Tenant Name(s)]`);
+    }
+    setCurrentLeaseText(rawText);
+  }, [language, propertyAddress, isSigned, signedDate, tenantName]);
 
   const handlePrint = () => {
     window.print();
   };
 
   const handleDownload = () => {
-    // Basic text download
     const element = document.createElement("a");
     const file = new Blob([currentLeaseText], {type: 'text/plain'});
     element.href = URL.createObjectURL(file);
@@ -95,8 +105,15 @@ export default function LeaseAgreementView({ propertyName, propertyAddress }: Le
   };
 
   const handleSignElectronically = () => {
-    // Placeholder for e-signature integration
-    toast({ title: "E-Signature", description: "Electronic signature process would start here (not implemented)." });
+    // Simulate user confirmation before signing if needed
+    setIsSigned(true);
+    setSignedDate(new Date());
+    // Mock tenant name for now
+    setTenantName("Demo User"); 
+    toast({ 
+      title: "Lease Signed Electronically", 
+      description: `You have signed the lease for ${propertyName}. A confirmation has been sent to your email (simulated).`
+    });
   };
 
 
@@ -131,18 +148,34 @@ export default function LeaseAgreementView({ propertyName, propertyAddress }: Le
             {currentLeaseText}
           </pre>
         </ScrollArea>
+         {isSigned && signedDate && (
+          <Alert variant="default" className="mt-6 bg-green-50 border-green-300">
+            <CheckSquare className="h-5 w-5 text-green-600" />
+            <AlertTitle className="text-green-700">Lease Signed Electronically</AlertTitle>
+            <AlertDescription className="text-green-600">
+              This lease agreement was electronically signed by {tenantName} on {signedDate.toLocaleDateString()}.
+              A copy has been notionally sent to your registered email address.
+            </AlertDescription>
+          </Alert>
+        )}
       </CardContent>
       <CardFooter className="flex flex-col sm:flex-row justify-between items-center gap-4 border-t pt-6">
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handlePrint}>
-            <Printer className="mr-2 h-4 w-4" /> Print
+          <Button variant="outline" onClick={handlePrint} disabled={!isSigned}>
+            <Printer className="mr-2 h-4 w-4" /> Print Signed Lease
           </Button>
-          <Button variant="outline" onClick={handleDownload}>
-            <Download className="mr-2 h-4 w-4" /> Download
+          <Button variant="outline" onClick={handleDownload} disabled={!isSigned}>
+            <Download className="mr-2 h-4 w-4" /> Download Signed Lease
           </Button>
         </div>
-        <Button size="lg" onClick={handleSignElectronically} className="w-full sm:w-auto">
-          <CheckSquare className="mr-2 h-4 w-4" /> Sign Electronically
+        <Button 
+          size="lg" 
+          onClick={handleSignElectronically} 
+          className="w-full sm:w-auto"
+          disabled={isSigned}
+        >
+          <CheckSquare className="mr-2 h-4 w-4" /> 
+          {isSigned ? 'Signed' : 'Sign Electronically'}
         </Button>
       </CardFooter>
     </Card>

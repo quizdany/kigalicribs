@@ -1,6 +1,14 @@
-import type { Property, TenantProfile } from '@/types';
 
-export const mockProperties: Property[] = [
+import type { Property, TenantProfile, Review } from '@/types';
+
+// Helper function to calculate average rating
+export function calculateAverageRating(reviews: Review[] | undefined): number | undefined {
+  if (!reviews || reviews.length === 0) return undefined;
+  const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+  return parseFloat((totalRating / reviews.length).toFixed(1));
+}
+
+const initialMockProperties: Omit<Property, 'averageRating' | 'reviews'>[] = [
   {
     id: '1',
     title: 'Modern Apartment in Kiyovu',
@@ -14,9 +22,9 @@ export const mockProperties: Property[] = [
     area: 120,
     amenities: ['WiFi', 'Parking', 'Security System', 'Balcony/Patio', 'Furnished', 'Air Conditioning', 'Kitchen Appliances', 'City View'],
     photos: [
-      'https://placehold.co/600x400.png',
-      'https://placehold.co/600x400.png',
-      'https://placehold.co/600x400.png',
+      'https://placehold.co/600x400.png?a=1',
+      'https://placehold.co/600x400.png?b=1',
+      'https://placehold.co/600x400.png?c=1',
     ],
     propertyType: 'Apartment',
     listedDate: '2024-05-01T10:00:00Z',
@@ -41,8 +49,8 @@ export const mockProperties: Property[] = [
     area: 350,
     amenities: ['Parking', 'Swimming Pool', 'Gym', 'Security System', 'Garden/Yard', 'Balcony/Patio', 'Pet Friendly', 'Backup Generator'],
     photos: [
-      'https://placehold.co/600x400.png',
-      'https://placehold.co/600x400.png',
+      'https://placehold.co/600x400.png?a=2',
+      'https://placehold.co/600x400.png?b=2',
     ],
     propertyType: 'House',
     listedDate: '2024-04-15T14:30:00Z',
@@ -62,11 +70,11 @@ export const mockProperties: Property[] = [
     currency: 'RWF',
     location: 'Kigali, Remera',
     address: 'KG 17 Ave, Kigali',
-    bedrooms: 1, // Studio considered 1 bed for simplicity
+    bedrooms: 1, 
     bathrooms: 1,
     area: 45,
     amenities: ['WiFi', 'Parking', 'Kitchen Appliances', 'Water Heater'],
-    photos: ['https://placehold.co/600x400.png'],
+    photos: ['https://placehold.co/600x400.png?a=3'],
     propertyType: 'Apartment',
     listedDate: '2024-05-10T09:00:00Z',
     features: 'Studio, 1 bathroom, 45 sqm, kitchenette, near public transport and stadium.',
@@ -81,16 +89,16 @@ export const mockProperties: Property[] = [
     title: 'Commercial Office Space in City Center',
     description: 'Prime office space located in the bustling city center of Kigali. Offers flexible floor plans and modern facilities, ideal for growing businesses.',
     price: 15,
-    currency: 'USD', // Price per sqm
+    currency: 'USD', 
     location: 'Kigali, City Center',
     address: 'KN 4 St, Kigali',
-    bedrooms: 0, // Not applicable for office
-    bathrooms: 2, // Common restrooms
-    area: 200, // Total available area
+    bedrooms: 0, 
+    bathrooms: 2, 
+    area: 200, 
     amenities: ['Parking', 'Security System', 'Elevator', 'Air Conditioning', 'Backup Generator', 'WiFi'],
     photos: [
-      'https://placehold.co/600x400.png',
-      'https://placehold.co/600x400.png',
+      'https://placehold.co/600x400.png?a=4',
+      'https://placehold.co/600x400.png?b=4',
     ],
     propertyType: 'Office',
     listedDate: '2024-03-20T11:00:00Z',
@@ -103,6 +111,29 @@ export const mockProperties: Property[] = [
     }
   }
 ];
+
+const propertyReviews: { [propertyId: string]: Review[] } = {
+  '1': [
+    { id: 'r1p1', propertyId: '1', tenantName: 'Grace M.', rating: 5, comment: 'Absolutely loved my stay here! The view is incredible and the apartment is very well-maintained.', date: '2024-06-15T10:00:00Z' },
+    { id: 'r2p1', propertyId: '1', tenantName: 'David K.', rating: 4, comment: 'Great location and comfortable apartment. Minor issue with the AC but it was fixed promptly.', date: '2024-07-01T14:30:00Z' },
+  ],
+  '2': [
+    { id: 'r1p2', propertyId: '2', tenantName: 'Family R.', rating: 5, comment: 'Perfect house for our family. The kids enjoyed the pool and garden immensely. Very secure area.', date: '2024-05-20T12:00:00Z' },
+  ],
+  '3': [
+     { id: 'r1p3', propertyId: '3', tenantName: 'John B.', rating: 3, comment: 'Decent for the price. A bit noisy from the street, but convenient location.', date: '2024-06-10T08:00:00Z' },
+  ]
+};
+
+export const mockProperties: Property[] = initialMockProperties.map(p => {
+  const reviews = propertyReviews[p.id] || [];
+  return {
+    ...p,
+    reviews: reviews,
+    averageRating: calculateAverageRating(reviews),
+  };
+});
+
 
 export const mockTenantProfiles: TenantProfile[] = [
   {
@@ -141,4 +172,24 @@ export function getPropertyById(id: string): Property | undefined {
 
 export function getTenantPreferencesForAI(tenant: TenantProfile): string {
   return `Budget: ${tenant.budget.min}-${tenant.budget.max} ${tenant.budget.currency}. Locations: ${tenant.preferredLocations.join(', ')}. Property types: ${tenant.propertyPreferences.types.join(', ')}. Min bedrooms: ${tenant.propertyPreferences.minBedrooms}. Min bathrooms: ${tenant.propertyPreferences.minBathrooms}. Must-have amenities: ${tenant.propertyPreferences.amenities.join(', ')}. Additional Notes: ${tenant.propertyPreferences.additionalNotes || 'None'}.`;
+}
+
+export function addReviewToProperty(propertyId: string, reviewData: Omit<Review, 'id' | 'propertyId' | 'date'>): Review | undefined {
+  const propertyIndex = mockProperties.findIndex(p => p.id === propertyId);
+  if (propertyIndex === -1) return undefined;
+
+  const newReview: Review = {
+    ...reviewData,
+    id: `r${Date.now()}p${propertyId}`, // Simple unique ID
+    propertyId,
+    date: new Date().toISOString(),
+  };
+
+  if (!mockProperties[propertyIndex].reviews) {
+    mockProperties[propertyIndex].reviews = [];
+  }
+  mockProperties[propertyIndex].reviews!.push(newReview);
+  mockProperties[propertyIndex].averageRating = calculateAverageRating(mockProperties[propertyIndex].reviews);
+  
+  return newReview;
 }

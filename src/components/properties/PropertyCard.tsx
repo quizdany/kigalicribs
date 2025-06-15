@@ -1,10 +1,11 @@
+
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Property } from '@/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, BedDouble, Bath, AreaChart, Tag, Lightbulb, CheckCircle } from 'lucide-react';
+import { MapPin, BedDouble, Bath, AreaChart, Tag, Lightbulb, CheckCircle, Star } from 'lucide-react';
 
 interface PropertyCardProps {
   property: Property;
@@ -26,7 +27,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, tenantLoggedIn })
             width={400}
             height={250}
             className="w-full h-56 object-cover"
-            data-ai-hint="modern house"
+            data-ai-hint="modern house exterior"
           />
         </Link>
         {property.aiData?.fairPrice && (
@@ -42,10 +43,19 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, tenantLoggedIn })
       </CardHeader>
       <CardContent className="p-4 flex-grow">
         <Link href={`/properties/${property.id}`}>
-          <CardTitle className="text-xl font-headline mb-2 hover:text-primary transition-colors truncate" title={property.title}>
+          <CardTitle className="text-xl font-headline mb-1 hover:text-primary transition-colors truncate" title={property.title}>
             {property.title}
           </CardTitle>
         </Link>
+        
+        {property.averageRating && property.reviews && property.reviews.length > 0 && (
+          <div className="flex items-center text-sm text-amber-500 mb-2">
+            <Star className="h-4 w-4 mr-1 fill-amber-500" /> 
+            {property.averageRating.toFixed(1)} 
+            <span className="text-muted-foreground ml-1">({property.reviews.length} review{property.reviews.length > 1 ? 's' : ''})</span>
+          </div>
+        )}
+
         <div className="text-muted-foreground text-sm mb-3 flex items-center">
           <MapPin className="h-4 w-4 mr-1 text-primary" />
           {property.location}
@@ -72,6 +82,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, tenantLoggedIn })
         <div className="text-lg font-bold text-primary flex items-center">
           <Tag className="h-5 w-5 mr-1.5" /> {formatPrice(property.price, property.currency)}
           {property.propertyType === 'Office' && <span className="text-xs text-muted-foreground ml-1">/sqm</span>}
+           {property.propertyType !== 'Office' && !property.title.toLowerCase().includes('office') && <span className="text-xs text-muted-foreground ml-1">/month</span>}
         </div>
         <Button asChild size="sm">
           <Link href={`/properties/${property.id}`}>View Details</Link>

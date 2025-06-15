@@ -1,4 +1,13 @@
 
+export interface Review {
+  id: string;
+  propertyId: string;
+  tenantName: string; // Or userId in a real app
+  rating: number; // 1-5
+  comment: string;
+  date: string; // ISO date string
+}
+
 export interface Property {
   id: string;
   title: string;
@@ -31,6 +40,8 @@ export interface Property {
   };
   features?: string; // Combined string of features for AI
   marketTrends?: string; // Info for AI
+  reviews?: Review[];
+  averageRating?: number;
 }
 
 export interface TenantProfile {

@@ -1,7 +1,8 @@
-import type { Property } from '@/types';
+
+import type { Property, Review } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { MapPin, BedDouble, Bath, AreaChart, Tag, CalendarDays, UserCircle, Phone, Mail, ListChecks } from 'lucide-react';
+import { MapPin, BedDouble, Bath, AreaChart, Tag, CalendarDays, UserCircle, Phone, Mail, ListChecks, Star, MessageSquare } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 interface PropertyInfoProps {
@@ -12,14 +13,48 @@ const formatPrice = (amount: number, currency: string) => {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency, minimumFractionDigits: 0 }).format(amount);
 };
 
+const StarRatingDisplay = ({ rating, reviewCount }: { rating?: number; reviewCount?: number }) => {
+  if (!rating || !reviewCount || reviewCount === 0) {
+    return <span className="text-sm text-muted-foreground">No reviews yet</span>;
+  }
+
+  const fullStars = Math.floor(rating);
+  const halfStar = rating % 1 >= 0.5;
+  const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+
+  return (
+    <div className="flex items-center">
+      {[...Array(fullStars)].map((_, i) => (
+        <Star key={`full-${i}`} className="h-5 w-5 text-amber-400 fill-amber-400" />
+      ))}
+      {halfStar && <Star key="half" className="h-5 w-5 text-amber-400 fill-amber-400" style={{ clipPath: 'inset(0 50% 0 0)' }} />}
+      {[...Array(emptyStars)].map((_, i) => (
+        <Star key={`empty-${i}`} className="h-5 w-5 text-amber-400" />
+      ))}
+      <span className="ml-2 text-lg font-semibold text-foreground">{rating.toFixed(1)}</span>
+      <span className="ml-1 text-sm text-muted-foreground">({reviewCount} review{reviewCount !== 1 ? 's' : ''})</span>
+    </div>
+  );
+};
+
+
 const PropertyInfo: React.FC<PropertyInfoProps> = ({ property }) => {
   return (
     <Card className="shadow-lg">
       <CardHeader>
-        <CardTitle className="text-3xl font-headline text-primary">{property.title}</CardTitle>
-        <div className="text-muted-foreground text-lg flex items-center mt-1">
-          <MapPin className="h-5 w-5 mr-2 text-primary" />
-          {property.location}, {property.address}
+        <div className="flex flex-col sm:flex-row justify-between items-start gap-2">
+          <div>
+            <CardTitle className="text-3xl font-headline text-primary">{property.title}</CardTitle>
+            <div className="text-muted-foreground text-lg flex items-center mt-1">
+              <MapPin className="h-5 w-5 mr-2 text-primary" />
+              {property.location}, {property.address}
+            </div>
+          </div>
+          {property.averageRating && property.reviews && (
+             <div className="mt-2 sm:mt-0">
+               <StarRatingDisplay rating={property.averageRating} reviewCount={property.reviews.length} />
+             </div>
+          )}
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -27,7 +62,7 @@ const PropertyInfo: React.FC<PropertyInfoProps> = ({ property }) => {
           <Tag className="h-7 w-7 mr-2 text-accent" />
           {formatPrice(property.price, property.currency)}
            {property.propertyType === 'Office' && <span className="text-sm text-muted-foreground ml-1">/sqm per month</span>}
-           {property.propertyType !== 'Office' && <span className="text-sm text-muted-foreground ml-1">/month</span>}
+           {property.propertyType !== 'Office' && !property.title.toLowerCase().includes('office') && <span className="text-sm text-muted-foreground ml-1">/month</span>}
         </div>
         
         <Separator />
@@ -68,8 +103,12 @@ const PropertyInfo: React.FC<PropertyInfoProps> = ({ property }) => {
               <h3 className="text-xl font-semibold mb-3">Contact Agent</h3>
               <div className="space-y-2 text-md">
                 <div className="flex items-center"><UserCircle className="h-5 w-5 mr-2 text-primary/80" /> {property.agent.name}</div>
-                <div className="flex items-center"><Mail className="h-5 w-5 mr-2 text-primary/80" /> <a href={`mailto:${property.agent.email}`} className="hover:text-primary">{property.agent.email}</a></div>
-                <div className="flex items-center"><Phone className="h-5 w-5 mr-2 text-primary/80" /> <a href={`tel:${property.agent.phone}`} className="hover:text-primary">{property.agent.phone}</a></div>
+                {property.agent.email && 
+                  <div className="flex items-center"><Mail className="h-5 w-5 mr-2 text-primary/80" /> <a href={`mailto:${property.agent.email}`} className="hover:text-primary">{property.agent.email}</a></div>
+                }
+                {property.agent.phone &&
+                  <div className="flex items-center"><Phone className="h-5 w-5 mr-2 text-primary/80" /> <a href={`tel:${property.agent.phone}`} className="hover:text-primary">{property.agent.phone}</a></div>
+                }
               </div>
             </div>
           </>
