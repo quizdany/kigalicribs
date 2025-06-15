@@ -84,11 +84,30 @@ export default async function PropertyDetailsPage({ params }: PropertyDetailsPag
             <PropertyReviewsList reviews={property.reviews || []} />
           </div>
 
-          {/* Mocking "logged in" to show review form */}
-          {isTenantLoggedIn && (
+          {isTenantLoggedIn ? (
             <>
               <Separator />
               <SubmitReviewForm propertyId={property.id} />
+            </>
+          ) : (
+             <>
+              <Separator />
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center text-xl font-headline">
+                    <MessageSquare className="mr-2 h-6 w-6 text-primary" /> Want to share your experience?
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Alert>
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Login Required to Review</AlertTitle>
+                    <AlertDescription>
+                      Please <Link href="/login" className="font-semibold underline hover:text-primary">log in</Link> or <Link href="/register" className="font-semibold underline hover:text-primary">create an account</Link> to submit a review for this property.
+                    </AlertDescription>
+                  </Alert>
+                </CardContent>
+              </Card>
             </>
           )}
 
