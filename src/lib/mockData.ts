@@ -70,7 +70,7 @@ const initialMockProperties: Omit<Property, 'averageRating' | 'reviews'>[] = [
     currency: 'RWF',
     location: 'Kigali, Remera',
     address: 'KG 17 Ave, Kigali',
-    bedrooms: 1, 
+    bedrooms: 1,
     bathrooms: 1,
     area: 45,
     amenities: ['WiFi', 'Parking', 'Kitchen Appliances', 'Water Heater'],
@@ -88,13 +88,13 @@ const initialMockProperties: Omit<Property, 'averageRating' | 'reviews'>[] = [
     id: '4',
     title: 'Commercial Office Space in City Center',
     description: 'Prime office space located in the bustling city center of Kigali. Offers flexible floor plans and modern facilities, ideal for growing businesses.',
-    price: 15,
-    currency: 'USD', 
+    price: 15, // USD per sqm
+    currency: 'USD',
     location: 'Kigali, City Center',
     address: 'KN 4 St, Kigali',
-    bedrooms: 0, 
-    bathrooms: 2, 
-    area: 200, 
+    bedrooms: 0,
+    bathrooms: 2,
+    area: 200,
     amenities: ['Parking', 'Security System', 'Elevator', 'Air Conditioning', 'Backup Generator', 'WiFi'],
     photos: [
       'https://placehold.co/600x400.png?a=4',
@@ -106,8 +106,59 @@ const initialMockProperties: Omit<Property, 'averageRating' | 'reviews'>[] = [
     features: '200 sqm office, flexible layout, city center, modern facilities, elevator, AC, generator, high-speed internet ready.',
     marketTrends: 'Office space in Kigali city center averages $12-$20 per sqm. Location is key for businesses.',
     aiData: {
-      fairPrice: { suggestedPrice: 16, priceJustification: 'Competitive pricing for a Grade A office location with excellent amenities.' },
+      fairPrice: { suggestedPrice: 16, priceJustification: 'Competitive pricing for a Grade A office location with excellent amenities.' }, // USD per sqm
       matchScore: { score: 90, reasoning: 'Highly suitable for businesses prioritizing a central location and professional environment.' }
+    }
+  },
+  {
+    id: '5',
+    title: 'Charming 3-Bedroom House in Remera',
+    description: 'A well-maintained 3-bedroom house in a quiet part of Remera. Features a small garden and easy access to local markets and schools.',
+    price: 650000,
+    currency: 'RWF',
+    location: 'Kigali, Remera',
+    address: 'KG 201 St, Kigali',
+    bedrooms: 3,
+    bathrooms: 2,
+    area: 150,
+    amenities: ['Parking', 'Garden/Yard', 'Kitchen Appliances', 'Water Heater', 'Security System'],
+    photos: [
+        'https://placehold.co/600x400.png?a=5',
+        'https://placehold.co/600x400.png?b=5',
+    ],
+    propertyType: 'House',
+    listedDate: '2024-06-01T09:00:00Z',
+    agent: { name: 'Remera Rentals', phone: '+250788112233', email: 'info@remerarentals.rw' },
+    features: '3 bedrooms, 2 bathrooms, 150 sqm, small garden, quiet neighborhood.',
+    marketTrends: '3-bedroom houses in Remera typically rent for 500,000-700,000 RWF. Good for families or shared living.',
+    aiData: {
+      fairPrice: { suggestedPrice: 600000, priceJustification: 'Priced fairly for its size, condition, and location within Remera.' },
+      matchScore: { score: 82, reasoning: 'Good option for those looking for a moderately sized house in a convenient, established neighborhood.' }
+    }
+  },
+  {
+    id: '6',
+    title: 'Modern 2-Bedroom Apartment in Kimironko (Overpriced)',
+    description: 'Newly built 2-bedroom apartment in Kimironko with modern finishes. Close to the market and main road. Listed significantly above AI valuation.',
+    price: 750000, // Intentionally high
+    currency: 'RWF',
+    location: 'Kigali, Kimironko',
+    address: 'KG 11 Ave, Kigali',
+    bedrooms: 2,
+    bathrooms: 1,
+    area: 90,
+    amenities: ['WiFi', 'Parking', 'Balcony/Patio', 'Kitchen Appliances', 'Security System'],
+    photos: [
+        'https://placehold.co/600x400.png?a=6',
+        'https://placehold.co/600x400.png?b=6',
+    ],
+    propertyType: 'Apartment',
+    listedDate: '2024-07-10T11:00:00Z',
+    features: '2 bedrooms, 1 bathroom, 90 sqm, modern finishes, balcony, near Kimironko market.',
+    marketTrends: '2-bedroom apartments in Kimironko usually rent for 450,000-650,000 RWF. This listing is above typical market rates.',
+    aiData: {
+      fairPrice: { suggestedPrice: 600000, priceJustification: 'The suggested fair price is 600,000 RWF based on comparable properties and features. The listing price is notably higher.' },
+      matchScore: { score: 65, reasoning: 'Matches some criteria but the price is significantly above market valuation, impacting overall score.' }
     }
   }
 ];
@@ -122,6 +173,12 @@ const propertyReviews: { [propertyId: string]: Review[] } = {
   ],
   '3': [
      { id: 'r1p3', propertyId: '3', tenantName: 'John B.', rating: 3, comment: 'Decent for the price. A bit noisy from the street, but convenient location.', date: '2024-06-10T08:00:00Z' },
+  ],
+  '5': [
+    { id: 'r1p5', propertyId: '5', tenantName: 'Sarah K.', rating: 4, comment: 'Nice house, good location in Remera. Landlord was responsive.', date: '2024-07-05T10:00:00Z' },
+  ],
+  '6': [
+    { id: 'r1p6', propertyId: '6', tenantName: 'Peter G.', rating: 2, comment: 'The apartment itself is new, but the price is way too high for Kimironko. Found something similar for much less.', date: '2024-07-20T15:00:00Z' },
   ]
 };
 
@@ -163,6 +220,20 @@ export const mockTenantProfiles: TenantProfile[] = [
       amenities: ['Garden/Yard', 'Swimming Pool', 'Security System', 'Pet Friendly'],
       additionalNotes: 'Need a spacious home for my family with a safe outdoor area for kids. Good schools nearby would be ideal.'
     },
+  },
+  {
+    id: 'tenant3',
+    fullName: 'Fatima Diallo',
+    email: 'fatima.d@example.com',
+    budget: {min: 400000, max: 700000, currency: 'RWF'},
+    preferredLocations: ['Remera', 'Kimironko'],
+    propertyPreferences: {
+        types: ['Apartment', 'House'],
+        minBedrooms: 2,
+        minBathrooms: 1,
+        amenities: ['Parking', 'Kitchen Appliances', 'Security System'],
+        additionalNotes: 'Looking for a clean and secure place, not too far from public transport. Furnished or unfurnished is fine.'
+    }
   }
 ];
 
@@ -191,5 +262,14 @@ export function addReviewToProperty(propertyId: string, reviewData: Omit<Review,
   mockProperties[propertyIndex].reviews!.push(newReview);
   mockProperties[propertyIndex].averageRating = calculateAverageRating(mockProperties[propertyIndex].reviews);
   
+  // Also update the global propertyReviews map for consistency if needed elsewhere, though direct modification of mockProperties is primary.
+  if (!propertyReviews[propertyId]) {
+    propertyReviews[propertyId] = [];
+  }
+  propertyReviews[propertyId].push(newReview);
+
+
   return newReview;
 }
+
+```
