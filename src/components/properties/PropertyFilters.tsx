@@ -37,10 +37,10 @@ interface PropertyFiltersProps {
 
 const defaultFilters: Filters = {
   searchTerm: "",
-  location: "", // Empty string means placeholder will be shown for Select
-  propertyType: "", // Empty string means placeholder will be shown for Select
+  location: "", 
+  propertyType: "", 
   minPrice: 0,
-  maxPrice: 5000000, 
+  maxPrice: 600000, // Default max price for RWF
   priceCurrency: "RWF",
   bedrooms: 0, 
   bathrooms: 0, 
@@ -56,7 +56,17 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
   };
 
   const handleSelectChange = (name: keyof Filters, value: string | number) => {
-    setFilters(prev => ({ ...prev, [name]: value }));
+    if (name === 'priceCurrency') {
+      // Reset price range when currency changes to avoid mismatches
+      setFilters(prev => ({ 
+        ...prev, 
+        [name]: value,
+        minPrice: 0,
+        maxPrice: value === 'USD' ? 500 : 600000, // Adjust default max based on new currency
+      }));
+    } else {
+      setFilters(prev => ({ ...prev, [name]: value }));
+    }
   };
   
   const handlePriceRangeChange = (value: [number, number]) => {
@@ -82,6 +92,10 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
     setFilters(defaultFilters);
     onFilterChange(defaultFilters);
   };
+
+  const currentMaxPriceForSlider = filters.priceCurrency === 'USD' ? 10000 : 1000000; // RWF slider max up to 1M
+  const currentStepForSlider = filters.priceCurrency === 'USD' ? 50 : 50000;
+
 
   return (
     <div className="p-6 bg-card rounded-lg shadow-lg space-y-6 sticky top-20">
@@ -140,7 +154,7 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
              <Select
               name="priceCurrency"
               value={filters.priceCurrency}
-              onValueChange={(value) => handleSelectChange("priceCurrency", value)}
+              onValueChange={(value) => handleSelectChange("priceCurrency", value as string)}
             >
               <SelectTrigger className="w-full h-10">
                 <SelectValue placeholder="Select Currency" />
@@ -154,10 +168,10 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
               <span>{filters.maxPrice?.toLocaleString()} {filters.priceCurrency}</span>
             </div>
             <Slider
-              value={[filters.minPrice || 0, filters.maxPrice || (filters.priceCurrency === 'USD' ? 5000 : 5000000)]}
+              value={[filters.minPrice || 0, filters.maxPrice || (filters.priceCurrency === 'USD' ? 500 : 600000)]}
               onValueChange={handlePriceRangeChange}
-              max={filters.priceCurrency === 'USD' ? 10000 : 10000000}
-              step={filters.priceCurrency === 'USD' ? 50 : 50000}
+              max={currentMaxPriceForSlider}
+              step={currentStepForSlider}
               className="my-4"
             />
           </AccordionContent>
@@ -202,14 +216,14 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
         <AccordionItem value="amenities">
           <AccordionTrigger className="text-base">Amenities</AccordionTrigger>
           <AccordionContent className="space-y-2 max-h-60 overflow-y-auto">
-            {amenityList.slice(0,10).map(amenity => ( 
+            {amenityList.map(amenity => ( 
               <div key={amenity} className="flex items-center space-x-2">
                 <Checkbox
-                  id={`amenity-${amenity}`}
+                  id={`amenity-${amenity.replace(/\s+/g, '-')}`}
                   checked={filters.amenities?.includes(amenity)}
                   onCheckedChange={(checked) => handleAmenityChange(amenity, !!checked)}
                 />
-                <Label htmlFor={`amenity-${amenity}`} className="font-normal">{amenity}</Label>
+                <Label htmlFor={`amenity-${amenity.replace(/\s+/g, '-')}`} className="font-normal">{amenity}</Label>
               </div>
             ))}
           </AccordionContent>

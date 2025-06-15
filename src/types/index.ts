@@ -67,7 +67,7 @@ export interface TenantProfile {
 export const amenityList = [
   "WiFi", "Parking", "Swimming Pool", "Gym", "Security System", "Balcony/Patio", "Garden/Yard", 
   "Furnished", "Air Conditioning", "Washing Machine", "Kitchen Appliances", "Elevator", 
-  "Pet Friendly", "City View", "Water Heater", "Backup Generator"
+  "Pet Friendly", "City View", "Water Heater", "Backup Generator", "Near Bus Station", "Tarmac Road Access"
 ];
 
 export const propertyTypes: Property['propertyType'][] = ["Apartment", "House", "Office", "Retail", "Villa", "Commercial"];
