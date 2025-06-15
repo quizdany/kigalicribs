@@ -1,1 +1,5 @@
-// Flows will be imported for their side effects in this file.
+import { config } from 'dotenv';
+config();
+
+import '@/ai/flows/property-match-score.ts';
+import '@/ai/flows/fair-price-indicator.ts';
