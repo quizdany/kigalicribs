@@ -1,7 +1,9 @@
+
 'use client';
 import { Lightbulb, MapPin, FileText, BadgePercent, UserCheck, Home } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { motion } from 'framer-motion';
+import TranslatableText from '@/components/shared/TranslatableText';
 
 const features = [
   {
@@ -54,10 +56,10 @@ const FeaturesSection = () => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            Why Choose <span className="text-primary">Tura Neza</span>?
+            <TranslatableText>Why Choose</TranslatableText> <span className="text-primary">Tura Neza</span>?
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            We provide a comprehensive suite of tools to make your property rental journey smooth and secure.
+            <TranslatableText>We provide a comprehensive suite of tools to make your property rental journey smooth and secure.</TranslatableText>
           </p>
         </div>
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -74,10 +76,10 @@ const FeaturesSection = () => {
               <Card className="h-full transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-card">
                 <CardHeader className="flex flex-row items-center space-x-4 pb-2">
                   {feature.icon}
-                  <CardTitle className="font-headline text-xl text-primary">{feature.title}</CardTitle>
+                  <CardTitle className="font-headline text-xl text-primary"><TranslatableText>{feature.title}</TranslatableText></CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">{feature.description}</p>
+                  <p className="text-muted-foreground"><TranslatableText>{feature.description}</TranslatableText></p>
                 </CardContent>
               </Card>
             </motion.div>

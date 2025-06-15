@@ -18,39 +18,32 @@ import {
   DropdownMenuRadioItem,
 } from "@/components/ui/dropdown-menu";
 import { useState, useEffect } from 'react';
-
-type Language = {
-  code: string;
-  name: string;
-};
-
-const supportedLanguages: Language[] = [
-  { code: 'EN', name: 'English' },
-  { code: 'FR', name: 'Français' },
-  { code: 'RW', name: 'Kinyarwanda' },
-];
+import { useLanguage } from '@/contexts/LanguageContext'; // Import useLanguage
+import type { Language } from '@/types';
 
 const Header = () => {
-  // Mock authentication state
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userName, setUserName] = useState<string | null>(null);
-  const [selectedLanguage, setSelectedLanguage] = useState<string>(supportedLanguages[0].code);
+  const { selectedLanguage, setSelectedLanguage, supportedLanguages } = useLanguage(); // Use context
 
-  // Simulate auth check
   useEffect(() => {
-    // In a real app, you'd check auth status here (e.g., from a context or service)
-    const loggedIn = Math.random() > 0.5; // Simulate login
+    const loggedIn = Math.random() > 0.5;
     setIsAuthenticated(loggedIn);
     if (loggedIn) {
       setUserName("Demo User");
     }
   }, []);
 
-
   const handleLogout = () => {
     setIsAuthenticated(false);
     setUserName(null);
-    // Add actual logout logic here
+  };
+
+  const handleLanguageChange = (langCode: string) => {
+    const language = supportedLanguages.find(l => l.code === langCode);
+    if (language) {
+      setSelectedLanguage(language);
+    }
   };
 
   return (
@@ -59,7 +52,7 @@ const Header = () => {
         <Logo />
         <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
           {siteConfig.mainNav
-            .filter(item => item.href !== '/register' && item.href !== '/login') // Filter out auth links handled separately
+            .filter(item => item.href !== '/register' && item.href !== '/login')
             .map((item) => (
             <Link
               key={item.href}
@@ -76,13 +69,13 @@ const Header = () => {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="focus:outline-none focus:ring-0">
                 <Languages className="h-5 w-5 mr-1" />
-                {selectedLanguage}
+                {selectedLanguage.code.toUpperCase()}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Select Language</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuRadioGroup value={selectedLanguage} onValueChange={setSelectedLanguage}>
+              <DropdownMenuRadioGroup value={selectedLanguage.code} onValueChange={handleLanguageChange}>
                 {supportedLanguages.map((lang) => (
                   <DropdownMenuRadioItem key={lang.code} value={lang.code}>
                     {lang.name}
@@ -91,7 +84,6 @@ const Header = () => {
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>
-
 
           {isAuthenticated ? (
             <DropdownMenu>
@@ -104,9 +96,6 @@ const Header = () => {
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">{userName}</p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      {/* user.email - if available */}
-                    </p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
@@ -138,7 +127,6 @@ const Header = () => {
             </div>
           )}
 
-          {/* Mobile Menu */}
           <div className="md:hidden">
             <Sheet>
               <SheetTrigger asChild>
@@ -161,14 +149,14 @@ const Header = () => {
                    <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                        <Button variant="outline" className="w-full text-lg py-6 justify-start">
-                        <Languages className="mr-2 h-5 w-5" /> {supportedLanguages.find(l => l.code === selectedLanguage)?.name || selectedLanguage}
+                        <Languages className="mr-2 h-5 w-5" /> {selectedLanguage.name}
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="w-[250px] sm:w-[350px]">
+                    <DropdownMenuContent align="start" className="w-[calc(100vw-4rem)] max-w-[250px] sm:max-w-[350px]">
                       <DropdownMenuLabel>Select Language</DropdownMenuLabel>
                       <DropdownMenuSeparator />
-                      <DropdownMenuRadioGroup value={selectedLanguage} onValueChange={setSelectedLanguage}>
-                        {supportedLanguages.map((lang) => (
+                      <DropdownMenuRadioGroup value={selectedLanguage.code} onValueChange={handleLanguageChange}>
+                        {supportedLanguages.map((lang: Language) => (
                           <DropdownMenuRadioItem key={lang.code} value={lang.code} className="text-lg py-3">
                             {lang.name}
                           </DropdownMenuRadioItem>

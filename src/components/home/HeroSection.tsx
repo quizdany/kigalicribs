@@ -6,12 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Search, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import TranslatableText from '@/components/shared/TranslatableText';
 
 const HeroSection = () => {
   return (
     <section className="relative py-20 md:py-32 bg-gradient-to-br from-primary/10 via-background to-background">
       <div className="absolute inset-0 opacity-50">
-        {/* You can add a subtle background pattern or image here */}
       </div>
       <div className="container relative mx-auto px-4 text-center">
         <motion.div
@@ -20,10 +20,10 @@ const HeroSection = () => {
           transition={{ duration: 0.5 }}
         >
           <h1 className="font-headline text-4xl font-bold tracking-tight text-foreground sm:text-5xl md:text-6xl">
-            Find Your Perfect <span className="text-primary">Home</span> in Rwanda
+            <TranslatableText>Find Your Perfect</TranslatableText> <span className="text-primary"><TranslatableText>Home</TranslatableText></span> <TranslatableText>in Rwanda</TranslatableText>
           </h1>
           <p className="mt-6 text-lg leading-8 text-muted-foreground max-w-2xl mx-auto">
-            Tura Neza connects you with the best rental properties across Kigali and beyond. Start your search today for a seamless and trustworthy experience.
+            <TranslatableText>Tura Neza connects you with the best rental properties across Kigali and beyond. Start your search today for a seamless and trustworthy experience.</TranslatableText>
           </p>
         </motion.div>
 
@@ -44,7 +44,7 @@ const HeroSection = () => {
           </div>
           <Button size="lg" className="h-12 text-lg rounded-lg shadow-md" asChild>
             <Link href="/search">
-              Search Properties <ChevronRight className="ml-2 h-5 w-5" />
+              <TranslatableText>Search Properties</TranslatableText> <ChevronRight className="ml-2 h-5 w-5" />
             </Link>
           </Button>
         </motion.div>

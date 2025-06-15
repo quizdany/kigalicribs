@@ -68,3 +68,8 @@ export const kigaliLocations = [
 export const currencies = ["RWF", "USD"];
 
 export const SELECT_ANY_VALUE = "%%ANY%%";
+
+export type Language = {
+  code: 'en' | 'fr' | 'rw'; // Standardized language codes
+  name: string;
+};
