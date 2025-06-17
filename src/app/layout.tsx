@@ -6,7 +6,7 @@ import AppLayout from '@/components/layout/AppLayout';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
 export const metadata: Metadata = {
-  title: 'Tura Neza - Find Your Perfect Property in Rwanda',
+  title: 'Cribs Ink - Find Your Perfect Property in Rwanda',
   description: 'Your trusted platform for renting properties in Rwanda, featuring smart search, fair price indicators, and digital lease agreements.',
 };
 

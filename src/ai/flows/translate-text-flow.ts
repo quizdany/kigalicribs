@@ -48,7 +48,7 @@ const prompt = ai.definePrompt({
   input: {schema: TranslateTextInputSchema},
   output: {schema: TranslateTextOutputSchema},
   prompt: `Translate the following text into {{targetLanguageName}}.
-Do not translate proper nouns or brand names like 'Tura Neza' unless it is contextually appropriate for the target language.
+Do not translate proper nouns or brand names like 'Cribs Ink' unless it is contextually appropriate for the target language.
 
 Original Text:
 {{{textToTranslate}}}

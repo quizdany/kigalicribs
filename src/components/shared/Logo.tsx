@@ -1,3 +1,4 @@
+
 import Link from 'next/link';
 import { Home } from 'lucide-react'; // Or a custom SVG logo
 
@@ -24,7 +25,7 @@ const Logo = ({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) => {
       {/* Replace with actual SVG logo if available */}
       <Home className={`text-primary ${currentSizeConfig.icon}`} />
       <span className={`font-headline font-extrabold ${currentSizeConfig.text} text-primary`}>
-        Tura Neza
+        Cribs Ink
       </span>
     </Link>
   );

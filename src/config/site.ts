@@ -1,3 +1,4 @@
+
 export type NavItem = {
   title: string;
   href: string;
@@ -17,11 +18,11 @@ export type SiteConfig = {
 };
 
 export const siteConfig: SiteConfig = {
-  name: "Tura Neza",
+  name: "Cribs Ink",
   description:
     "Your trusted platform for renting properties in Rwanda, featuring smart search, fair price indicators, and digital lease agreements.",
-  url: "https://turaneza.rw", // Replace with actual URL
-  ogImage: "https://turaneza.rw/og.jpg", // Replace with actual OG image URL
+  url: "https://cribsink.rw", // Updated URL
+  ogImage: "https://cribsink.rw/og.jpg", // Updated OG image URL
   mainNav: [
     {
       title: "Home",

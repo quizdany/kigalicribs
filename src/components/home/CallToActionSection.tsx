@@ -20,7 +20,7 @@ const CallToActionSection = () => {
             <TranslatableText>Ready to Find Your</TranslatableText> <span className="text-primary"><TranslatableText>Dream Property</TranslatableText></span>?
           </h2>
           <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
-            <TranslatableText>Join Tura Neza today. Whether you're looking for a new home or listing your property, we're here to help.</TranslatableText>
+            <TranslatableText>Join Cribs Ink today. Whether you're looking for a new home or listing your property, we're here to help.</TranslatableText>
           </p>
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button size="lg" className="text-lg" asChild>

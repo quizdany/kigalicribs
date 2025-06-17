@@ -23,7 +23,7 @@ const HeroSection = () => {
             <TranslatableText>Find Your Perfect</TranslatableText> <span className="text-primary"><TranslatableText>Home</TranslatableText></span> <TranslatableText>in Rwanda</TranslatableText>
           </h1>
           <p className="mt-6 text-lg leading-8 text-muted-foreground max-w-2xl mx-auto">
-            <TranslatableText>Tura Neza connects you with the best rental properties across Kigali and beyond. Start your search today for a seamless and trustworthy experience.</TranslatableText>
+            <TranslatableText>Cribs Ink connects you with the best rental properties across Kigali and beyond. Start your search today for a seamless and trustworthy experience.</TranslatableText>
           </p>
         </motion.div>
 
