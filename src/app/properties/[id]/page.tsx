@@ -1,4 +1,3 @@
-
 // This should be a server component to fetch data
 import { getPropertyById, mockTenantProfiles, addReviewToProperty } from '@/lib/mockData'; // Mock data fetching
 import PropertyGallery from '@/components/properties/PropertyGallery';
@@ -15,6 +14,7 @@ import type { Property } from '@/types';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { unstable_noStore as noStore } from 'next/cache';
+import MomoPaymentGate from '@/components/properties/MomoPaymentGate';
 
 
 interface PropertyDetailsPageProps {
@@ -74,7 +74,6 @@ export default async function PropertyDetailsPage({ params }: PropertyDetailsPag
         <div className="lg:col-span-2 space-y-8">
           <PropertyGallery photos={property.photos} altText={property.title} />
           <PropertyInfo property={property} />
-          
           <Separator />
 
           <div>
@@ -123,16 +122,11 @@ export default async function PropertyDetailsPage({ params }: PropertyDetailsPag
             </CardHeader>
             <CardContent className="space-y-3">
               <p className="text-sm text-muted-foreground">
-                Contact the owner or proceed to lease agreement if available.
+                Proceed to lease agreement if available.
               </p>
               <Button size="lg" className="w-full" asChild>
                 <Link href={`/lease/${property.id}`}>View Lease Options</Link>
               </Button>
-              {property.agent?.phone && (
-                 <Button variant="outline" size="lg" className="w-full" asChild>
-                    <a href={`tel:${property.agent.phone}`}>Call Owner</a>
-                 </Button>
-              )}
             </CardContent>
           </Card>
         </div>

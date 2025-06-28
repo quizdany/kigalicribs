@@ -4,6 +4,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import AppLayout from '@/components/layout/AppLayout';
 import { LanguageProvider } from '@/contexts/LanguageContext';
+import AuthProvider from '@/components/providers/AuthProvider';
 
 export const metadata: Metadata = {
   title: 'Cribs Ink - Find Your Perfect Property in Rwanda',
@@ -23,11 +24,13 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased">
-        <LanguageProvider>
-          <AppLayout>
-            {children}
-          </AppLayout>
-        </LanguageProvider>
+        <AuthProvider>
+          <LanguageProvider>
+            <AppLayout>
+              {children}
+            </AppLayout>
+          </LanguageProvider>
+        </AuthProvider>
         <Toaster />
       </body>
     </html>

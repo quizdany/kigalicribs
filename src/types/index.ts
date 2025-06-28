@@ -1,4 +1,3 @@
-
 export interface Review {
   id: string;
   propertyId: string;
@@ -69,10 +68,10 @@ export interface PropertyFormData {
   title: string;
   description: string;
   price: number;
-  currency: string;
-  location: string; // This is just the neighborhood, e.g., "Remera"
+  currency: typeof currenciesList[number];
+  location: typeof kigaliLocationsList[number];
   address: string;
-  propertyType: Property['propertyType'];
+  propertyType: typeof propertyTypesList[number];
   bedrooms: number;
   bathrooms: number;
   area: number;
@@ -84,7 +83,6 @@ export interface PropertyFormData {
   featuresForAI?: string;
   marketTrendsForAI?: string;
 }
-
 
 export const amenityList = [
   "WiFi", "Parking", "Swimming Pool", "Gym", "Security System", "Balcony/Patio", "Garden/Yard", 
@@ -106,3 +104,9 @@ export type Language = {
   code: 'en' | 'fr' | 'rw'; // Standardized language codes
   name: string;
 };
+
+export const propertyTypesList = ["Apartment", "House", "Office", "Retail", "Villa", "Commercial"] as const;
+export const currenciesList = ["RWF", "USD"] as const;
+export const kigaliLocationsList = [
+  "Kiyovu", "Kimihurura", "Nyarutarama", "Kibagabaga", "Gacuriro", "Remera", "Kicukiro", "Kanombe", "Gisozi", "Nyamirambo"
+] as const;

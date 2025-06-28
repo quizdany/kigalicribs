@@ -1,12 +1,17 @@
+"use client";
 
 import type { Property, Review } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MapPin, BedDouble, Bath, AreaChart, Tag, CalendarDays, UserCircle, Phone, Mail, ListChecks, Star, MessageSquare } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { useState, useEffect } from 'react';
+import MomoPaymentGate from './MomoPaymentGate';
+import { useRouter } from 'next/navigation';
 
 interface PropertyInfoProps {
   property: Property;
+  showContactInfo?: boolean;
 }
 
 const formatPrice = (amount: number, currency: string) => {
@@ -38,8 +43,18 @@ const StarRatingDisplay = ({ rating, reviewCount }: { rating?: number; reviewCou
 };
 
 
-const PropertyInfo: React.FC<PropertyInfoProps> = ({ property }) => {
+const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, showContactInfo = false }) => {
+  const [showContact, setShowContact] = useState(false);
+  const router = useRouter();
   const googleMapsSearchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(property.address + ', ' + property.location)}`;
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('showContact') === '1') setShowContact(true);
+    }
+  }, []);
+
   return (
     <Card className="shadow-lg">
       <CardHeader>
@@ -108,15 +123,24 @@ const PropertyInfo: React.FC<PropertyInfoProps> = ({ property }) => {
             <Separator />
             <div>
               <h3 className="text-xl font-semibold mb-3">Contact Owner</h3>
-              <div className="space-y-2 text-md">
-                <div className="flex items-center"><UserCircle className="h-5 w-5 mr-2 text-primary/80" /> {property.agent.name}</div>
-                {property.agent.email && 
-                  <div className="flex items-center"><Mail className="h-5 w-5 mr-2 text-primary/80" /> <a href={`mailto:${property.agent.email}`} className="hover:text-primary">{property.agent.email}</a></div>
-                }
-                {property.agent.phone &&
-                  <div className="flex items-center"><Phone className="h-5 w-5 mr-2 text-primary/80" /> <a href={`tel:${property.agent.phone}`} className="hover:text-primary">{property.agent.phone}</a></div>
-                }
-              </div>
+              {!showContact ? (
+                <button
+                  className="btn btn-primary"
+                  onClick={() => router.push(`/payment?redirectTo=/properties/${property.id}?showContact=1&fee=1000&context=contact`)}
+                >
+                  Contact Owner
+                </button>
+              ) : (
+                <div className="space-y-2 text-md">
+                  <div className="flex items-center"><UserCircle className="h-5 w-5 mr-2 text-primary/80" /> {property.agent.name}</div>
+                  {property.agent.email && 
+                    <div className="flex items-center"><Mail className="h-5 w-5 mr-2 text-primary/80" /> <a href={`mailto:${property.agent.email}`} className="hover:text-primary">{property.agent.email}</a></div>
+                  }
+                  {property.agent.phone &&
+                    <div className="flex items-center"><Phone className="h-5 w-5 mr-2 text-primary/80" /> <a href={`tel:${property.agent.phone}`} className="hover:text-primary">{property.agent.phone}</a></div>
+                  }
+                </div>
+              )}
             </div>
           </>
         )}

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,20 +24,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { amenityList, propertyTypes, kigaliLocations, currencies, type PropertyFormData } from "@/types";
+import { amenityList, propertyTypesList, currenciesList, kigaliLocationsList, type PropertyFormData } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { createPropertyListing } from "@/lib/actions"; 
 import { addPropertyToMockData } from "@/lib/mockData"; // For prototype: add to client-side mock data
 import { UploadCloud } from "lucide-react";
+import MomoPaymentGate from './MomoPaymentGate';
+import { useState } from 'react';
 
 const formSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters.").max(100, "Title too long."),
   description: z.string().min(20, "Description must be at least 20 characters.").max(1000, "Description too long."),
   price: z.coerce.number().positive("Price must be positive."),
-  currency: z.enum(currencies as [string, ...string[]], { required_error: "Currency is required."}),
-  location: z.enum(kigaliLocations as [string, ...string[]], { required_error: "Location is required."}),
+  currency: z.enum(currenciesList, { required_error: "Currency is required."}),
+  location: z.enum(kigaliLocationsList, { required_error: "Location is required."}),
   address: z.string().min(5, "Address must be at least 5 characters."),
-  propertyType: z.enum(propertyTypes as [string, ...string[]], { required_error: "Property type is required."}),
+  propertyType: z.enum(propertyTypesList, { required_error: "Property type is required."}),
   bedrooms: z.coerce.number().min(0).max(20, "Too many bedrooms"),
   bathrooms: z.coerce.number().min(0).max(20, "Too many bathrooms"),
   area: z.coerce.number().positive("Area must be positive."),
@@ -53,16 +54,18 @@ const formSchema = z.object({
 
 export default function PropertyForm() {
   const { toast } = useToast();
+  const [pendingValues, setPendingValues] = useState<PropertyFormData | null>(null);
+  const [showPayment, setShowPayment] = useState(false);
   const form = useForm<PropertyFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
       description: "",
       price: 0,
-      currency: "RWF",
-      location: kigaliLocations[0],
+      currency: currenciesList[0],
+      location: kigaliLocationsList[0],
       address: "",
-      propertyType: propertyTypes[0],
+      propertyType: propertyTypesList[0],
       bedrooms: 1,
       bathrooms: 1,
       area: 0,
@@ -77,13 +80,15 @@ export default function PropertyForm() {
   });
 
   async function onSubmit(values: PropertyFormData) {
-    try {
-      // For prototype: add to client-side mock data for immediate feedback
-      addPropertyToMockData(values); 
-      
-      // Intended server action call (currently logs to console)
-      await createPropertyListing(values); 
+    setPendingValues(values);
+    setShowPayment(true);
+  }
 
+  async function handlePaymentComplete() {
+    if (!pendingValues) return;
+    try {
+      addPropertyToMockData(pendingValues);
+      await createPropertyListing(pendingValues);
       toast({
         title: "Property Listed!",
         description: "Your property has been successfully listed (in mock data for now).",
@@ -96,6 +101,9 @@ export default function PropertyForm() {
         variant: "destructive",
       });
       console.error("Property listing error:", error);
+    } finally {
+      setShowPayment(false);
+      setPendingValues(null);
     }
   }
 
@@ -160,7 +168,7 @@ export default function PropertyForm() {
                         <SelectTrigger><SelectValue placeholder="Select currency" /></SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {currencies.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                        {currenciesList.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -181,7 +189,7 @@ export default function PropertyForm() {
                         <SelectTrigger><SelectValue placeholder="Select location" /></SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {kigaliLocations.map(loc => <SelectItem key={loc} value={loc}>{loc}</SelectItem>)}
+                        {kigaliLocationsList.map(loc => <SelectItem key={loc} value={loc}>{loc}</SelectItem>)}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -215,7 +223,7 @@ export default function PropertyForm() {
                         <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {propertyTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
+                        {propertyTypesList.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -368,6 +376,14 @@ export default function PropertyForm() {
             <Button type="submit" size="lg" className="w-full md:w-auto">List Property</Button>
           </form>
         </Form>
+        {showPayment && (
+          <MomoPaymentGate fee={2000}>
+            <div className="text-center">
+              <p className="mb-4">Thank you for your payment! Your property will now be listed.</p>
+              <Button onClick={handlePaymentComplete} className="w-full">Finish Listing</Button>
+            </div>
+          </MomoPaymentGate>
+        )}
       </CardContent>
     </Card>
   );

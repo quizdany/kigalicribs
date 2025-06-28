@@ -31,6 +31,7 @@ import { registerTenant } from "@/lib/actions"; // Assuming server action
 const formSchema = z.object({
   fullName: z.string().min(2, { message: "Full name must be at least 2 characters." }),
   email: z.string().email({ message: "Invalid email address." }),
+  password: z.string().min(6, { message: "Password must be at least 6 characters." }),
   phone: z.string().optional(),
   budgetMin: z.coerce.number().min(0, { message: "Minimum budget must be positive." }),
   budgetMax: z.coerce.number().min(0, { message: "Maximum budget must be positive." }),
@@ -55,6 +56,7 @@ export default function TenantRegistrationForm() {
     defaultValues: {
       fullName: "",
       email: "",
+      password: "",
       phone: "",
       budgetMin: 0,
       budgetMax: 0,
@@ -69,21 +71,23 @@ export default function TenantRegistrationForm() {
   });
 
   async function onSubmit(values: TenantRegistrationFormData) {
-    // try {
-    //   await registerTenant(values); // Server action call
+    try {
+      const result = await registerTenant(values);
+      
+      if (result.success) {
+        toast({
+          title: "Profile Created!",
+          description: result.message,
+        });
+        form.reset();
+      }
+    } catch (error) {
       toast({
-        title: "Profile Created!",
-        description: "Your tenant profile has been successfully created.",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to create profile. Please try again.",
+        variant: "destructive",
       });
-      form.reset();
-    // } catch (error) {
-    //   toast({
-    //     title: "Error",
-    //     description: "Failed to create profile. Please try again.",
-    //     variant: "destructive",
-    //   });
-    // }
-    console.log(values); // Placeholder for actual submission
+    }
   }
 
   return (
@@ -117,6 +121,19 @@ export default function TenantRegistrationForm() {
                     <FormLabel>Email Address</FormLabel>
                     <FormControl>
                       <Input type="email" placeholder="e.g., jane.doe@example.com" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" placeholder="Create a password" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
