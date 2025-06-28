@@ -1,32 +1,43 @@
-
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
 import PropertyFilters, { Filters } from '@/components/properties/PropertyFilters';
 import PropertyList from '@/components/properties/PropertyList';
 import MapViewPlaceholder from '@/components/properties/MapViewPlaceholder';
-import { mockProperties } from '@/lib/mockData';
 import type { Property } from '@/types';
-import { SELECT_ANY_VALUE } from '@/types'; // Import the constant
+import { SELECT_ANY_VALUE } from '@/types';
 import { Button } from '@/components/ui/button';
 import { List, Map } from 'lucide-react';
+import { fetchAllProperties } from '@/lib/actions';
 
 export default function SearchPage() {
-  const [filteredProperties, setFilteredProperties] = useState<Property[]>(mockProperties);
-  const [isLoading, setIsLoading] = useState(false);
+  const [allProperties, setAllProperties] = useState<Property[]>([]);
+  const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
-  const [tenantLoggedIn, setTenantLoggedIn] = useState(false); // Mocked
+  const [tenantLoggedIn, setTenantLoggedIn] = useState(false);
 
   useEffect(() => {
-    // Simulate auth check for tenant to show match scores
     setTenantLoggedIn(Math.random() > 0.5);
+    setIsLoading(true);
+    fetchAllProperties()
+      .then(data => {
+        console.log('Fetched properties from Supabase:', data); // Debug: check data shape
+        setAllProperties(data || []);
+        setFilteredProperties(data || []);
+      })
+      .catch(err => {
+        setAllProperties([]);
+        setFilteredProperties([]);
+        // Optionally show an error toast here
+      })
+      .finally(() => setIsLoading(false));
   }, []);
 
   const handleFilterChange = useCallback((filters: Filters) => {
     setIsLoading(true);
-    // Simulate API call / filtering logic
     setTimeout(() => {
-      let results = mockProperties;
+      let results = allProperties;
 
       if (filters.searchTerm) {
         results = results.filter(p => 
@@ -38,7 +49,7 @@ export default function SearchPage() {
         results = results.filter(p => p.location.includes(filters.location!));
       }
       if (filters.propertyType && filters.propertyType !== SELECT_ANY_VALUE) {
-        results = results.filter(p => p.propertyType === filters.propertyType);
+        results = results.filter(p => p.property_type === filters.propertyType);
       }
       if (filters.bedrooms && filters.bedrooms > 0) {
         results = results.filter(p => p.bedrooms >= filters.bedrooms!);
@@ -53,13 +64,13 @@ export default function SearchPage() {
         results = results.filter(p => p.currency === filters.priceCurrency && p.price <= filters.maxPrice!);
       }
       if (filters.amenities && filters.amenities.length > 0) {
-        results = results.filter(p => filters.amenities!.every(a => p.amenities.includes(a)));
+        results = results.filter(p => Array.isArray(p.amenities) && filters.amenities!.every(a => p.amenities.includes(a)));
       }
 
       setFilteredProperties(results);
       setIsLoading(false);
-    }, 500);
-  }, []);
+    }, 200);
+  }, [allProperties]);
 
   return (
     <div className="container mx-auto py-8 px-4">

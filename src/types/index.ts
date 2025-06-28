@@ -20,27 +20,30 @@ export interface Property {
   area: number; // in sq meters
   amenities: string[];
   photos: string[]; // URLs of photos
-  propertyType: 'Apartment' | 'House' | 'Office' | 'Retail' | 'Villa' | 'Commercial';
-  listedDate: string; // ISO date string
+  propertyType?: string; // camelCase for legacy/mock
+  property_type?: string; // snake_case for Supabase
+  listedDate?: string;
   agent?: { // Can be agent or owner info
     name: string;
     phone: string;
     email: string;
   };
-  aiData?: {
-    fairPrice?: {
-      suggestedPrice: number;
-      priceJustification: string;
-    };
-    matchScore?: { // Assuming tenant context is available when this is populated
-      score: number; // 0-100
-      reasoning: string;
-    };
-  };
-  features?: string; // Combined string of features for AI
-  marketTrends?: string; // Info for AI
-  reviews?: Review[];
+  agentName?: string;
+  agentEmail?: string;
+  agentPhone?: string;
+  agent_name?: string;
+  agent_email?: string;
+  agent_phone?: string;
+  aiData?: any;
+  features?: string;
+  features_for_ai?: string;
+  marketTrends?: string;
+  market_trends_for_ai?: string;
+  reviews?: any[];
   averageRating?: number;
+  landlord_id?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface TenantProfile {

@@ -1,30 +1,44 @@
 'use server';
 
 import type { TenantRegistrationFormData } from '@/components/auth/TenantRegistrationForm';
-import type { PropertyFormData } from '@/components/properties/PropertyForm';
+import type { LandlordRegistrationFormData } from '@/components/auth/LandlordRegistrationForm';
+import type { PropertyFormData } from '@/types';
 import type { LoginFormData } from '@/components/auth/LoginForm';
 import { adminDb } from '@/lib/firebase-admin';
+import { sendVerificationEmail } from '@/lib/email';
+import { generateVerificationToken, hashVerificationToken } from '@/lib/utils';
 import bcrypt from 'bcryptjs';
+import { supabase } from './supabaseClient';
 
 export async function registerTenant(data: TenantRegistrationFormData) {
   try {
     console.log('Registering tenant:', data);
     
-    // Check if user already exists
-    const existingUser = await adminDb
+    // Check if user already exists in either collection
+    const existingTenant = await adminDb
       .collection('tenants')
       .where('email', '==', data.email)
       .limit(1)
       .get();
 
-    if (!existingUser.empty) {
-      throw new Error('A tenant with this email already exists.');
+    const existingLandlord = await adminDb
+      .collection('landlords')
+      .where('email', '==', data.email)
+      .limit(1)
+      .get();
+
+    if (!existingTenant.empty || !existingLandlord.empty) {
+      throw new Error('A user with this email already exists.');
     }
 
     // Hash the password
     const hashedPassword = await bcrypt.hash(data.password, 12);
 
-    // Save tenant profile to Firebase
+    // Generate verification token
+    const verificationToken = generateVerificationToken();
+    const hashedToken = hashVerificationToken(verificationToken);
+
+    // Save tenant profile to Firebase with verification status
     const tenantDoc = await adminDb.collection('tenants').add({
       fullName: data.fullName,
       email: data.email,
@@ -43,20 +57,110 @@ export async function registerTenant(data: TenantRegistrationFormData) {
         amenities: data.preferredAmenities || []
       },
       additionalNotes: data.additionalNotes || null,
-      status: 'active',
+      status: 'pending_verification',
+      emailVerified: false,
+      verificationToken: hashedToken,
+      verificationTokenCreatedAt: new Date(),
       createdAt: new Date(),
       updatedAt: new Date()
     });
 
+    // Send verification email
+    try {
+      await sendVerificationEmail({
+        email: data.email,
+        name: data.fullName,
+        verificationToken,
+        role: 'tenant'
+      });
+    } catch (emailError) {
+      console.error('Failed to send verification email:', emailError);
+      // Don't fail registration if email fails, but log it
+    }
+
     console.log('Tenant registered successfully with ID:', tenantDoc.id);
     return { 
       success: true, 
-      message: 'Tenant profile created successfully!',
+      message: 'Tenant profile created successfully! Please check your email to verify your account.',
       tenantId: tenantDoc.id 
     };
   } catch (error) {
     console.error('Error registering tenant:', error);
     throw new Error(error instanceof Error ? error.message : 'Failed to register tenant due to a server error.');
+  }
+}
+
+export async function registerLandlord(data: LandlordRegistrationFormData) {
+  try {
+    console.log('Registering landlord:', data);
+    
+    // Check if user already exists in either collection
+    const existingTenant = await adminDb
+      .collection('tenants')
+      .where('email', '==', data.email)
+      .limit(1)
+      .get();
+
+    const existingLandlord = await adminDb
+      .collection('landlords')
+      .where('email', '==', data.email)
+      .limit(1)
+      .get();
+
+    if (!existingTenant.empty || !existingLandlord.empty) {
+      throw new Error('A user with this email already exists.');
+    }
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(data.password, 12);
+
+    // Generate verification token
+    const verificationToken = generateVerificationToken();
+    const hashedToken = hashVerificationToken(verificationToken);
+
+    // Save landlord profile to Firebase with verification status
+    const landlordDoc = await adminDb.collection('landlords').add({
+      firstName: data.firstName,
+      lastName: data.lastName,
+      fullName: `${data.firstName} ${data.lastName}`,
+      email: data.email,
+      password: hashedPassword,
+      phone: data.phone,
+      companyName: data.companyName || null,
+      businessLicense: data.businessLicense || null,
+      experience: data.experience,
+      propertiesOwned: data.propertiesOwned,
+      additionalInfo: data.additionalInfo || null,
+      status: 'pending_verification',
+      emailVerified: false,
+      verificationToken: hashedToken,
+      verificationTokenCreatedAt: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
+
+    // Send verification email
+    try {
+      await sendVerificationEmail({
+        email: data.email,
+        name: `${data.firstName} ${data.lastName}`,
+        verificationToken,
+        role: 'landlord'
+      });
+    } catch (emailError) {
+      console.error('Failed to send verification email:', emailError);
+      // Don't fail registration if email fails, but log it
+    }
+
+    console.log('Landlord registered successfully with ID:', landlordDoc.id);
+    return { 
+      success: true, 
+      message: 'Landlord profile created successfully! Please check your email to verify your account.',
+      landlordId: landlordDoc.id 
+    };
+  } catch (error) {
+    console.error('Error registering landlord:', error);
+    throw new Error(error instanceof Error ? error.message : 'Failed to register landlord due to a server error.');
   }
 }
 
@@ -88,6 +192,16 @@ export async function loginTenant(data: LoginFormData) {
       throw new Error('Invalid email or password.');
     }
 
+    // Check if email is verified
+    if (!userData.emailVerified) {
+      throw new Error('Please verify your email address before logging in. Check your inbox for a verification link.');
+    }
+
+    // Check if account is active
+    if (userData.status !== 'active') {
+      throw new Error('Your account is not active. Please contact support if you believe this is an error.');
+    }
+
     console.log('Login successful for user:', userData.email);
     return { 
       success: true, 
@@ -96,7 +210,7 @@ export async function loginTenant(data: LoginFormData) {
       role: data.role,
       user: {
         id: userDoc.id,
-        fullName: userData.fullName || userData.firstName + ' ' + userData.lastName,
+        fullName: userData.fullName || `${userData.firstName} ${userData.lastName}`,
         email: userData.email,
         role: data.role
       }
@@ -120,4 +234,43 @@ export async function createPropertyListing(data: PropertyFormData) {
   }
 }
 
-// Add more server actions as needed for authentication, fetching data, etc.
+function mapFormDataToDb(data: PropertyFormData, landlordId: string) {
+  return {
+    title: data.title,
+    description: data.description,
+    price: data.price,
+    currency: data.currency,
+    location: data.location,
+    address: data.address,
+    property_type: data.propertyType,
+    bedrooms: data.bedrooms,
+    bathrooms: data.bathrooms,
+    area: data.area,
+    amenities: data.amenities ?? [],
+    photos: data.photos,
+    agent_name: data.agentName || null,
+    agent_email: data.agentEmail || null,
+    agent_phone: data.agentPhone || null,
+    features_for_ai: data.featuresForAI || null,
+    market_trends_for_ai: data.marketTrendsForAI || null,
+    landlord_id: landlordId,
+  };
+}
+
+export async function createPropertyListingSupabase(data: PropertyFormData, landlordId: string) {
+  const mappedData = mapFormDataToDb(data, landlordId);
+  const { error } = await supabase
+    .from('properties')
+    .insert([mappedData]);
+  if (error) throw error;
+  return { success: true, message: 'Property listed successfully.' };
+}
+
+export async function fetchAllProperties() {
+  const { data, error } = await supabase
+    .from('properties')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return data;
+}

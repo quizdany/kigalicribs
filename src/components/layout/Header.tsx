@@ -1,8 +1,8 @@
-
 'use client';
 
 import Link from 'next/link';
 import { Menu, LogIn, UserPlus, UserCircle, LogOut, Languages } from 'lucide-react';
+import { useSession, signOut } from 'next-auth/react';
 import { siteConfig } from '@/config/site';
 import Logo from '@/components/shared/Logo';
 import { Button } from '@/components/ui/button';
@@ -17,26 +17,15 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
 } from "@/components/ui/dropdown-menu";
-import { useState, useEffect } from 'react';
-import { useLanguage } from '@/contexts/LanguageContext'; // Import useLanguage
+import { useLanguage } from '@/contexts/LanguageContext';
 import type { Language } from '@/types';
 
 const Header = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userName, setUserName] = useState<string | null>(null);
-  const { selectedLanguage, setSelectedLanguage, supportedLanguages } = useLanguage(); // Use context
+  const { data: session, status } = useSession();
+  const { selectedLanguage, setSelectedLanguage, supportedLanguages } = useLanguage();
 
-  useEffect(() => {
-    const loggedIn = Math.random() > 0.5;
-    setIsAuthenticated(loggedIn);
-    if (loggedIn) {
-      setUserName("Demo User");
-    }
-  }, []);
-
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    setUserName(null);
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: '/' });
   };
 
   const handleLanguageChange = (langCode: string) => {
@@ -45,6 +34,8 @@ const Header = () => {
       setSelectedLanguage(language);
     }
   };
+
+  const isAuthenticated = status === 'authenticated';
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -95,15 +86,21 @@ const Header = () => {
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{userName}</p>
+                    <p className="text-sm font-medium leading-none">{session?.user?.name}</p>
+                    <p className="text-xs leading-none text-muted-foreground capitalize">{session?.user?.role}</p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link href="/profile">My Profile</Link>
                 </DropdownMenuItem>
+                {session?.user?.role === 'landlord' && (
+                  <DropdownMenuItem asChild>
+                    <Link href="/list-property">List Property</Link>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem asChild>
-                   <Link href="/my-listings">My Listings</Link>
+                   <Link href="/dashboard">Dashboard</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>
@@ -171,6 +168,24 @@ const Header = () => {
                       </Button>
                        <Button asChild className="w-full text-lg py-6">
                         <Link href="/register"><UserPlus className="mr-2 h-5 w-5" />Register</Link>
+                      </Button>
+                    </>
+                  )}
+                  {isAuthenticated && (
+                    <>
+                      <Button variant="outline" asChild className="w-full text-lg py-6">
+                        <Link href="/dashboard">Dashboard</Link>
+                      </Button>
+                      <Button variant="outline" asChild className="w-full text-lg py-6">
+                        <Link href="/profile">My Profile</Link>
+                      </Button>
+                      {session?.user?.role === 'landlord' && (
+                        <Button variant="outline" asChild className="w-full text-lg py-6">
+                          <Link href="/list-property">List Property</Link>
+                        </Button>
+                      )}
+                      <Button variant="destructive" onClick={handleLogout} className="w-full text-lg py-6">
+                        <LogOut className="mr-2 h-5 w-5" />Logout
                       </Button>
                     </>
                   )}

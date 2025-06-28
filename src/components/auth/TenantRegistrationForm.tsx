@@ -27,11 +27,15 @@ import { useToast } from "@/hooks/use-toast";
 import { amenityList, propertyTypes, kigaliLocations, currencies } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { registerTenant } from "@/lib/actions"; // Assuming server action
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import Link from "next/link";
 
 const formSchema = z.object({
   fullName: z.string().min(2, { message: "Full name must be at least 2 characters." }),
   email: z.string().email({ message: "Invalid email address." }),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
+  confirmPassword: z.string().min(1, { message: "Please confirm your password." }),
   phone: z.string().optional(),
   budgetMin: z.coerce.number().min(0, { message: "Minimum budget must be positive." }),
   budgetMax: z.coerce.number().min(0, { message: "Maximum budget must be positive." }),
@@ -45,18 +49,24 @@ const formSchema = z.object({
 }).refine(data => data.budgetMax >= data.budgetMin, {
   message: "Maximum budget cannot be less than minimum budget.",
   path: ["budgetMax"],
+}).refine(data => data.password === data.confirmPassword, {
+  message: "Passwords don't match.",
+  path: ["confirmPassword"],
 });
 
 export type TenantRegistrationFormData = z.infer<typeof formSchema>;
 
 export default function TenantRegistrationForm() {
   const { toast } = useToast();
+  const router = useRouter();
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const form = useForm<TenantRegistrationFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       fullName: "",
       email: "",
       password: "",
+      confirmPassword: "",
       phone: "",
       budgetMin: 0,
       budgetMax: 0,
@@ -75,10 +85,7 @@ export default function TenantRegistrationForm() {
       const result = await registerTenant(values);
       
       if (result.success) {
-        toast({
-          title: "Profile Created!",
-          description: result.message,
-        });
+        setIsSubmitted(true);
         form.reset();
       }
     } catch (error) {
@@ -88,6 +95,41 @@ export default function TenantRegistrationForm() {
         variant: "destructive",
       });
     }
+  }
+
+  if (isSubmitted) {
+    return (
+      <Card className="w-full max-w-2xl mx-auto">
+        <CardHeader>
+          <CardTitle className="text-2xl font-headline text-center text-green-600">Registration Successful!</CardTitle>
+          <CardDescription className="text-center">
+            Please check your email to verify your account
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="text-center">
+          <div className="mb-6">
+            <p className="text-gray-600 mb-4">
+              We've sent a verification email to your inbox. Please click the verification link in the email to activate your account.
+            </p>
+            <p className="text-sm text-gray-500">
+              If you don't see the email, check your spam folder.
+            </p>
+          </div>
+          <div className="space-y-3">
+            <Button asChild className="w-full">
+              <Link href="/login">Go to Login</Link>
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsSubmitted(false)}
+              className="w-full"
+            >
+              Register Another Account
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
@@ -134,6 +176,19 @@ export default function TenantRegistrationForm() {
                     <FormLabel>Password</FormLabel>
                     <FormControl>
                       <Input type="password" placeholder="Create a password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirm Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" placeholder="Confirm your password" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

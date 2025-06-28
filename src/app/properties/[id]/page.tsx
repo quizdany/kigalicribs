@@ -1,5 +1,5 @@
 // This should be a server component to fetch data
-import { getPropertyById, mockTenantProfiles, addReviewToProperty } from '@/lib/mockData'; // Mock data fetching
+import { supabase } from '@/lib/supabaseClient';
 import PropertyGallery from '@/components/properties/PropertyGallery';
 import PropertyInfo from '@/components/properties/PropertyInfo';
 import FairPriceAnalysis from '@/components/properties/FairPriceAnalysis';
@@ -35,9 +35,14 @@ async function getPropertyData(id: string): Promise<Property | null> {
 // Next.js server components might not pick up this change without revalidation or `noStore()`.
 
 export default async function PropertyDetailsPage({ params }: PropertyDetailsPageProps) {
-  const property = await getPropertyData(params.id);
+  // Fetch property from Supabase
+  const { data: property, error } = await supabase
+    .from('properties')
+    .select('*')
+    .eq('id', params.id)
+    .single();
 
-  if (!property) {
+  if (error || !property) {
     return (
       <div className="container mx-auto py-12 px-4 text-center">
         <Alert variant="destructive" className="max-w-lg mx-auto">
@@ -54,20 +59,6 @@ export default async function PropertyDetailsPage({ params }: PropertyDetailsPag
     );
   }
 
-  // Mock: randomly decide if a tenant is "logged in" and pick one for demo
-  const isTenantLoggedIn = Math.random() > 0.3; // More likely to be logged in for demo
-  const currentTenant = isTenantLoggedIn ? mockTenantProfiles[Math.floor(Math.random() * mockTenantProfiles.length)] : undefined;
-  
-  if (currentTenant && property.aiData && !property.aiData.matchScore) {
-     property.aiData.matchScore = { score: Math.floor(Math.random() * 50) + 50, reasoning: "This property is a strong contender based on your saved preferences for location and size. The amenities align well, though it's slightly above your average budget."};
-  }
-
-  // For SubmitReviewForm to trigger updates on this server component,
-  // it would typically use a server action that revalidates the path, or router.refresh().
-  // Since we're using mockData directly, updates might not be immediate without a page refresh.
-  // The `addReviewToProperty` function modifies the mockData array. `noStore()` helps here.
-
-
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -83,37 +74,11 @@ export default async function PropertyDetailsPage({ params }: PropertyDetailsPag
             <PropertyReviewsList reviews={property.reviews || []} />
           </div>
 
-          {isTenantLoggedIn ? (
-            <>
-              <Separator />
-              <SubmitReviewForm propertyId={property.id} />
-            </>
-          ) : (
-             <>
-              <Separator />
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center text-xl font-headline">
-                    <MessageSquare className="mr-2 h-6 w-6 text-primary" /> Want to share your experience?
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Alert>
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>Login Required to Review</AlertTitle>
-                    <AlertDescription>
-                      Please <Link href="/login" className="font-semibold underline hover:text-primary">log in</Link> or <Link href="/register" className="font-semibold underline hover:text-primary">create an account</Link> to submit a review for this property.
-                    </AlertDescription>
-                  </Alert>
-                </CardContent>
-              </Card>
-            </>
-          )}
-
+          {/* You can add review submission and login logic here if needed */}
         </div>
         <div className="lg:col-span-1 space-y-8 sticky top-24 self-start">
           <FairPriceAnalysis property={property} />
-          <MatchScoreDisplay property={property} tenantProfile={currentTenant} />
+          <MatchScoreDisplay property={property} tenantProfile={undefined} />
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center text-xl font-headline">

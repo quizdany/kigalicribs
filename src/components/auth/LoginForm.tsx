@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useState } from "react";
+import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -18,7 +19,6 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { loginTenant } from "@/lib/actions";
 import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
@@ -46,25 +46,32 @@ export default function LoginForm() {
   async function onSubmit(values: LoginFormData) {
     setIsLoading(true);
     try {
-      const result = await loginTenant(values);
+      const result = await signIn("credentials", {
+        email: values.email,
+        password: values.password,
+        role: values.role,
+        redirect: false,
+      });
       
-      if (result.success) {
+      if (result?.error) {
+        toast({
+          title: "Login Failed",
+          description: "Invalid email or password. Please try again.",
+          variant: "destructive",
+        });
+      } else {
         toast({
           title: "Login Successful!",
-          description: result.message,
+          description: `Welcome back${values.role === 'landlord' ? ', landlord' : ''}!`,
         });
         
-        // Redirect based on role
-        if (values.role === "landlord") {
-          router.push("/list-property");
-        } else {
-          router.push("/"); // Home page for tenants
-        }
+        // Redirect to dashboard after successful login
+        router.push("/dashboard");
       }
     } catch (error) {
       toast({
         title: "Login Failed",
-        description: error instanceof Error ? error.message : "Invalid credentials. Please try again.",
+        description: "An error occurred during login. Please try again.",
         variant: "destructive",
       });
     } finally {

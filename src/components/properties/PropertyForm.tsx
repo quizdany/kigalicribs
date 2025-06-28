@@ -26,11 +26,11 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { amenityList, propertyTypesList, currenciesList, kigaliLocationsList, type PropertyFormData } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { createPropertyListing } from "@/lib/actions"; 
-import { addPropertyToMockData } from "@/lib/mockData"; // For prototype: add to client-side mock data
-import { UploadCloud } from "lucide-react";
 import MomoPaymentGate from './MomoPaymentGate';
 import { useState } from 'react';
+import CloudinaryImageUpload from './CloudinaryImageUpload';
+import { useSession } from 'next-auth/react';
+import { createPropertyListingSupabase } from '@/lib/actions';
 
 const formSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters.").max(100, "Title too long."),
@@ -44,7 +44,7 @@ const formSchema = z.object({
   bathrooms: z.coerce.number().min(0).max(20, "Too many bathrooms"),
   area: z.coerce.number().positive("Area must be positive."),
   amenities: z.array(z.string()).optional(),
-  photos: z.array(z.string()).min(1, "At least one photo URL is required.").optional(), // For now, simple URL input
+  photos: z.array(z.string()).min(1, "At least one photo is required."),
   agentName: z.string().optional(),
   agentEmail: z.string().email("Invalid email.").optional(),
   agentPhone: z.string().optional(),
@@ -54,6 +54,7 @@ const formSchema = z.object({
 
 export default function PropertyForm() {
   const { toast } = useToast();
+  const { data: session } = useSession();
   const [pendingValues, setPendingValues] = useState<PropertyFormData | null>(null);
   const [showPayment, setShowPayment] = useState(false);
   const form = useForm<PropertyFormData>({
@@ -87,20 +88,20 @@ export default function PropertyForm() {
   async function handlePaymentComplete() {
     if (!pendingValues) return;
     try {
-      addPropertyToMockData(pendingValues);
-      await createPropertyListing(pendingValues);
+      const landlordId = session?.user?.id;
+      await createPropertyListingSupabase(pendingValues, landlordId);
       toast({
-        title: "Property Listed!",
-        description: "Your property has been successfully listed (in mock data for now).",
+        title: 'Property Listed!',
+        description: 'Your property has been successfully listed.',
       });
       form.reset();
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to list property. Please try again.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to list property. Please try again.',
+        variant: 'destructive',
       });
-      console.error("Property listing error:", error);
+      console.error('Property listing error:', error);
     } finally {
       setShowPayment(false);
       setPendingValues(null);
@@ -317,20 +318,10 @@ export default function PropertyForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Property Photos</FormLabel>
-                  <FormDescription>Enter URLs for photos, one per line. (Placeholder for file upload)</FormDescription>
+                  <FormDescription>Upload images of your property. You can upload multiple images.</FormDescription>
                   <FormControl>
-                    <Textarea 
-                      placeholder="https://example.com/photo1.jpg\nhttps://example.com/photo2.jpg" 
-                      {...field}
-                      onChange={(e) => field.onChange(e.target.value.split('\n').map(url => url.trim()).filter(url => url))}
-                      value={Array.isArray(field.value) ? field.value.join('\n') : ''}
-                      rows={3}
-                    />
+                    <CloudinaryImageUpload value={field.value || []} onChange={field.onChange} />
                   </FormControl>
-                  <div className="mt-2 p-4 border border-dashed rounded-md flex flex-col items-center justify-center text-muted-foreground">
-                    <UploadCloud className="w-10 h-10 mb-2" />
-                    <p>Drag & drop or click to upload (feature coming soon)</p>
-                  </div>
                   <FormMessage />
                 </FormItem>
               )}
