@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { registerLandlord } from "@/lib/actions";
+import { registerLandlord, updateLandlordProfile } from "@/lib/actions";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
@@ -41,13 +41,42 @@ const formSchema = z.object({
 
 export type LandlordRegistrationFormData = z.infer<typeof formSchema>;
 
-export default function LandlordRegistrationForm() {
+interface LandlordRegistrationFormProps {
+  editable?: boolean;
+  initialData?: Partial<LandlordRegistrationFormData>;
+  onSuccess?: () => void | Promise<void>;
+}
+
+function sanitizeFormValues(values: any) {
+  const sanitized: any = {};
+  for (const key in values) {
+    if (values[key] === null || values[key] === undefined) {
+      // If the key is a number field, default to 0
+      if (["propertiesOwned"].includes(key)) {
+        sanitized[key] = 0;
+      } else if (Array.isArray(values[key])) {
+        sanitized[key] = [];
+      } else {
+        sanitized[key] = "";
+      }
+    } else if (Array.isArray(values[key])) {
+      sanitized[key] = values[key];
+    } else if (typeof values[key] === 'object') {
+      sanitized[key] = sanitizeFormValues(values[key]);
+    } else {
+      sanitized[key] = values[key];
+    }
+  }
+  return sanitized;
+}
+
+export default function LandlordRegistrationForm({ editable = false, initialData, onSuccess }: LandlordRegistrationFormProps) {
   const { toast } = useToast();
   const router = useRouter();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const form = useForm<LandlordRegistrationFormData>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    defaultValues: sanitizeFormValues(initialData || {
       firstName: "",
       lastName: "",
       email: "",
@@ -59,21 +88,30 @@ export default function LandlordRegistrationForm() {
       experience: "",
       propertiesOwned: 0,
       additionalInfo: "",
-    },
+    }),
   });
 
   async function onSubmit(values: LandlordRegistrationFormData) {
     try {
-      const result = await registerLandlord(values);
-      
-      if (result.success) {
-        setIsSubmitted(true);
-        form.reset();
+      if (editable) {
+        // Update profile logic (to be implemented in actions)
+        // @ts-ignore
+        const result = await updateLandlordProfile(values);
+        if (result.success) {
+          toast({ title: "Profile Updated!", description: "Your profile has been updated." });
+          if (onSuccess) await onSuccess();
+        }
+      } else {
+        const result = await registerLandlord(values);
+        if (result.success) {
+          setIsSubmitted(true);
+          form.reset();
+        }
       }
     } catch (error) {
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create profile. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to save profile. Please try again.",
         variant: "destructive",
       });
     }
@@ -293,7 +331,7 @@ export default function LandlordRegistrationForm() {
               )}
             />
 
-            <Button type="submit" size="lg" className="w-full md:w-auto">Create Landlord Profile</Button>
+            <Button type="submit" size="lg" className="w-full md:w-auto">{editable ? "Save" : "Register"}</Button>
           </form>
         </Form>
       </CardContent>

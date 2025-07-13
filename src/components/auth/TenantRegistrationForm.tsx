@@ -26,7 +26,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { amenityList, propertyTypes, kigaliLocations, currencies } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { registerTenant } from "@/lib/actions"; // Assuming server action
+import { registerTenant, updateTenantProfile } from "@/lib/actions"; // Assuming server action
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
@@ -56,42 +56,61 @@ const formSchema = z.object({
 
 export type TenantRegistrationFormData = z.infer<typeof formSchema>;
 
-export default function TenantRegistrationForm() {
+interface TenantRegistrationFormProps {
+  editable?: boolean;
+  initialData?: Partial<TenantRegistrationFormData>;
+  onSuccess?: () => void | Promise<void>;
+}
+
+function sanitizeFormValues(values: any): TenantRegistrationFormData {
+  return {
+    fullName: values.fullName ?? "",
+    email: values.email ?? "",
+    password: values.password ?? "",
+    confirmPassword: values.confirmPassword ?? "",
+    phone: values.phone ?? "",
+    budgetMin: values.budgetMin ?? 0,
+    budgetMax: values.budgetMax ?? 0,
+    budgetCurrency: values.budgetCurrency ?? "RWF",
+    preferredLocations: Array.isArray(values.preferredLocations) ? values.preferredLocations : [],
+    propertyTypes: Array.isArray(values.propertyTypes) ? values.propertyTypes : [],
+    minBedrooms: values.minBedrooms ?? 0,
+    minBathrooms: values.minBathrooms ?? 0,
+    preferredAmenities: Array.isArray(values.preferredAmenities) ? values.preferredAmenities : [],
+    additionalNotes: values.additionalNotes ?? "",
+  };
+}
+
+export default function TenantRegistrationForm({ editable = false, initialData, onSuccess }: TenantRegistrationFormProps) {
   const { toast } = useToast();
   const router = useRouter();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const form = useForm<TenantRegistrationFormData>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      fullName: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-      phone: "",
-      budgetMin: 0,
-      budgetMax: 0,
-      budgetCurrency: "RWF",
-      preferredLocations: [],
-      propertyTypes: [],
-      minBedrooms: 1,
-      minBathrooms: 1,
-      preferredAmenities: [],
-      additionalNotes: "",
-    },
+    defaultValues: sanitizeFormValues(initialData || {}),
   });
 
   async function onSubmit(values: TenantRegistrationFormData) {
     try {
-      const result = await registerTenant(values);
-      
-      if (result.success) {
-        setIsSubmitted(true);
-        form.reset();
+      if (editable) {
+        // Update profile logic (to be implemented in actions)
+        // @ts-ignore
+        const result = await updateTenantProfile(values);
+        if (result.success) {
+          toast({ title: "Profile Updated!", description: "Your profile has been updated." });
+          if (onSuccess) await onSuccess();
+        }
+      } else {
+        const result = await registerTenant(values);
+        if (result.success) {
+          setIsSubmitted(true);
+          form.reset();
+        }
       }
     } catch (error) {
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create profile. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to save profile. Please try again.",
         variant: "destructive",
       });
     }
@@ -243,7 +262,7 @@ export default function TenantRegistrationForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Currency</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} defaultValue={field.value || 'RWF'}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select currency" />
@@ -357,7 +376,7 @@ export default function TenantRegistrationForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Minimum Bedrooms</FormLabel>
-                    <Select onValueChange={(val) => field.onChange(parseInt(val))} defaultValue={String(field.value)}>
+                    <Select onValueChange={(val) => field.onChange(parseInt(val))} defaultValue={String(field.value ?? 0)}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Any" />
@@ -379,7 +398,7 @@ export default function TenantRegistrationForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Minimum Bathrooms</FormLabel>
-                     <Select onValueChange={(val) => field.onChange(parseInt(val))} defaultValue={String(field.value)}>
+                     <Select onValueChange={(val) => field.onChange(parseInt(val))} defaultValue={String(field.value ?? 0)}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Any" />
@@ -459,7 +478,7 @@ export default function TenantRegistrationForm() {
               )}
             />
 
-            <Button type="submit" size="lg" className="w-full md:w-auto">Create Profile</Button>
+            <Button type="submit" size="lg" className="w-full md:w-auto">{editable ? "Save" : "Register"}</Button>
           </form>
         </Form>
       </CardContent>

@@ -274,3 +274,116 @@ export async function fetchAllProperties() {
   if (error) throw error;
   return data;
 }
+
+export async function updateTenantProfile(data: TenantRegistrationFormData) {
+  try {
+    const tenantSnapshot = await adminDb
+      .collection('tenants')
+      .where('email', '==', data.email)
+      .limit(1)
+      .get();
+    if (tenantSnapshot.empty) throw new Error('Tenant not found.');
+    const tenantDoc = tenantSnapshot.docs[0];
+    await tenantDoc.ref.update({
+      fullName: data.fullName,
+      phone: data.phone || null,
+      budget: {
+        min: data.budgetMin,
+        max: data.budgetMax,
+        currency: data.budgetCurrency
+      },
+      preferences: {
+        locations: data.preferredLocations,
+        propertyTypes: data.propertyTypes,
+        minBedrooms: data.minBedrooms,
+        minBathrooms: data.minBathrooms,
+        amenities: data.preferredAmenities || []
+      },
+      additionalNotes: data.additionalNotes || null,
+      updatedAt: new Date()
+    });
+    return { success: true, message: 'Tenant profile updated.' };
+  } catch (error) {
+    console.error('Error updating tenant profile:', error);
+    throw new Error(error instanceof Error ? error.message : 'Failed to update tenant profile.');
+  }
+}
+
+export async function updateLandlordProfile(data: LandlordRegistrationFormData) {
+  try {
+    const landlordSnapshot = await adminDb
+      .collection('landlords')
+      .where('email', '==', data.email)
+      .limit(1)
+      .get();
+    if (landlordSnapshot.empty) throw new Error('Landlord not found.');
+    const landlordDoc = landlordSnapshot.docs[0];
+    await landlordDoc.ref.update({
+      firstName: data.firstName,
+      lastName: data.lastName,
+      fullName: `${data.firstName} ${data.lastName}`,
+      phone: data.phone,
+      companyName: data.companyName || null,
+      businessLicense: data.businessLicense || null,
+      experience: data.experience,
+      propertiesOwned: data.propertiesOwned,
+      additionalInfo: data.additionalInfo || null,
+      updatedAt: new Date()
+    });
+    return { success: true, message: 'Landlord profile updated.' };
+  } catch (error) {
+    console.error('Error updating landlord profile:', error);
+    throw new Error(error instanceof Error ? error.message : 'Failed to update landlord profile.');
+  }
+}
+
+function sanitizeFirestoreData(data: any): any {
+  if (data == null || typeof data !== 'object') return data;
+  if (Array.isArray(data)) return data.map(sanitizeFirestoreData);
+  const plain: any = {};
+  for (const key in data) {
+    if (data[key] && typeof data[key] === 'object' &&
+      typeof data[key].toDate === 'function') {
+      plain[key] = data[key].toDate().toISOString();
+    } else if (data[key] && typeof data[key] === 'object' &&
+      '_seconds' in data[key] && '_nanoseconds' in data[key]) {
+      // Firestore Timestamp object
+      plain[key] = new Date(data[key]._seconds * 1000 + data[key]._nanoseconds / 1e6).toISOString();
+    } else {
+      plain[key] = sanitizeFirestoreData(data[key]);
+    }
+  }
+  return plain;
+}
+
+export async function getTenantProfile(email: string) {
+  try {
+    const tenantSnapshot = await adminDb
+      .collection('tenants')
+      .where('email', '==', email)
+      .limit(1)
+      .get();
+    if (tenantSnapshot.empty) throw new Error('Tenant not found.');
+    const tenantDoc = tenantSnapshot.docs[0];
+    return sanitizeFirestoreData(tenantDoc.data());
+  } catch (error) {
+    console.error('Error fetching tenant profile:', error);
+    throw new Error(error instanceof Error ? error.message : 'Failed to fetch tenant profile.');
+  }
+}
+
+export async function getLandlordProfile(email: string) {
+  try {
+    const landlordSnapshot = await adminDb
+      .collection('landlords')
+      .where('email', '==', email)
+      .limit(1)
+      .get();
+    if (landlordSnapshot.empty) throw new Error('Landlord not found.');
+    const landlordDoc = landlordSnapshot.docs[0];
+    return sanitizeFirestoreData(landlordDoc.data());
+  } catch (error) {
+    console.error('Error fetching landlord profile:', error);
+    throw new Error(error instanceof Error ? error.message : 'Failed to fetch landlord profile.');
+  }
+}
