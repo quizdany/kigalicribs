@@ -238,16 +238,16 @@ function mapFormDataToDb(data: PropertyFormData, landlordId: string) {
   return {
     title: data.title,
     description: data.description,
-    price: data.price,
+    price: Number(data.price) || 0,
     currency: data.currency,
     location: data.location,
     address: data.address,
     property_type: data.propertyType,
-    bedrooms: data.bedrooms,
-    bathrooms: data.bathrooms,
-    area: data.area,
-    amenities: data.amenities ?? [],
-    photos: data.photos,
+    bedrooms: Number(data.bedrooms) || 0,
+    bathrooms: Number(data.bathrooms) || 0,
+    area: Number(data.area) || 0,
+    amenities: Array.isArray(data.amenities) ? data.amenities : [],
+    photos: Array.isArray(data.photos) ? data.photos : [],
     agent_name: data.agentName || null,
     agent_email: data.agentEmail || null,
     agent_phone: data.agentPhone || null,
@@ -259,6 +259,7 @@ function mapFormDataToDb(data: PropertyFormData, landlordId: string) {
 
 export async function createPropertyListingSupabase(data: PropertyFormData, landlordId: string) {
   const mappedData = mapFormDataToDb(data, landlordId);
+  console.log('Inserting property to Supabase:', mappedData);
   const { error } = await supabase
     .from('properties')
     .insert([mappedData]);

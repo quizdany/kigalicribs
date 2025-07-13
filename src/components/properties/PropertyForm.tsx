@@ -27,7 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 import { amenityList, propertyTypesList, currenciesList, kigaliLocationsList, type PropertyFormData } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import MomoPaymentGate from './MomoPaymentGate';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CloudinaryImageUpload from './CloudinaryImageUpload';
 import { useSession } from 'next-auth/react';
 import { createPropertyListingSupabase } from '@/lib/actions';
@@ -368,14 +368,26 @@ export default function PropertyForm() {
           </form>
         </Form>
         {showPayment && (
-          <MomoPaymentGate fee={2000}>
-            <div className="text-center">
-              <p className="mb-4">Thank you for your payment! Your property will now be listed.</p>
-              <Button onClick={handlePaymentComplete} className="w-full">Finish Listing</Button>
-            </div>
+          <MomoPaymentGate fee={2000} context="list">
+            <AutoListProperty onList={handlePaymentComplete} />
           </MomoPaymentGate>
         )}
       </CardContent>
     </Card>
+  );
+}
+
+function AutoListProperty({ onList }: { onList: () => void }) {
+  const [listed, setListed] = useState(false);
+  useEffect(() => {
+    if (!listed) {
+      setListed(true);
+      onList();
+    }
+  }, [listed, onList]);
+  return (
+    <div className="text-center">
+      <p className="mb-4">Thank you for your payment! Your property is being listed...</p>
+    </div>
   );
 }
