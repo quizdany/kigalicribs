@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,6 +33,8 @@ export interface Filters {
 interface PropertyFiltersProps {
   onFilterChange: (filters: Filters) => void;
   initialFilters?: Filters;
+  minPrice?: number;
+  maxPrice?: number;
 }
 
 const defaultFilters: Filters = {
@@ -47,8 +49,22 @@ const defaultFilters: Filters = {
   amenities: [],
 };
 
-export default function PropertyFilters({ onFilterChange, initialFilters }: PropertyFiltersProps) {
+export default function PropertyFilters({ onFilterChange, initialFilters, minPrice, maxPrice }: PropertyFiltersProps) {
   const [filters, setFilters] = useState<Filters>(initialFilters || defaultFilters);
+
+  // Sync local slider values with parent minPrice/maxPrice
+  useEffect(() => {
+    setFilters(prev => ({
+      ...prev,
+      minPrice: minPrice,
+      maxPrice: maxPrice,
+    }));
+  }, [minPrice, maxPrice]);
+
+  // Notify parent only after filters state changes
+  useEffect(() => {
+    onFilterChange(filters);
+  }, [filters, onFilterChange]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -57,12 +73,12 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
 
   const handleSelectChange = (name: keyof Filters, value: string | number) => {
     if (name === 'priceCurrency') {
-      // Reset price range when currency changes to avoid mismatches
+      const currencyValue = String(value);
       setFilters(prev => ({ 
         ...prev, 
-        [name]: value,
-        minPrice: 0,
-        maxPrice: value === 'USD' ? 500 : 600000, // Adjust default max based on new currency
+        [name]: currencyValue,
+        minPrice: minPrice ?? (currencyValue === 'USD' ? 0 : 0),
+        maxPrice: maxPrice ?? (currencyValue === 'USD' ? 10000 : 1000000),
       }));
     } else {
       setFilters(prev => ({ ...prev, [name]: value }));
@@ -83,19 +99,24 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
       }
     });
   };
-  
-  const handleApplyFilters = () => {
-    onFilterChange(filters);
-  };
 
   const handleResetFilters = () => {
-    setFilters(defaultFilters);
-    onFilterChange(defaultFilters);
+    setFilters(prev => ({
+      ...defaultFilters,
+      minPrice: minPrice,
+      maxPrice: maxPrice,
+    }));
   };
 
-  const currentMaxPriceForSlider = filters.priceCurrency === 'USD' ? 10000 : 1000000; // RWF slider max up to 1M
+  const currentMinPriceForSlider = minPrice ?? (filters.priceCurrency === 'USD' ? 0 : 0);
+  const currentMaxPriceForSlider = maxPrice ?? (filters.priceCurrency === 'USD' ? 10000 : 1000000);
   const currentStepForSlider = filters.priceCurrency === 'USD' ? 50 : 50000;
 
+  const priceCurrencyValue = currencies.includes(filters.priceCurrency as string) ? (filters.priceCurrency as string) : 'RWF';
+  const locationValue = kigaliLocations.includes(filters.location as string) ? (filters.location as string) : '';
+  const propertyTypeValue = propertyTypes.includes(filters.propertyType as string) ? (filters.propertyType as string) : '';
+  const bedroomsValue = String(filters.bedrooms ?? 0);
+  const bathroomsValue = String(filters.bathrooms ?? 0);
 
   return (
     <div className="p-6 bg-card rounded-lg shadow-lg space-y-6 sticky top-20">
@@ -104,7 +125,7 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
       <Input
         name="searchTerm"
         placeholder="Search by keyword (e.g. modern, spacious)"
-        value={filters.searchTerm}
+        value={filters.searchTerm ?? ''}
         onChange={handleInputChange}
         className="h-10"
       />
@@ -115,7 +136,7 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
           <AccordionContent>
             <Select
               name="location"
-              value={filters.location}
+              value={locationValue !== undefined ? locationValue : ''}
               onValueChange={(value) => handleSelectChange("location", value)}
             >
               <SelectTrigger className="w-full h-10">
@@ -134,7 +155,7 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
           <AccordionContent>
             <Select
               name="propertyType"
-              value={filters.propertyType}
+              value={propertyTypeValue || ''}
               onValueChange={(value) => handleSelectChange("propertyType", value)}
             >
               <SelectTrigger className="w-full h-10">
@@ -153,7 +174,7 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
           <AccordionContent className="space-y-4">
              <Select
               name="priceCurrency"
-              value={filters.priceCurrency}
+              value={priceCurrencyValue as string || 'RWF'}
               onValueChange={(value) => handleSelectChange("priceCurrency", value as string)}
             >
               <SelectTrigger className="w-full h-10">
@@ -168,8 +189,9 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
               <span>{filters.maxPrice?.toLocaleString()} {filters.priceCurrency}</span>
             </div>
             <Slider
-              value={[filters.minPrice || 0, filters.maxPrice || (filters.priceCurrency === 'USD' ? 500 : 600000)]}
+              value={[filters.minPrice ?? currentMinPriceForSlider, filters.maxPrice ?? currentMaxPriceForSlider]}
               onValueChange={handlePriceRangeChange}
+              min={currentMinPriceForSlider}
               max={currentMaxPriceForSlider}
               step={currentStepForSlider}
               className="my-4"
@@ -184,7 +206,7 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
               <Label htmlFor="bedrooms">Bedrooms</Label>
               <Select
                 name="bedrooms"
-                value={String(filters.bedrooms)}
+                value={bedroomsValue}
                 onValueChange={(value) => handleSelectChange("bedrooms", parseInt(value))}
               >
                 <SelectTrigger id="bedrooms" className="w-full h-10">
@@ -199,7 +221,7 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
               <Label htmlFor="bathrooms">Bathrooms</Label>
               <Select
                 name="bathrooms"
-                value={String(filters.bathrooms)}
+                value={bathroomsValue}
                 onValueChange={(value) => handleSelectChange("bathrooms", parseInt(value))}
               >
                 <SelectTrigger id="bathrooms" className="w-full h-10">
@@ -229,9 +251,7 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
           </AccordionContent>
         </AccordionItem>
       </Accordion>
-
       <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t">
-        <Button onClick={handleApplyFilters} className="w-full sm:w-auto flex-1">Apply Filters</Button>
         <Button onClick={handleResetFilters} variant="outline" className="w-full sm:w-auto">
           <RotateCcw className="mr-2 h-4 w-4"/> Reset
         </Button>

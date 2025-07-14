@@ -1,90 +1,73 @@
-import type { Property } from '@/types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Lightbulb, TrendingUp, Info } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
+"use client";
+
+import { useEffect, useState } from 'react';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { Loader2, Lightbulb } from 'lucide-react';
 
 interface FairPriceAnalysisProps {
-  property: Property;
+  property: {
+    title: string;
+    description: string;
+    location: string;
+    area: number;
+    bedrooms: number;
+    bathrooms: number;
+    amenities?: string[];
+    price: number;
+    currency: string;
+    propertyType: string;
+    address: string;
+};
 }
 
-const formatPrice = (amount: number, currency: string) => {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency, minimumFractionDigits: 0 }).format(amount);
-};
+export default function FairPriceAnalysis({ property }: FairPriceAnalysisProps) {
+  const [loading, setLoading] = useState(true);
+  const [fairPrice, setFairPrice] = useState<number | null>(null);
+  const [justification, setJustification] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-const FairPriceAnalysis: React.FC<FairPriceAnalysisProps> = ({ property }) => {
-  const fairPriceData = property.aiData?.fairPrice;
-
-  if (!fairPriceData) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center text-xl font-headline">
-            <Lightbulb className="mr-2 h-6 w-6 text-primary" /> Fair Price Analysis
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Alert variant="default">
-            <Info className="h-4 w-4" />
-            <AlertTitle>Analysis Not Available</AlertTitle>
-            <AlertDescription>
-              Fair price analysis for this property is currently unavailable.
-            </AlertDescription>
-          </Alert>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  const priceDifference = property.price - fairPriceData.suggestedPrice;
-  const percentageDifference = (priceDifference / fairPriceData.suggestedPrice) * 100;
-  let priceBadgeVariant: "default" | "secondary" | "destructive" | "outline" = "secondary";
-  let priceBadgeText = "Fairly Priced";
-
-  if (percentageDifference > 10) { // More than 10% above suggested
-    priceBadgeVariant = "destructive";
-    priceBadgeText = "Above Market";
-  } else if (percentageDifference < -10) { // More than 10% below suggested
-    priceBadgeVariant = "default"; // Use default for potentially good deal
-    priceBadgeText = "Below Market";
-  }
-
+  useEffect(() => {
+    async function fetchFairPrice() {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch('/api/ai/fair-price', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            propertyFeatures: `${property.bedrooms} bedrooms, ${property.bathrooms} bathrooms, ${property.area} sqm, amenities: ${(property.amenities || []).join(', ')}, type: ${property.propertyType}`,
+            locationDetails: `${property.location}, ${property.address}`,
+            marketTrends: '', // The backend will gather market data from the web
+          }),
+        });
+        if (!res.ok) throw new Error('Failed to fetch fair price');
+        const data = await res.json();
+        setFairPrice(data.suggestedPrice);
+        setJustification(data.priceJustification);
+      } catch (err: any) {
+        setError('Unable to fetch fair price at this time.');
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchFairPrice();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [property]);
 
   return (
-    <Card className="bg-primary/5 shadow-md">
-      <CardHeader>
-        <CardTitle className="flex items-center text-xl font-headline text-primary">
-          <Lightbulb className="mr-2 h-6 w-6" /> Fair Price Indicator
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 p-4 bg-background rounded-lg border">
-            <div>
-                <p className="text-sm text-muted-foreground">AI Suggested Fair Price</p>
-                <p className="text-2xl font-bold text-primary">
-                    {formatPrice(fairPriceData.suggestedPrice, property.currency)}
-                </p>
-            </div>
-            <Badge variant={priceBadgeVariant} className="px-3 py-1 text-sm">{priceBadgeText}</Badge>
-        </div>
-        
-        <div>
-          <h4 className="font-semibold text-foreground mb-1 flex items-center"><TrendingUp className="mr-2 h-4 w-4 text-accent" />AI Reasoning:</h4>
-          <p className="text-sm text-muted-foreground italic bg-muted p-3 rounded-md">
-            "{fairPriceData.priceJustification}"
-          </p>
-        </div>
-        {property.marketTrends && (
-           <div>
-              <h4 className="font-semibold text-foreground mb-1">Market Context Provided:</h4>
-              <p className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
-                {property.marketTrends}
-              </p>
-            </div>
-        )}
-      </CardContent>
-    </Card>
+    <Alert className="bg-primary/5 border-primary/30">
+      <Lightbulb className="h-6 w-6 text-primary mr-2 inline-block" />
+      <AlertTitle>AI Fair Pricing Indicator</AlertTitle>
+      {loading ? (
+        <div className="flex items-center gap-2 mt-2"><Loader2 className="animate-spin h-5 w-5" /> Analyzing market data...</div>
+      ) : error ? (
+        <AlertDescription className="text-destructive mt-2">{error}</AlertDescription>
+      ) : fairPrice !== null ? (
+        <AlertDescription className="mt-2">
+          <span className="font-bold text-primary">Suggested Price:</span> {property.currency} {fairPrice.toLocaleString()}<br />
+          <span className="text-muted-foreground text-sm">{justification}</span>
+        </AlertDescription>
+      ) : null}
+    </Alert>
   );
-};
-
-export default FairPriceAnalysis;
+}

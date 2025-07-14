@@ -15,6 +15,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Printer, Download, CheckSquare, Languages, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { format } from 'date-fns';
 
 interface LeaseAgreementViewProps {
   propertyName: string;
@@ -69,30 +72,66 @@ Nyir'inzu                        Ukodesha (Yashyizeho Umukono mu Buryo bw'Ikoran
   },
 };
 
+// Helper for money formatting
+const formatMoney = (amount: string | number, currency: string) => {
+  if (!amount) return '';
+  const num = typeof amount === 'string' ? parseFloat(amount) : amount;
+  if (isNaN(num)) return '';
+  return num.toLocaleString('en-US', { minimumFractionDigits: 0 }) + ' ' + (currency === 'USD' ? 'USD' : 'Rwf');
+};
+
 export default function LeaseAgreementView({ propertyName, propertyAddress }: LeaseAgreementViewProps) {
   const [language, setLanguage] = useState('english');
   const [currentLeaseText, setCurrentLeaseText] = useState('');
   const { toast } = useToast();
   const [isSigned, setIsSigned] = useState(false);
   const [signedDate, setSignedDate] = useState<Date | null>(null);
-  // In a real app, tenantName would come from user session
-  const [tenantName, setTenantName] = useState<string>("Demo Tenant"); 
+  const [step, setStep] = useState(1);
 
+  // Lease form state
+  const [form, setForm] = useState({
+    tenantName: '',
+    tenantId: '',
+    tenantContact: '',
+    landlordName: '',
+    landlordId: '',
+    landlordContact: '',
+    monthlyPayment: '',
+    paymentDeadline: '',
+    downPayment: '',
+    leaseDuration: '',
+    leaseStartDate: '',
+    currency: 'RWF',
+    propertyDistrict: '',
+    propertySector: '',
+    propertyCell: '',
+    propertyVillage: '',
+  });
+
+  // Update lease text with form values
   useEffect(() => {
+    if (step !== 2) return;
     let rawText = leaseTexts[language]?.content || leaseTexts['english'].content;
-    rawText = rawText.replace('${"{propertyAddress}"}', propertyAddress);
-    
-    // Replace tenant name placeholder based on signed status
-    const tenantPlaceholder = language === 'kinyarwanda' ? '[Amazina y\'Ukodesha]' : '[Tenant Name(s)]';
-    if (isSigned && signedDate) {
-      const signedTenantName = language === 'kinyarwanda' ? `${tenantName} (Yasinye ku ${signedDate.toLocaleDateString()})` : `${tenantName} (Electronically Signed on ${signedDate.toLocaleDateString()})`;
-      rawText = rawText.replace(tenantPlaceholder, signedTenantName);
-    } else {
-      rawText = rawText.replace(tenantPlaceholder, tenantPlaceholder); // Keep placeholder if not signed
-    }
-    
+    rawText = rawText
+      .replace('${"{propertyAddress}"}', propertyAddress)
+      .replace('[Tenant Name(s)]', form.tenantName || '[Tenant Name(s)]')
+      .replace('[Tenant ID]', form.tenantId || '[Tenant ID]')
+      .replace('[Tenant Contact]', form.tenantContact || '[Tenant Contact]')
+      .replace('[Landlord Name]', form.landlordName || '[Landlord Name]')
+      .replace('[Landlord ID]', form.landlordId || '[Landlord ID]')
+      .replace('[Landlord Contact]', form.landlordContact || '[Landlord Contact]')
+      .replace('[Rent Amount]', form.monthlyPayment || '[Rent Amount]')
+      .replace('[Currency]', form.currency)
+      .replace('[Lease Term, e.g., 12 months]', form.leaseDuration ? `${form.leaseDuration} months` : '[Lease Term, e.g., 12 months]')
+      .replace('[Start Date]', form.leaseStartDate ? format(new Date(form.leaseStartDate), 'yyyy-MM-dd') : '[Start Date]')
+      .replace('[End Date]', (form.leaseStartDate && form.leaseDuration) ? format(new Date(new Date(form.leaseStartDate).setMonth(new Date(form.leaseStartDate).getMonth() + Number(form.leaseDuration))), 'yyyy-MM-dd') : '[End Date]')
+      .replace('[Security Deposit Amount]', form.downPayment || '[Security Deposit Amount]')
+      .replace('[Property District]', form.propertyDistrict || '[Property District]')
+      .replace('[Property Sector]', form.propertySector || '[Property Sector]')
+      .replace('[Property Cell]', form.propertyCell || '[Property Cell]')
+      .replace('[Property Village]', form.propertyVillage || '[Property Village]');
     setCurrentLeaseText(rawText);
-  }, [language, propertyAddress, isSigned, signedDate, tenantName]);
+  }, [language, propertyAddress, step, form]);
 
   const handlePrint = () => {
     window.print();
@@ -110,27 +149,159 @@ export default function LeaseAgreementView({ propertyName, propertyAddress }: Le
   };
 
   const handleSignElectronically = () => {
-    // Simulate user confirmation before signing if needed
     setIsSigned(true);
     setSignedDate(new Date());
-    // Mock tenant name for now
-    setTenantName("Demo User"); 
     toast({ 
       title: "Lease Signed Electronically", 
       description: `You have signed the lease for ${propertyName}. A confirmation has been sent to your email (simulated).`
     });
   };
 
+  // Form handlers
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
+  };
 
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setStep(2);
+  };
+
+  // Step 1: Interactive form
+  if (step === 1) {
+    return (
+      <Card className="w-full max-w-xl mx-auto shadow-2xl">
+        <CardHeader className="border-b">
+          <CardTitle className="text-2xl font-headline text-primary">Lease Agreement Details</CardTitle>
+          <CardDescription>Fill in the details to personalize your lease agreement.</CardDescription>
+        </CardHeader>
+        <CardContent className="pt-6">
+          <form onSubmit={handleFormSubmit} className="space-y-6">
+            {/* Tenant Info */}
+            <div>
+              <div className="font-semibold mb-2 text-primary">Tenant Information</div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label>Tenant Name</Label>
+                  <Input name="tenantName" value={form.tenantName} onChange={handleFormChange} required />
+                </div>
+                <div>
+                  <Label>National ID/Passport</Label>
+                  <Input name="tenantId" value={form.tenantId} onChange={handleFormChange} required />
+                </div>
+                <div>
+                  <Label>Contact (Phone/Email)</Label>
+                  <Input name="tenantContact" value={form.tenantContact} onChange={handleFormChange} required />
+                </div>
+              </div>
+            </div>
+            {/* Landlord Info */}
+            <div>
+              <div className="font-semibold mb-2 text-primary">Landlord Information</div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label>Landlord Name</Label>
+                  <Input name="landlordName" value={form.landlordName} onChange={handleFormChange} required />
+                </div>
+                <div>
+                  <Label>National ID/Passport</Label>
+                  <Input name="landlordId" value={form.landlordId} onChange={handleFormChange} required />
+                </div>
+                <div>
+                  <Label>Contact (Phone/Email)</Label>
+                  <Input name="landlordContact" value={form.landlordContact} onChange={handleFormChange} required />
+                </div>
+              </div>
+            </div>
+            {/* Property Location Info */}
+            <div>
+              <div className="font-semibold mb-2 text-primary">Property Location</div>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                  <Label>District</Label>
+                  <Input name="propertyDistrict" value={form.propertyDistrict} onChange={handleFormChange} required />
+                </div>
+                <div>
+                  <Label>Sector</Label>
+                  <Input name="propertySector" value={form.propertySector} onChange={handleFormChange} required />
+                </div>
+                <div>
+                  <Label>Cell</Label>
+                  <Input name="propertyCell" value={form.propertyCell} onChange={handleFormChange} required />
+                </div>
+                <div>
+                  <Label>Village</Label>
+                  <Input name="propertyVillage" value={form.propertyVillage} onChange={handleFormChange} required />
+                </div>
+              </div>
+            </div>
+            {/* Lease/Payment Info */}
+            <div>
+              <div className="font-semibold mb-2 text-primary">Lease & Payment Details</div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label>Agreed Monthly Payment</Label>
+                  <Input name="monthlyPayment" type="number" min="0" value={form.monthlyPayment} onChange={handleFormChange} required />
+                </div>
+                <div>
+                  <Label>Currency</Label>
+                  <select name="currency" value={form.currency} onChange={handleFormChange} className="w-full border rounded h-10 px-2">
+                    <option value="RWF">RWF</option>
+                    <option value="USD">USD</option>
+                  </select>
+                </div>
+                <div>
+                  <Label>Payment Deadline</Label>
+                  <select name="paymentDeadline" value={form.paymentDeadline} onChange={handleFormChange} className="w-full border rounded h-10 px-2" required>
+                    <option value="">Select Day</option>
+                    {Array.from({ length: 31 }, (_, i) => (
+                      <option key={i + 1} value={String(i + 1).padStart(2, '0')}>{i + 1}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <Label>Down Payment</Label>
+                  <Input name="downPayment" type="number" min="0" value={form.downPayment} onChange={handleFormChange} required />
+                </div>
+                <div>
+                  <Label>Lease Duration (months)</Label>
+                  <Input name="leaseDuration" type="number" min="1" value={form.leaseDuration} onChange={handleFormChange} required />
+                </div>
+                <div>
+                  <Label>Lease Start Date</Label>
+                  <Input name="leaseStartDate" type="date" value={form.leaseStartDate} onChange={handleFormChange} required />
+                </div>
+              </div>
+            </div>
+            <Button type="submit" className="w-full mt-4">Generate Lease Agreement</Button>
+          </form>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Step 2: Show agreement and allow signing
   return (
     <Card className="w-full max-w-4xl mx-auto shadow-2xl">
       <CardHeader className="border-b">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <CardTitle className="text-2xl font-headline text-primary">
-              {leaseTexts[language]?.title || leaseTexts['english'].title}
-            </CardTitle>
-            <CardDescription>For property: {propertyName}</CardDescription>
+          <div className="w-full">
+            <CardTitle className="text-2xl font-headline text-center mb-2">{leaseTexts[language]?.title || leaseTexts['english'].title}</CardTitle>
+            <CardDescription className="text-center mb-4">For property: {propertyName}</CardDescription>
+            <div className="w-full max-w-2xl mx-auto flex flex-col gap-1 text-base">
+              {/* Tenant Info */}
+              <div className="font-bold">Tenant</div>
+              <div>Full Name: {form.tenantName}</div>
+              <div>ID/Passport: {form.tenantId}</div>
+              <div>Contact: <span className="font-mono">{form.tenantContact}</span></div>
+              <div className="h-4" /> {/* Spacer line */}
+              {/* Landlord Info */}
+              <div className="font-bold">Landlord</div>
+              <div>Full Name: {form.landlordName}</div>
+              <div>ID/Passport: {form.landlordId}</div>
+              <div>Contact: <span className="font-mono">{form.landlordContact}</span></div>
+            </div>
           </div>
           <div className="flex items-center space-x-2">
             <Languages className="h-5 w-5 text-muted-foreground"/>
@@ -149,16 +320,71 @@ export default function LeaseAgreementView({ propertyName, propertyAddress }: Le
       </CardHeader>
       <CardContent className="pt-6">
         <ScrollArea className="h-[500px] w-full border rounded-md p-4 bg-background">
-          <pre className="whitespace-pre-wrap text-sm leading-relaxed font-body">
-            {currentLeaseText}
-          </pre>
+          {/* Agreement body */}
+          <div className="max-w-3xl mx-auto px-2">
+            <div className="mb-6 text-2xl font-extrabold text-center tracking-tight">Residential Lease Agreement</div>
+            <p className="mb-6 text-base text-foreground/90 text-justify w-full">
+              This Residential Lease Agreement ("Agreement") is made and entered into this {form.leaseStartDate ? format(new Date(form.leaseStartDate), 'yyyy-MM-dd') : '[Start Date]'} by and between {form.landlordName || '[Landlord Name]'} ("Landlord") and {form.tenantName || '[Tenant Name]'} ("Tenant"). By signing below, both parties acknowledge and agree that this Agreement is legally binding and enforceable in accordance with applicable law.
+            </p>
+            {/* Reformatted numbered points in two-column layout */}
+            <div className="space-y-6">
+              {/* 1 */}
+              <div className="flex flex-col md:flex-row md:items-start md:gap-4">
+                <div className="md:w-1/5 font-bold flex-shrink-0 flex items-start"><span>1.</span> <span className="ml-2">Property</span></div>
+                <div className="md:w-4/5 text-base text-foreground/90">
+                  Landlord agrees to lease to Tenant, and Tenant agrees to lease from Landlord, the premises located at <span className="font-semibold">{propertyAddress}</span> ({form.propertyDistrict}, {form.propertySector}, {form.propertyCell}, {form.propertyVillage}).
+                </div>
+              </div>
+              {/* 2 */}
+              <div className="flex flex-col md:flex-row md:items-start md:gap-4">
+                <div className="md:w-1/5 font-bold flex-shrink-0 flex items-start"><span>2.</span> <span className="ml-2">Term</span></div>
+                <div className="md:w-4/5 text-base text-foreground/90">
+                  The term of this lease shall be for a period of <span className="font-semibold">{form.leaseDuration} months</span>, commencing on <span className="font-semibold">{form.leaseStartDate}</span> and ending on <span className="font-semibold">{form.leaseStartDate && form.leaseDuration ? format(new Date(new Date(form.leaseStartDate).setMonth(new Date(form.leaseStartDate).getMonth() + Number(form.leaseDuration))), 'yyyy-MM-dd') : '[End Date]'}</span>.
+                </div>
+              </div>
+              {/* 3 */}
+              <div className="flex flex-col md:flex-row md:items-start md:gap-4">
+                <div className="md:w-1/5 font-bold flex-shrink-0 flex items-start"><span>3.</span> <span className="ml-2">Rent</span></div>
+                <div className="md:w-4/5 text-base text-foreground/90">
+                  Tenant shall pay Landlord a monthly rent of <span className="font-semibold">{formatMoney(form.monthlyPayment, form.currency)}</span>, payable in advance on the <span className="font-semibold">{form.paymentDeadline}</span> day of each month.
+                </div>
+              </div>
+              {/* 4 */}
+              <div className="flex flex-col md:flex-row md:items-start md:gap-4">
+                <div className="md:w-1/5 font-bold flex-shrink-0 flex items-start"><span>4.</span> <span className="ml-2">Security Deposit</span></div>
+                <div className="md:w-4/5 text-base text-foreground/90">
+                  Upon execution of this Agreement, Tenant shall deposit with Landlord the sum of <span className="font-semibold">{formatMoney(form.downPayment, form.currency)}</span> as security for the full and faithful performance by Tenant of every term, condition, and covenant of this Agreement.
+                </div>
+              </div>
+              {/* 5 */}
+              <div className="flex flex-col md:flex-row md:items-start md:gap-4">
+                <div className="md:w-1/5 font-bold flex-shrink-0 flex items-start"><span>5.</span> <span className="ml-2">Other Terms</span></div>
+                <div className="md:w-4/5 text-base text-foreground/90">
+                  ... (more clauses on use of premises, maintenance, utilities, default, etc.) ...
+                </div>
+              </div>
+            </div>
+            <div className="mt-10 text-center text-base text-foreground/80">
+              IN WITNESS WHEREOF, the parties have executed this Agreement as of the date first above written.
+            </div>
+            <div className="flex flex-col md:flex-row gap-12 mt-12 items-center justify-center">
+              <div className="flex flex-col items-center">
+                <div className="w-56 border-b-2 border-muted-foreground mb-2"></div>
+                <div className="text-sm text-muted-foreground">Landlord</div>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="w-56 border-b-2 border-muted-foreground mb-2"></div>
+                <div className="text-sm text-muted-foreground">Tenant {isSigned && signedDate ? '(Electronically Signed)' : ''}</div>
+              </div>
+            </div>
+          </div>
         </ScrollArea>
          {isSigned && signedDate && (
           <Alert variant="default" className="mt-6 bg-green-50 border-green-300">
             <CheckSquare className="h-5 w-5 text-green-600" />
             <AlertTitle className="text-green-700">Lease Signed Electronically</AlertTitle>
             <AlertDescription className="text-green-600">
-              This lease agreement was electronically signed by {tenantName} on {signedDate.toLocaleDateString()}.
+              This lease agreement was electronically signed by {form.tenantName} on {signedDate.toLocaleDateString()}.
               A copy has been notionally sent to your registered email address.
             </AlertDescription>
           </Alert>

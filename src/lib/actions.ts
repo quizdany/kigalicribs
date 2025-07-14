@@ -251,7 +251,7 @@ function mapFormDataToDb(data: PropertyFormData, landlordId: string) {
     agent_name: data.agentName || null,
     agent_email: data.agentEmail || null,
     agent_phone: data.agentPhone || null,
-    features_for_ai: data.featuresForAI || null,
+    other_important_details: data.otherImportantDetails || null,
     market_trends_for_ai: data.marketTrendsForAI || null,
     landlord_id: landlordId,
   };

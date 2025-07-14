@@ -45,11 +45,10 @@ const formSchema = z.object({
   area: z.coerce.number().positive("Area must be positive."),
   amenities: z.array(z.string()).optional(),
   photos: z.array(z.string()).min(1, "At least one photo is required."),
-  agentName: z.string().optional(),
-  agentEmail: z.string().email("Invalid email.").optional(),
-  agentPhone: z.string().optional(),
-  featuresForAI: z.string().min(10, "Please provide key features for AI analysis.").max(500).optional(),
-  marketTrendsForAI: z.string().min(10, "Please provide market context for AI analysis.").max(500).optional(),
+  agentName: z.string().min(2, "Contact name is required."),
+  agentEmail: z.string().email("Invalid email."),
+  agentPhone: z.string().min(7, "Contact phone is required."),
+  otherImportantDetails: z.string().max(500).optional(),
 });
 
 export default function PropertyForm() {
@@ -75,8 +74,7 @@ export default function PropertyForm() {
       agentName: "",
       agentEmail: "",
       agentPhone: "",
-      featuresForAI: "",
-      marketTrendsForAI: "",
+      otherImportantDetails: "",
     },
   });
 
@@ -327,23 +325,29 @@ export default function PropertyForm() {
               )}
             />
 
-            <h3 className="text-lg font-semibold pt-4 border-t">Owner/Contact Information (Optional)</h3>
+            <h3 className="text-lg font-semibold pt-4 border-t">Owner/Contact Information</h3>
              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <FormField control={form.control} name="agentName" render={({ field }) => ( <FormItem> <FormLabel>Name</FormLabel> <FormControl><Input placeholder="Owner or Contact Name" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-              <FormField control={form.control} name="agentEmail" render={({ field }) => ( <FormItem> <FormLabel>Email</FormLabel> <FormControl><Input type="email" placeholder="contact@example.com" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-              <FormField control={form.control} name="agentPhone" render={({ field }) => ( <FormItem> <FormLabel>Phone</FormLabel> <FormControl><Input type="tel" placeholder="+250 7XX XXX XXX" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-            </div>
-            
-            <h3 className="text-lg font-semibold pt-4 border-t">AI Pricing Assist (Optional)</h3>
+              <FormField
+                control={form.control}
+                name="agentName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Owner Contact Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., John Doe" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
              <FormField
               control={form.control}
-              name="featuresForAI"
+                name="agentEmail"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Key Property Features for AI</FormLabel>
-                  <FormDescription>Summarize distinct features, e.g., "newly renovated, panoramic view, quiet street".</FormDescription>
+                    <FormLabel>Owner Contact Email</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="e.g., Renovated kitchen, large balcony with city view, 24/7 security" {...field} />
+                      <Input placeholder="e.g., johndoe@email.com" type="email" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -351,13 +355,29 @@ export default function PropertyForm() {
             />
              <FormField
               control={form.control}
-              name="marketTrendsForAI"
+                name="agentPhone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Owner Contact Phone</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., +250 788 123 456" type="tel" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            <h3 className="text-lg font-semibold pt-4 border-t">Other Important Details (Optional)</h3>
+             <FormField
+              control={form.control}
+              name="otherImportantDetails"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Local Market Context for AI</FormLabel>
-                  <FormDescription>Briefly describe current market trends or comparable properties in the area.</FormDescription>
+                  <FormLabel>Other Important Details</FormLabel>
+                  <FormDescription>Optionally add any other information you think is important for tenants to know.</FormDescription>
                   <FormControl>
-                    <Textarea placeholder="e.g., High demand for 2-bedrooms in this area, similar units rent for $1000-$1200." {...field} />
+                    <Textarea placeholder="e.g., No pets allowed, available from August, parking for 2 cars, etc." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

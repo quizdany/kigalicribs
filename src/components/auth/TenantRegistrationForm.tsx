@@ -101,10 +101,10 @@ export default function TenantRegistrationForm({ editable = false, initialData, 
           if (onSuccess) await onSuccess();
         }
       } else {
-        const result = await registerTenant(values);
-        if (result.success) {
-          setIsSubmitted(true);
-          form.reset();
+      const result = await registerTenant(values);
+      if (result.success) {
+        setIsSubmitted(true);
+        form.reset();
         }
       }
     } catch (error) {

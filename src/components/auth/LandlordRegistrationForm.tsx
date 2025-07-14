@@ -102,10 +102,10 @@ export default function LandlordRegistrationForm({ editable = false, initialData
           if (onSuccess) await onSuccess();
         }
       } else {
-        const result = await registerLandlord(values);
-        if (result.success) {
-          setIsSubmitted(true);
-          form.reset();
+      const result = await registerLandlord(values);
+      if (result.success) {
+        setIsSubmitted(true);
+        form.reset();
         }
       }
     } catch (error) {

@@ -80,11 +80,10 @@ export interface PropertyFormData {
   area: number;
   amenities?: string[];
   photos?: string[]; 
-  agentName?: string;
-  agentEmail?: string;
-  agentPhone?: string;
-  featuresForAI?: string;
-  marketTrendsForAI?: string;
+  agentName: string;
+  agentEmail: string;
+  agentPhone: string;
+  otherImportantDetails?: string;
 }
 
 export const amenityList = [
