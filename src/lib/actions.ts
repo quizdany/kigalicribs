@@ -9,6 +9,7 @@ import { sendVerificationEmail } from '@/lib/email';
 import { generateVerificationToken, hashVerificationToken } from '@/lib/utils';
 import bcrypt from 'bcryptjs';
 import { supabase } from './supabaseClient';
+// import { v4 as uuidv4 } from 'uuid'; // REMOVE THIS LINE
 
 export async function registerTenant(data: TenantRegistrationFormData) {
   try {
@@ -234,7 +235,7 @@ export async function createPropertyListing(data: PropertyFormData) {
   }
 }
 
-function mapFormDataToDb(data: PropertyFormData, landlordId: string) {
+export async function mapFormDataToDb(data: PropertyFormData, landlordId?: string) {
   return {
     title: data.title,
     description: data.description,
@@ -251,14 +252,20 @@ function mapFormDataToDb(data: PropertyFormData, landlordId: string) {
     agent_name: data.agentName || null,
     agent_email: data.agentEmail || null,
     agent_phone: data.agentPhone || null,
-    other_important_details: data.otherImportantDetails || null,
-    market_trends_for_ai: data.marketTrendsForAI || null,
-    landlord_id: landlordId,
+    ...(landlordId ? { landlord_id: landlordId } : {}),
   };
 }
 
 export async function createPropertyListingSupabase(data: PropertyFormData, landlordId: string) {
-  const mappedData = mapFormDataToDb(data, landlordId);
+  // Generate a robust, production-safe unique ID for the new property
+  let id = '';
+  if (typeof globalThis.crypto !== 'undefined' && typeof globalThis.crypto.randomUUID === 'function') {
+    id = globalThis.crypto.randomUUID();
+  } else {
+    // Fallback: combine timestamp and a random string for uniqueness
+    id = `prop_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+  }
+  const mappedData = { ...(await mapFormDataToDb(data, landlordId)), id };
   console.log('Inserting property to Supabase:', mappedData);
   const { error } = await supabase
     .from('properties')
@@ -274,6 +281,45 @@ export async function fetchAllProperties() {
     .order('created_at', { ascending: false });
   if (error) throw error;
   return data;
+}
+
+export async function getPropertiesByLandlord(landlordId: string) {
+  // Fetch properties from Supabase where landlord_id matches
+  const { data, error } = await supabase
+    .from('properties')
+    .select('*')
+    .eq('landlord_id', landlordId)
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return data;
+}
+
+export async function getPropertyById(id: string) {
+  const { data, error } = await supabase
+    .from('properties')
+    .select('*')
+    .eq('id', id)
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function updateProperty(id: string, data: any) {
+  const { error } = await supabase
+    .from('properties')
+    .update(data)
+    .eq('id', id);
+  if (error) throw error;
+  return { success: true };
+}
+
+export async function deleteProperty(id: string) {
+  const { error } = await supabase
+    .from('properties')
+    .delete()
+    .eq('id', id);
+  if (error) throw error;
+  return { success: true };
 }
 
 export async function updateTenantProfile(data: TenantRegistrationFormData) {
@@ -387,4 +433,25 @@ export async function getLandlordProfile(email: string) {
     console.error('Error fetching landlord profile:', error);
     throw new Error(error instanceof Error ? error.message : 'Failed to fetch landlord profile.');
   }
+}
+
+/**
+ * Fetch the signed lease for a tenant by their user ID.
+ * Returns null if no lease is found.
+ */
+export async function getTenantSignedLease(tenantId: string) {
+  // Try to fetch the lease from a 'leases' table in Supabase
+  const { data, error } = await supabase
+    .from('leases')
+    .select('property_name,property_address,start_date,end_date,document_url')
+    .eq('tenant_id', tenantId)
+    .single();
+  if (error || !data) return null;
+  return {
+    propertyName: data.property_name,
+    propertyAddress: data.property_address,
+    startDate: data.start_date,
+    endDate: data.end_date,
+    documentUrl: data.document_url,
+  };
 }

@@ -7,9 +7,11 @@ interface PropertyListProps {
   properties: Property[];
   isLoading?: boolean;
   tenantLoggedIn?: boolean;
+  isLandlord?: boolean;
+  onDelete?: (id: string) => void;
 }
 
-const PropertyList: React.FC<PropertyListProps> = ({ properties, isLoading, tenantLoggedIn }) => {
+const PropertyList: React.FC<PropertyListProps> = ({ properties, isLoading, tenantLoggedIn, isLandlord, onDelete }) => {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -45,7 +47,7 @@ const PropertyList: React.FC<PropertyListProps> = ({ properties, isLoading, tena
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-8">
       {properties.map(property => (
-        <PropertyCard key={property.id} property={property} tenantLoggedIn={tenantLoggedIn} />
+        <PropertyCard key={property.id} property={property} tenantLoggedIn={tenantLoggedIn} isLandlord={isLandlord} onDelete={onDelete} />
       ))}
     </div>
   );

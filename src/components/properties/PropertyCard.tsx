@@ -6,25 +6,42 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MapPin, BedDouble, Bath, AreaChart, Tag, Lightbulb, CheckCircle, Star } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from '@/components/ui/alert-dialog';
 
 interface PropertyCardProps {
   property: Property;
   tenantLoggedIn?: boolean; // To conditionally show match score
+  isLandlord?: boolean;
+  onDelete?: (id: string) => void;
 }
 
-const PropertyCard: React.FC<PropertyCardProps> = ({ property, tenantLoggedIn }) => {
+const PropertyCard: React.FC<PropertyCardProps> = ({ property, tenantLoggedIn, isLandlord, onDelete }) => {
   const formatPrice = (amount: number, currency: string) => {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency, minimumFractionDigits: 0 }).format(amount);
   };
 
-  const googleMapsSearchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(property.location)}`;
+  const googleMapsSearchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(property.location || '')}`;
+
+  const photos = property.photos || [];
+  const amenities = property.amenities || [];
+  const propertyType = property.propertyType || property.property_type || '';
 
   return (
     <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col h-full">
       <CardHeader className="p-0 relative">
         <Link href={`/properties/${property.id}`} aria-label={`View details for ${property.title}`}>
           <Image
-            src={property.photos[0] || 'https://placehold.co/400x250.png'}
+            src={photos[0] || 'https://placehold.co/400x250.png'}
             alt={property.title}
             width={400}
             height={250}
@@ -80,21 +97,49 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, tenantLoggedIn })
         </p>
 
         <div className="mb-3">
-          {property.amenities.slice(0, 3).map(amenity => (
+          {amenities.slice(0, 3).map(amenity => (
             <Badge key={amenity} variant="outline" className="mr-1 mb-1 text-xs">{amenity}</Badge>
           ))}
-          {property.amenities.length > 3 && <Badge variant="outline" className="text-xs">+{property.amenities.length - 3} more</Badge>}
+          {amenities.length > 3 && <Badge variant="outline" className="text-xs">+{amenities.length - 3} more</Badge>}
         </div>
       </CardContent>
       <CardFooter className="p-4 flex justify-between items-center border-t">
         <div className="text-lg font-bold text-primary flex items-center">
           <Tag className="h-5 w-5 mr-1.5" /> {formatPrice(property.price, property.currency)}
-          {property.propertyType === 'Office' && <span className="text-xs text-muted-foreground ml-1">/sqm</span>}
-           {property.propertyType !== 'Office' && !property.title.toLowerCase().includes('office') && <span className="text-xs text-muted-foreground ml-1">/month</span>}
+          {propertyType === 'Office' && <span className="text-xs text-muted-foreground ml-1">/sqm</span>}
+           {propertyType !== 'Office' && !property.title.toLowerCase().includes('office') && <span className="text-xs text-muted-foreground ml-1">/month</span>}
         </div>
         <Button asChild size="sm">
           <Link href={`/properties/${property.id}`}>View Details</Link>
         </Button>
+        {isLandlord && (
+          <>
+            <Button asChild size="sm" variant="outline">
+              <Link href={`/properties/edit/${property.id}`}>Edit</Link>
+            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button size="sm" variant="destructive">
+                  Delete
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Property?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete this property? This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => onDelete && onDelete(property.id)}>
+                    Yes, Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </>
+        )}
       </CardFooter>
     </Card>
   );

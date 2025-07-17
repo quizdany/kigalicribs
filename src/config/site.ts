@@ -18,9 +18,9 @@ export type SiteConfig = {
 };
 
 export const siteConfig: SiteConfig = {
-  name: "Cribs Ink",
+  name: "Kigali Cribs",
   description:
-    "Your trusted platform for renting properties in Rwanda, featuring smart search, fair price indicators, and digital lease agreements.",
+    "Your trusted platform for renting properties in Rwanda, featuring smart search, fair price indicators, and digital lease agreements. Kigali Cribs is your trusted partner.",
   url: "https://cribsink.rw", // Updated URL
   ogImage: "https://cribsink.rw/og.jpg", // Updated OG image URL
   mainNav: [

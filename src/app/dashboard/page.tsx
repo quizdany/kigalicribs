@@ -52,46 +52,49 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {isLandlord ? (
             <>
-              <Card>
+              <Card className="flex flex-col h-full">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Plus className="h-5 w-5" />
                     List New Property
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600 mb-4">Add a new property to your portfolio and start attracting tenants.</p>
-                  <Button asChild className="w-full">
+                <CardContent className="flex flex-col h-full">
+                  <p className="text-neutral-700 mb-4">Add a new property to your portfolio and start attracting tenants.</p>
+                  <div className="flex-grow" />
+                  <Button asChild className="w-full mt-auto">
                     <Link href="/list-property">List Property</Link>
                   </Button>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="flex flex-col h-full">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Building2 className="h-5 w-5" />
                     My Properties
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600 mb-4">Manage your existing properties and view tenant applications.</p>
-                  <Button asChild variant="outline" className="w-full">
+                <CardContent className="flex flex-col h-full">
+                  <p className="text-neutral-700 mb-4">Manage your existing properties and view tenant applications.</p>
+                  <div className="flex-grow" />
+                  <Button asChild variant="outline" className="w-full mt-auto">
                     <Link href="/my-properties">View Properties</Link>
                   </Button>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="flex flex-col h-full">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <UserCircle className="h-5 w-5" />
                     Tenant Applications
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600 mb-4">Review and respond to tenant applications for your properties.</p>
-                  <Button asChild variant="outline" className="w-full">
+                <CardContent className="flex flex-col h-full">
+                  <p className="text-neutral-700 mb-4">Review and respond to tenant applications for your properties.</p>
+                  <div className="flex-grow" />
+                  <Button asChild variant="outline" className="w-full mt-auto">
                     <Link href="/applications">View Applications</Link>
                   </Button>
                 </CardContent>
@@ -107,7 +110,7 @@ export default function DashboardPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600 mb-4">Search for properties that match your preferences and budget.</p>
+                  <p className="text-neutral-700 mb-4">Search for properties that match your preferences and budget.</p>
                   <Button asChild className="w-full">
                     <Link href="/search">Search Properties</Link>
                   </Button>
@@ -122,7 +125,7 @@ export default function DashboardPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600 mb-4">Track your property applications and lease agreements.</p>
+                  <p className="text-neutral-700 mb-4">Track your property applications and lease agreements.</p>
                   <Button asChild variant="outline" className="w-full">
                     <Link href="/my-applications">View Applications</Link>
                   </Button>
@@ -137,7 +140,7 @@ export default function DashboardPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600 mb-4">Update your preferences and personal information.</p>
+                  <p className="text-neutral-700 mb-4">Update your preferences and personal information.</p>
                   <Button asChild variant="outline" className="w-full">
                     <Link href="/profile">Edit Profile</Link>
                   </Button>

@@ -38,10 +38,12 @@ const Header = () => {
   const isAuthenticated = status === 'authenticated';
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 max-w-screen-2xl items-center justify-between">
-        <Logo />
-        <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-0 m-0">
+      <div className="flex w-full h-20 items-center justify-between p-0 m-0 relative">
+        <div className="pl-0 ml-0 flex items-center">
+          <Logo size="lg" />
+        </div>
+        <nav className="hidden md:flex items-center space-x-6 text-sm font-medium absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
           {siteConfig.mainNav
             .filter(item => item.href !== '/register' && item.href !== '/login')
             .map((item) => (

@@ -1,31 +1,46 @@
 
 import Link from 'next/link';
-import { Home } from 'lucide-react'; // Or a custom SVG logo
+import Image from 'next/image';
 
 const Logo = ({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) => {
   const sizeConfig = {
     sm: {
-      text: 'text-2xl',
-      icon: 'h-6 w-6',
+      icon: 'w-12 h-12', // 48x48
+      text: 'text-xl', // larger for more vertical length
+      line: 'leading-none', // even tighter
     },
     md: {
-      text: 'text-3xl',
-      icon: 'h-7 w-7',
+      icon: 'w-16 h-16', // 64x64
+      text: 'text-2xl',
+      line: 'leading-none',
     },
     lg: {
-      text: 'text-4xl',
-      icon: 'h-8 w-8',
+      icon: 'w-20 h-20', // 80x80
+      text: 'text-3xl',
+      line: 'leading-none',
     },
   };
 
   const currentSizeConfig = sizeConfig[size] || sizeConfig.md;
 
   return (
-    <Link href="/" className="flex items-center space-x-2">
-      {/* Replace with actual SVG logo if available */}
-      <Home className={`text-primary ${currentSizeConfig.icon}`} />
-      <span className={`font-headline font-extrabold ${currentSizeConfig.text} text-primary`}>
-        Cribs Ink
+    <Link href="/" className="flex items-center">
+      {/* KIGALICRIBS Logo Image */}
+      <div className={`relative ${currentSizeConfig.icon} flex-shrink-0 bg-transparent`} style={{marginLeft: 0, marginRight: 0, padding: 0}}>
+        <Image
+          src="/logo.png"
+          alt="KIGALICRIBS Logo"
+          fill
+          className="object-contain mix-blend-multiply"
+          priority
+          sizes="80px"
+          style={{
+            filter: 'contrast(1.2) brightness(1.1)',
+          }}
+        />
+      </div>
+      <span className={`font-extrabold ${currentSizeConfig.text} ${currentSizeConfig.line} text-primary tracking-tight`} style={{fontStretch: 'extra-expanded', marginLeft: 0, paddingLeft: 0}}>
+        KIGALICRIBS
       </span>
     </Link>
   );

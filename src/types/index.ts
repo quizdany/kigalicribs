@@ -95,7 +95,12 @@ export const amenityList = [
 export const propertyTypes: Property['propertyType'][] = ["Apartment", "House", "Office", "Retail", "Villa", "Commercial"];
 
 export const kigaliLocations = [
-  "Kiyovu", "Kimihurura", "Nyarutarama", "Kibagabaga", "Gacuriro", "Remera", "Kicukiro", "Kanombe", "Gisozi", "Nyamirambo"
+  // Gasabo District
+  "Kacyiru", "Kibagabaga", "Kimironko", "Gacuriro (Kagugu)", "Nyarutarama", "Kinyinya", "Remera", "Gisozi",
+  // Kicukiro District
+  "Kicukiro Centre", "Sonatubes", "Gatenga", "Niboye", "Kanombe", "Kagarama", "Gahanga", "Masaka",
+  // Nyarugenge District
+  "City Centre (CBD)", "Nyamirambo", "Kiyovu", "Gitega", "Muhima", "Biryogo", "Rwezamenyo"
 ];
 
 export const currencies = ["RWF", "USD"];
@@ -110,5 +115,10 @@ export type Language = {
 export const propertyTypesList = ["Apartment", "House", "Office", "Retail", "Villa", "Commercial"] as const;
 export const currenciesList = ["RWF", "USD"] as const;
 export const kigaliLocationsList = [
-  "Kiyovu", "Kimihurura", "Nyarutarama", "Kibagabaga", "Gacuriro", "Remera", "Kicukiro", "Kanombe", "Gisozi", "Nyamirambo"
+  // Gasabo District
+  "Kacyiru", "Kibagabaga", "Kimironko", "Gacuriro (Kagugu)", "Nyarutarama", "Kinyinya", "Remera", "Gisozi",
+  // Kicukiro District
+  "Kicukiro Centre", "Sonatubes", "Gatenga", "Niboye", "Kanombe", "Kagarama", "Gahanga", "Masaka",
+  // Nyarugenge District
+  "City Centre (CBD)", "Nyamirambo", "Kiyovu", "Gitega", "Muhima", "Biryogo", "Rwezamenyo"
 ] as const;

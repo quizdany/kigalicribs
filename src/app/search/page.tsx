@@ -9,14 +9,17 @@ import { SELECT_ANY_VALUE } from '@/types';
 import { Button } from '@/components/ui/button';
 import { List, Map } from 'lucide-react';
 import { fetchAllProperties } from '@/lib/actions';
+import { useSearchParams } from 'next/navigation';
 
 export default function SearchPage() {
+  const searchParams = useSearchParams();
+  const locationParam = searchParams.get('location') || '';
   const [allProperties, setAllProperties] = useState<Property[]>([]);
   const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const [tenantLoggedIn, setTenantLoggedIn] = useState(false);
-  const [filterState, setFilterState] = useState<Filters>({});
+  const [filterState, setFilterState] = useState<Filters>({ location: locationParam });
   // Remove dynamic price range logic and set static range for RWF
   const priceRange = { min: 100000, max: 2000000 };
 
@@ -136,7 +139,7 @@ export default function SearchPage() {
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         <div className="lg:col-span-1">
-          <PropertyFilters onFilterChange={handleFilterChange} minPrice={priceRange.min} maxPrice={priceRange.max} />
+          <PropertyFilters onFilterChange={handleFilterChange} minPrice={priceRange.min} maxPrice={priceRange.max} initialFilters={{ ...filterState, location: locationParam }} />
         </div>
         <div className="lg:col-span-3">
           <div className="flex justify-end mb-6">

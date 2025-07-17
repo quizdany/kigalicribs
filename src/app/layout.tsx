@@ -7,7 +7,7 @@ import { LanguageProvider } from '@/contexts/LanguageContext';
 import AuthProvider from '@/components/providers/AuthProvider';
 
 export const metadata: Metadata = {
-  title: 'Cribs Ink - Find Your Perfect Property in Rwanda',
+  title: 'Kigali Cribs - Find Your Perfect Property in Rwanda',
   description: 'Your trusted platform for renting properties in Rwanda, featuring smart search, fair price indicators, and digital lease agreements.',
 };
 
