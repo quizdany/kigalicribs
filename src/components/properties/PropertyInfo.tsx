@@ -23,19 +23,23 @@ const StarRatingDisplay = ({ rating, reviewCount }: { rating?: number; reviewCou
     return <span className="text-sm text-muted-foreground">No reviews yet</span>;
   }
 
-  const fullStars = Math.floor(rating);
-  const halfStar = rating % 1 >= 0.5;
-  const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+  // Always render exactly 5 stars
+  const stars = Array.from({ length: 5 }, (_, i) => {
+    if (rating >= i + 1) {
+      // Full star
+      return <Star key={`full-${i}`} className="h-5 w-5 text-amber-400 fill-amber-400" />;
+    } else if (rating > i && rating < i + 1) {
+      // Half star
+      return <Star key={`half-${i}`} className="h-5 w-5 text-amber-400 fill-amber-400" style={{ clipPath: 'inset(0 50% 0 0)' }} />;
+    } else {
+      // Empty star
+      return <Star key={`empty-${i}`} className="h-5 w-5 text-amber-400" />;
+    }
+  });
 
   return (
     <div className="flex items-center">
-      {[...Array(fullStars)].map((_, i) => (
-        <Star key={`full-${i}`} className="h-5 w-5 text-amber-400 fill-amber-400" />
-      ))}
-      {halfStar && <Star key="half" className="h-5 w-5 text-amber-400 fill-amber-400" style={{ clipPath: 'inset(0 50% 0 0)' }} />}
-      {[...Array(emptyStars)].map((_, i) => (
-        <Star key={`empty-${i}`} className="h-5 w-5 text-amber-400" />
-      ))}
+      {stars}
       <span className="ml-2 text-lg font-semibold text-foreground">{rating.toFixed(1)}</span>
       <span className="ml-1 text-sm text-muted-foreground">({reviewCount} review{reviewCount !== 1 ? 's' : ''})</span>
     </div>

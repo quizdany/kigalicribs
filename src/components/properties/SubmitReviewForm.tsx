@@ -24,14 +24,14 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { addReviewToProperty } from "@/lib/mockData"; // Assuming this can be called client-side for mock
 import { Star } from "lucide-react";
-import { useState } from "react"; // Needed if we implement interactive stars
+import { useState } from "react";
+import { supabase } from "@/lib/supabaseClient";
+import { useSession } from "next-auth/react";
 
 const reviewFormSchema = z.object({
   rating: z.coerce.number().min(1, "Rating is required.").max(5, "Rating must be between 1 and 5."),
   comment: z.string().min(10, "Comment must be at least 10 characters.").max(1000, "Comment is too long."),
-  // tenantName: z.string().min(2, "Name is required."), // Assuming name comes from logged-in user context
 });
 
 export type ReviewFormData = z.infer<typeof reviewFormSchema>;
@@ -42,8 +42,8 @@ interface SubmitReviewFormProps {
 
 export default function SubmitReviewForm({ propertyId }: SubmitReviewFormProps) {
   const { toast } = useToast();
-  // Mock tenant name - in a real app, this would come from authentication context
-  const mockTenantName = "Demo User"; 
+  const { data: session } = useSession();
+  const tenantName = session?.user?.name || "Tenant";
 
   const form = useForm<ReviewFormData>({
     resolver: zodResolver(reviewFormSchema),
@@ -53,36 +53,40 @@ export default function SubmitReviewForm({ propertyId }: SubmitReviewFormProps) 
     },
   });
 
-  function onSubmit(values: ReviewFormData) {
+  async function onSubmit(values: ReviewFormData) {
     try {
-      // Simulate adding review to mock data
-      const newReview = addReviewToProperty(propertyId, {
-        tenantName: mockTenantName, // Use mock or context-derived name
-        rating: values.rating,
-        comment: values.comment,
+      const response = await fetch('/api/submit-review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          propertyId,
+          rating: values.rating,
+          comment: values.comment,
+        }),
       });
-
-      if (newReview) {
+      const result = await response.json();
+      if (!response.ok) {
         toast({
-          title: "Review Submitted!",
-          description: "Thank you for your feedback.",
+          title: 'Error',
+          description: result.error || 'Failed to submit review.',
+          variant: 'destructive',
+        });
+        console.error('API error:', result.error);
+      } else {
+        toast({
+          title: 'Review Submitted!',
+          description: 'Thank you for your feedback.',
         });
         form.reset();
-        // In a real app with server actions, revalidation would occur, or router.refresh() could be used here if needed from client.
-        // For mock data and `noStore()` on parent, data should be fresh on next load/refresh.
-      } else {
-         toast({
-          title: "Error",
-          description: "Property not found for review.",
-          variant: "destructive",
-        });
+        window.location.reload();
       }
-    } catch (error) {
+    } catch (error: any) {
       toast({
-        title: "Error",
-        description: "Failed to submit review. Please try again.",
-        variant: "destructive",
+        title: 'Error',
+        description: error?.message || JSON.stringify(error) || 'Failed to submit review. Please try again.',
+        variant: 'destructive',
       });
+      console.error('Review submission error (catch):', error);
     }
   }
 

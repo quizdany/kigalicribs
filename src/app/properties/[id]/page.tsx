@@ -15,32 +15,53 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { unstable_noStore as noStore } from 'next/cache';
 import MomoPaymentGate from '@/components/properties/MomoPaymentGate';
-
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { Review } from '@/types';
 
 interface PropertyDetailsPageProps {
   params: { id: string };
 }
 
-// Simulate fetching data for a server component
-async function getPropertyData(id: string): Promise<Property | null> {
-  noStore(); // Opt out of caching for this fetch with mock data
-  const property = getPropertyById(id);
-  if (!property) return null;
-  return property;
-}
-
-// Wrapper client component for review submission state management if needed for optimistic updates.
-// For now, we'll rely on router.refresh() or accept that mockData updates won't be instant.
-// The `addReviewToProperty` in mockData modifies the array directly.
-// Next.js server components might not pick up this change without revalidation or `noStore()`.
-
 export default async function PropertyDetailsPage({ params }: PropertyDetailsPageProps) {
+  noStore();
+  const { id: routeId } = await params;
   // Fetch property from Supabase
   const { data: property, error } = await supabase
     .from('properties')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', routeId)
     .single();
+
+  const propertyId = property?.id;
+
+  // Fetch reviews for this property from Supabase
+  const { data: reviewsRaw } = await supabase
+    .from('reviews')
+    .select('*')
+    .eq('property_id', propertyId)
+    .order('created_at', { ascending: false });
+
+  console.log('Fetched raw reviews:', reviewsRaw);
+  console.log('Current propertyId:', propertyId);
+
+  const reviews = (reviewsRaw ?? []).map((r: any) => ({
+    id: r.id,
+    propertyId: r.property_id,
+    tenantName: r.tenant_name,
+    rating: r.rating,
+    comment: r.comment,
+    date: r.created_at,
+  }));
+
+  console.log('Mapped reviews:', reviews);
+
+  // Calculate average rating
+  const averageRating = reviews.length > 0 ? (reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length) : null;
+
+  // Get session to check if user is a tenant
+  const session = await getServerSession(authOptions);
+  const isTenant = session?.user?.role === 'tenant';
 
   if (error || !property) {
     return (
@@ -64,17 +85,19 @@ export default async function PropertyDetailsPage({ params }: PropertyDetailsPag
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
           <PropertyGallery photos={property.photos} altText={property.title} />
-          <PropertyInfo property={property} />
+          <PropertyInfo property={{ ...property, averageRating, reviews }} />
           <Separator />
 
           <div>
             <h2 className="text-2xl font-headline mb-4 flex items-center">
-              <MessageSquare className="mr-2 h-6 w-6 text-primary" /> Reviews ({property.reviews?.length || 0})
+              <MessageSquare className="mr-2 h-6 w-6 text-primary" /> Reviews ({reviews.length})
             </h2>
-            <PropertyReviewsList reviews={property.reviews || []} />
+            <PropertyReviewsList reviews={reviews} />
+            {isTenant && (
+              <SubmitReviewForm propertyId={property.id} />
+            )}
           </div>
 
-          {/* You can add review submission and login logic here if needed */}
         </div>
         <div className="lg:col-span-1 space-y-8 sticky top-24 self-start">
           <FairPriceAnalysis property={property} />
