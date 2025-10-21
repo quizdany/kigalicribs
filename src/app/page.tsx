@@ -1,6 +1,6 @@
 'use client'
 
-import { Search, MapPin, Filter, Heart, Star, Bed, Bath, Square, Phone, User, Menu, X, Shield } from 'lucide-react'
+import { Search, MapPin, Filter, Heart, Star, Bed, Bath, Square, Phone, User, Menu, X, Shield, Copy } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -10,6 +10,20 @@ export default function HomePage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [properties, setProperties] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [showFiltersModal, setShowFiltersModal] = useState(false)
+  const [showContactModal, setShowContactModal] = useState(false)
+  const [contactLoading, setContactLoading] = useState(false)
+  const [contactError, setContactError] = useState<string | null>(null)
+  const [contactInfo, setContactInfo] = useState<any | null>(null)
+  const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null)
+  
+  // Search filters state
+  const [filters, setFilters] = useState({
+    location: '',
+    propertyType: 'all',
+    budget: 'any',
+    amenities: [] as string[],
+  })
 
   useEffect(() => {
     fetchFeaturedProperties()
@@ -26,6 +40,90 @@ export default function HomePage() {
       console.error('Error fetching properties:', err)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleSearch = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault()
+    setLoading(true)
+    
+    try {
+      const params = new URLSearchParams()
+      
+      if (filters.location) params.append('location', filters.location)
+      if (filters.propertyType !== 'all') params.append('propertyType', filters.propertyType)
+      
+      // Budget ranges
+      if (filters.budget !== 'any') {
+        const budgetMap: Record<string, { min?: number; max?: number }> = {
+          'under-50k': { max: 50000 },
+          '50k-100k': { min: 50000, max: 100000 },
+          '100k-200k': { min: 100000, max: 200000 },
+          '200k-500k': { min: 200000, max: 500000 },
+          'above-500k': { min: 500000 },
+        }
+        
+        const range = budgetMap[filters.budget]
+        if (range) {
+          if (range.min) params.append('minPrice', range.min.toString())
+          if (range.max) params.append('maxPrice', range.max.toString())
+        }
+      }
+      
+      if (filters.amenities.length > 0) {
+        params.append('amenities', filters.amenities.join(','))
+      }
+      
+      params.append('perPage', '20')
+      
+      const res = await fetch(`/api/properties?${params.toString()}`)
+      const json = await res.json()
+      if (json?.success) {
+        setProperties(json.data || [])
+      }
+    } catch (err) {
+      console.error('Error searching properties:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const toggleAmenity = (amenity: string) => {
+    setFilters(prev => ({
+      ...prev,
+      amenities: prev.amenities.includes(amenity)
+        ? prev.amenities.filter(a => a !== amenity)
+        : [...prev.amenities, amenity]
+    }))
+  }
+
+  const openContact = async (propertyId: string) => {
+    try {
+      setSelectedPropertyId(propertyId)
+      setShowContactModal(true)
+      setContactLoading(true)
+      setContactError(null)
+      setContactInfo(null)
+      const res = await fetch(`/api/properties/${propertyId}/contact`)
+      const json = await res.json()
+      if (!json?.success) {
+        throw new Error(json?.error || 'Failed to load contact info')
+      }
+      setContactInfo(json.data)
+    } catch (err: any) {
+      console.error('Contact fetch error:', err)
+      setContactError(err?.message || 'Failed to load contact info')
+    } finally {
+      setContactLoading(false)
+    }
+  }
+
+  const copyToClipboard = async (text?: string) => {
+    if (!text) return
+    try {
+      await navigator.clipboard.writeText(text)
+    } catch (e) {
+      console.warn('Clipboard copy failed')
     }
   }
   
@@ -93,7 +191,7 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           
           {/* Search Form */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8">
+          <form onSubmit={handleSearch} className="bg-white border border-gray-200 rounded-xl shadow-sm p-8">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end">
               {/* Location - Takes up more space */}
               <div className="lg:col-span-5">
@@ -104,6 +202,8 @@ export default function HomePage() {
                   <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                   <input
                     type="text"
+                    value={filters.location}
+                    onChange={(e) => setFilters(prev => ({ ...prev, location: e.target.value }))}
                     placeholder="Search Kigali, Gasabo, Kicukiro..."
                     className="w-full pl-12 pr-4 py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm bg-gray-50 hover:bg-white transition-colors"
                   />
@@ -115,12 +215,16 @@ export default function HomePage() {
                 <label className="block text-sm font-semibold text-gray-700 mb-3">
                   Property Type
                 </label>
-                <select className="w-full px-4 py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm bg-gray-50 hover:bg-white transition-colors">
-                  <option>All Types</option>
-                  <option>Apartment</option>
-                  <option>House</option>
-                  <option>Studio</option>
-                  <option>Room</option>
+                <select 
+                  value={filters.propertyType}
+                  onChange={(e) => setFilters(prev => ({ ...prev, propertyType: e.target.value }))}
+                  className="w-full px-4 py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm bg-gray-50 hover:bg-white transition-colors"
+                >
+                  <option value="all">All Types</option>
+                  <option value="apartment">Apartment</option>
+                  <option value="house">House</option>
+                  <option value="studio">Studio</option>
+                  <option value="room">Room</option>
                 </select>
               </div>
               
@@ -129,19 +233,23 @@ export default function HomePage() {
                 <label className="block text-sm font-semibold text-gray-700 mb-3">
                   Budget
                 </label>
-                <select className="w-full px-4 py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm bg-gray-50 hover:bg-white transition-colors">
-                  <option>Any Budget</option>
-                  <option>Under 50K</option>
-                  <option>50K - 100K</option>
-                  <option>100K - 200K</option>
-                  <option>200K - 500K</option>
-                  <option>Above 500K</option>
+                <select 
+                  value={filters.budget}
+                  onChange={(e) => setFilters(prev => ({ ...prev, budget: e.target.value }))}
+                  className="w-full px-4 py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm bg-gray-50 hover:bg-white transition-colors"
+                >
+                  <option value="any">Any Budget</option>
+                  <option value="under-50k">Under 50K</option>
+                  <option value="50k-100k">50K - 100K</option>
+                  <option value="100k-200k">100K - 200K</option>
+                  <option value="200k-500k">200K - 500K</option>
+                  <option value="above-500k">Above 500K</option>
                 </select>
               </div>
               
               {/* Search Button */}
               <div className="lg:col-span-2">
-                <button className="w-full flex items-center justify-center px-6 py-4 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold transition-colors shadow-sm">
+                <button type="submit" className="w-full flex items-center justify-center px-6 py-4 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold transition-colors shadow-sm">
                   <Search className="mr-2 h-5 w-5" />
                   <span className="hidden sm:inline">Search</span>
                   <span className="sm:hidden">Find</span>
@@ -151,19 +259,105 @@ export default function HomePage() {
             
             {/* More Filters Button - Separate row */}
             <div className="mt-6 flex justify-center">
-              <button className="flex items-center px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors">
+              <button 
+                type="button"
+                onClick={() => setShowFiltersModal(true)}
+                className="flex items-center px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
+              >
                 <Filter className="mr-2 h-4 w-4" />
                 More Filters
+                {filters.amenities.length > 0 && (
+                  <span className="ml-2 px-2 py-0.5 bg-red-600 text-white text-xs rounded-full">
+                    {filters.amenities.length}
+                  </span>
+                )}
               </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      {/* More Filters Modal */}
+      {showFiltersModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold text-gray-900">More Filters</h3>
+                <button 
+                  onClick={() => setShowFiltersModal(false)}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* Amenities */}
+              <div className="mb-6">
+                <h4 className="font-semibold text-gray-900 mb-4">Amenities</h4>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {[
+                    'furnished',
+                    'parking',
+                    'security',
+                    'internet',
+                    'water tank',
+                    'generator',
+                    'garden',
+                    'balcony',
+                    'swimming pool'
+                  ].map((amenity) => (
+                    <label key={amenity} className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={filters.amenities.includes(amenity)}
+                        onChange={() => toggleAmenity(amenity)}
+                        className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+                      />
+                      <span className="text-sm text-gray-700 capitalize">{amenity}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4 border-t">
+                <button
+                  onClick={() => {
+                    setFilters(prev => ({ ...prev, amenities: [] }))
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
+                >
+                  Clear
+                </button>
+                <button
+                  onClick={() => {
+                    setShowFiltersModal(false)
+                    handleSearch()
+                  }}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors"
+                >
+                  Apply Filters
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Featured Properties */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-2xl font-bold text-gray-900">Featured Properties in Kigali</h2>
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">
+              {filters.location || filters.propertyType !== 'all' || filters.budget !== 'any' || filters.amenities.length > 0
+                ? 'Search Results'
+                : 'Featured Properties in Kigali'}
+            </h2>
+            {(filters.location || filters.propertyType !== 'all' || filters.budget !== 'any' || filters.amenities.length > 0) && (
+              <p className="text-sm text-gray-600 mt-1">{properties.length} properties found</p>
+            )}
+          </div>
           <Link href="/properties" className="text-red-600 hover:text-red-700 font-medium">View All</Link>
         </div>
         
@@ -185,37 +379,44 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {properties.map((property) => (
               <div key={property.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-                <div className="relative">
-                  {property.images && property.images.length > 0 ? (
-                    <img 
-                      src={property.images[0]} 
-                      alt={property.title} 
-                      className="w-full h-48 object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-48 bg-gradient-to-br from-red-100 to-red-200 flex items-center justify-center">
-                      <span className="text-red-400 text-sm">No image</span>
+                <Link href={`/properties/${property.id}`}>
+                  <div className="relative cursor-pointer">
+                    {property.images && property.images.length > 0 ? (
+                      <img 
+                        src={property.images[0]} 
+                        alt={property.title} 
+                        className="w-full h-48 object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-48 bg-gradient-to-br from-red-100 to-red-200 flex items-center justify-center">
+                        <span className="text-red-400 text-sm">No image</span>
+                      </div>
+                    )}
+                    <button 
+                      onClick={(e) => e.preventDefault()}
+                      className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md hover:bg-gray-50"
+                    >
+                      <Heart className="h-4 w-4 text-gray-600" />
+                    </button>
+                    <div className="absolute bottom-3 left-3 bg-green-600 text-white px-2 py-1 rounded text-sm font-medium">
+                      Verified
                     </div>
-                  )}
-                  <button className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md hover:bg-gray-50">
-                    <Heart className="h-4 w-4 text-gray-600" />
-                  </button>
-                  <div className="absolute bottom-3 left-3 bg-green-600 text-white px-2 py-1 rounded text-sm font-medium">
-                    Verified
                   </div>
-                </div>
+                </Link>
                 <div className="p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-semibold text-gray-900 text-lg line-clamp-1">{property.title}</h3>
-                    <div className="flex items-center">
-                      <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                      <span className="text-sm text-gray-600 ml-1">New</span>
+                  <Link href={`/properties/${property.id}`} className="block mb-3">
+                    <div className="flex justify-between items-start mb-2 cursor-pointer">
+                      <h3 className="font-semibold text-gray-900 text-lg line-clamp-1 hover:text-red-600 transition-colors">{property.title}</h3>
+                      <div className="flex items-center">
+                        <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                        <span className="text-sm text-gray-600 ml-1">New</span>
+                      </div>
                     </div>
-                  </div>
-                  <p className="text-gray-600 text-sm mb-3 flex items-center">
-                    <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
-                    <span className="line-clamp-1">{property.address || property.location}, {property.district}</span>
-                  </p>
+                    <p className="text-gray-600 text-sm flex items-center">
+                      <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
+                      <span className="line-clamp-1">{property.address || property.location}, {property.district}</span>
+                    </p>
+                  </Link>
                   {(property.bedrooms || property.bathrooms || property.size) && (
                     <div className="flex items-center space-x-4 text-sm text-gray-600 mb-3">
                       {property.bedrooms ? (
@@ -245,7 +446,7 @@ export default function HomePage() {
                       </span>
                       <span className="text-gray-600 text-sm"> RWF/month</span>
                     </div>
-                    <button className="flex items-center text-red-600 hover:text-red-700 font-medium">
+                    <button onClick={() => openContact(property.id)} className="flex items-center text-red-600 hover:text-red-700 font-medium">
                       <Phone className="h-4 w-4 mr-1" />
                       Contact
                     </button>
@@ -256,6 +457,104 @@ export default function HomePage() {
           </div>
         )}
       </div>
+
+      {/* Contact Modal */}
+      {showContactModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h3 className="text-lg font-semibold">Owner contact</h3>
+              <button
+                onClick={() => {
+                  setShowContactModal(false)
+                  setSelectedPropertyId(null)
+                  setContactInfo(null)
+                  setContactError(null)
+                }}
+                className="p-2 rounded hover:bg-gray-100"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="p-4">
+              {contactLoading && (
+                <p className="text-gray-600">Loading contact…</p>
+              )}
+              {contactError && (
+                <p className="text-red-600 text-sm">{contactError}</p>
+              )}
+              {!contactLoading && !contactError && contactInfo && (
+                <div className="space-y-4">
+                  {contactInfo.title && (
+                    <div>
+                      <p className="text-sm text-gray-500">Property</p>
+                      <p className="font-medium">{contactInfo.title}</p>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-500">Email</p>
+                      <p className="font-medium break-all">{contactInfo.owner_email || 'Not provided'}</p>
+                    </div>
+                    {contactInfo.owner_email && (
+                      <div className="flex items-center gap-2">
+                        <a
+                          href={`mailto:${contactInfo.owner_email}`}
+                          className="px-3 py-1 text-sm rounded bg-red-600 text-white hover:bg-red-700"
+                        >Email</a>
+                        <button
+                          onClick={() => copyToClipboard(contactInfo.owner_email)}
+                          className="p-2 rounded border hover:bg-gray-50"
+                          title="Copy"
+                        >
+                          <Copy className="h-4 w-4" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-500">Phone</p>
+                      <p className="font-medium">{contactInfo.owner_phone || 'Not provided'}</p>
+                    </div>
+                    {contactInfo.owner_phone && (
+                      <div className="flex items-center gap-2">
+                        <a
+                          href={`tel:${contactInfo.owner_phone}`}
+                          className="px-3 py-1 text-sm rounded bg-green-600 text-white hover:bg-green-700"
+                        >Call</a>
+                        <button
+                          onClick={() => copyToClipboard(contactInfo.owner_phone)}
+                          className="p-2 rounded border hover:bg-gray-50"
+                          title="Copy"
+                        >
+                          <Copy className="h-4 w-4" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="p-4 border-t flex justify-end gap-2">
+              {selectedPropertyId && (
+                <Link
+                  href={`/contracts/new?propertyId=${selectedPropertyId}`}
+                  className="px-4 py-2 rounded bg-gray-100 text-gray-800 hover:bg-gray-200"
+                >
+                  Start lease agreement
+                </Link>
+              )}
+              <button
+                onClick={() => setShowContactModal(false)}
+                className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Why Choose TuraNeza */}
       <div className="bg-white py-16">
@@ -293,7 +592,6 @@ export default function HomePage() {
         </div>
       </div>
 
-      // ...existing code...
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12">

@@ -1,15 +1,20 @@
 "use client"
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
-import AuthButton from '@/components/AuthButton'
-import { Camera, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { Camera, Loader2, ArrowLeft, X } from 'lucide-react'
 
-export default function NewProperty() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
+export default function EditPropertyPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
+  const [property, setProperty] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  const [isOwner, setIsOwner] = useState(false)
+  const router = useRouter()
+
   const [form, setForm] = useState({
     title: '',
     description: '',
@@ -23,29 +28,65 @@ export default function NewProperty() {
     ownerPhone: '',
   })
   const [amenities, setAmenities] = useState<string[]>([])
-  const [images, setImages] = useState<File[]>([])
-  const [preview, setPreview] = useState<string[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const router = useRouter()
+  const [existingImages, setExistingImages] = useState<string[]>([])
+  const [newImages, setNewImages] = useState<File[]>([])
+  const [newImagePreviews, setNewImagePreviews] = useState<string[]>([])
 
-  // Check authentication status
   useEffect(() => {
-    checkAuth()
-  }, [])
+    fetchProperty()
+  }, [id])
 
-  const checkAuth = async () => {
+  const fetchProperty = async () => {
     try {
+      setLoading(true)
       const { data: { session } } = await supabase.auth.getSession()
-      setIsAuthenticated(!!session)
+      
       if (!session) {
-        setError('You must be logged in to list a property')
+        setError('You must be logged in to edit properties')
+        setLoading(false)
+        return
       }
-    } catch (err) {
-      console.error('Auth check error:', err)
-      setIsAuthenticated(false)
+
+      const res = await fetch(`/api/properties/${id}`)
+      const json = await res.json()
+      
+      if (!json?.success) {
+        throw new Error(json?.error || 'Failed to load property')
+      }
+      
+      const prop = json.data
+
+      // Check if user is the owner
+      if (prop.owner_id !== session.user.id) {
+        setError('You do not have permission to edit this property')
+        setIsOwner(false)
+        setLoading(false)
+        return
+      }
+
+      setIsOwner(true)
+      setProperty(prop)
+      
+      // Populate form
+      setForm({
+        title: prop.title || '',
+        description: prop.description || '',
+        type: prop.property_type || prop.type || '',
+        price: prop.price?.toString() || '',
+        bedrooms: prop.bedrooms?.toString() || '',
+        bathrooms: prop.bathrooms?.toString() || '',
+        size: prop.size?.toString() || '',
+        address: prop.address || '',
+        district: prop.district || '',
+        ownerPhone: prop.owner_phone || '',
+      })
+      
+      setAmenities(prop.amenities || [])
+      setExistingImages(prop.images || [])
+    } catch (err: any) {
+      setError(err.message || 'Failed to load property')
     } finally {
-      setIsCheckingAuth(false)
+      setLoading(false)
     }
   }
 
@@ -63,43 +104,49 @@ export default function NewProperty() {
     )
   }
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleNewImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files)
-      if (files.length + images.length > 10) {
+      const totalImages = existingImages.length + newImages.length + files.length
+      
+      if (totalImages > 10) {
         setError('Maximum 10 images allowed')
         return
       }
-      setImages(prev => [...prev, ...files])
+      
+      setNewImages(prev => [...prev, ...files])
       
       // Create preview URLs
-      const newPreviews = files.map(file => URL.createObjectURL(file))
-      setPreview(prev => [...prev, ...newPreviews])
+      const previews = files.map(file => URL.createObjectURL(file))
+      setNewImagePreviews(prev => [...prev, ...previews])
     }
   }
 
-  const removeImage = (index: number) => {
-    setPreview(prev => prev.filter((_, i) => i !== index))
-    setImages(prev => prev.filter((_, i) => i !== index))
+  const removeExistingImage = (index: number) => {
+    setExistingImages(prev => prev.filter((_, i) => i !== index))
+  }
+
+  const removeNewImage = (index: number) => {
+    setNewImagePreviews(prev => prev.filter((_, i) => i !== index))
+    setNewImages(prev => prev.filter((_, i) => i !== index))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
+    setSaving(true)
     setError('')
 
     try {
-      // Get current session
       const { data: { session } } = await supabase.auth.getSession()
       
       if (!session) {
-        throw new Error('You must be logged in to list a property')
+        throw new Error('You must be logged in to edit properties')
       }
 
-      // Upload images to Supabase Storage
-      let imageUrls: string[] = []
-      if (images.length > 0) {
-        const uploadPromises = images.map(async (image, index) => {
+      // Upload new images to Supabase Storage
+      let newImageUrls: string[] = []
+      if (newImages.length > 0) {
+        const uploadPromises = newImages.map(async (image, index) => {
           const fileExt = image.name.split('.').pop()
           const fileName = `${session.user.id}-${Date.now()}-${index}.${fileExt}`
           const filePath = `properties/${fileName}`
@@ -121,11 +168,14 @@ export default function NewProperty() {
           return publicUrl
         })
 
-        imageUrls = await Promise.all(uploadPromises)
+        newImageUrls = await Promise.all(uploadPromises)
       }
 
-      const res = await fetch('/api/properties', {
-        method: 'POST',
+      // Combine existing and new images
+      const allImages = [...existingImages, ...newImageUrls]
+
+      const res = await fetch(`/api/properties/${id}`, {
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${session.access_token}`,
@@ -133,7 +183,7 @@ export default function NewProperty() {
         body: JSON.stringify({
           title: form.title,
           description: form.description,
-          type: form.type,
+          property_type: form.type,
           price: Number(form.price),
           bedrooms: Number(form.bedrooms) || null,
           bathrooms: Number(form.bathrooms) || null,
@@ -141,21 +191,42 @@ export default function NewProperty() {
           address: form.address,
           district: form.district,
           amenities,
-          images: imageUrls,
-          ownerPhone: form.ownerPhone,
+          images: allImages,
+          owner_phone: form.ownerPhone,
         }),
       })
 
       const json = await res.json()
-      if (!json?.success) throw new Error(json?.error || 'Failed to create property')
+      if (!json?.success) throw new Error(json?.error || 'Failed to update property')
       
-      // Redirect to properties page
-      router.push('/properties')
+      // Redirect to property detail page
+      router.push(`/properties/${id}`)
     } catch (err: any) {
       setError(err.message || 'Unknown error occurred')
     } finally {
-      setLoading(false)
+      setSaving(false)
     }
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Loader2 className="animate-spin h-8 w-8 text-red-600" />
+      </div>
+    )
+  }
+
+  if (error && !isOwner) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{error}</p>
+          <Link href="/properties" className="text-red-600 hover:text-red-700">
+            Back to properties
+          </Link>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -163,39 +234,16 @@ export default function NewProperty() {
       <nav className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
-            <Link href="/" className="flex items-center">
-              <img src="/images/kigalicribsLogo.png" alt="KigaliCribs Logo" className="h-8 w-auto mr-2" />
-              <span className="text-xl tracking-tighter">
-                <span className="font-bold text-gray-900">K</span>
-                <span className="text-gray-600">igali</span>
-                <span className="font-bold text-gray-900">C</span>
-                <span className="text-gray-600">ribs</span>
-              </span>
+            <Link href={`/properties/${id}`} className="flex items-center text-gray-700 hover:text-gray-900">
+              <ArrowLeft className="h-5 w-5 mr-2" />
+              Back to property
             </Link>
-            <AuthButton />
           </div>
         </div>
       </nav>
 
       <div className="max-w-3xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        {isCheckingAuth ? (
-          <div className="flex justify-center items-center py-12">
-            <Loader2 className="animate-spin h-8 w-8 text-red-600" />
-          </div>
-        ) : !isAuthenticated ? (
-          <div className="bg-white shadow-sm rounded-lg p-8 text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Authentication Required</h2>
-            <p className="text-gray-600 mb-6">You need to be logged in to list a property.</p>
-            <Link 
-              href="/auth" 
-              className="inline-block px-6 py-3 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors"
-            >
-              Login to Continue
-            </Link>
-          </div>
-        ) : (
-          <>
-            <h1 className="text-3xl font-bold text-gray-900 mb-8">List Your Property</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">Edit Property</h1>
         
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg">
@@ -203,7 +251,7 @@ export default function NewProperty() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="bg-white shadow-sm rounded-lg p-6 space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-8 bg-white shadow-sm rounded-lg p-6">
           {/* Basic Information */}
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-gray-900">Basic Information</h2>
@@ -220,7 +268,7 @@ export default function NewProperty() {
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                placeholder="e.g., Modern 2BHK Apartment in Kigali Heights"
+                placeholder="e.g., Modern 2BR Apartment in Kimihurura"
               />
             </div>
 
@@ -234,9 +282,9 @@ export default function NewProperty() {
                 value={form.description}
                 onChange={handleChange}
                 required
-                rows={4}
+                rows={6}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                placeholder="Describe your property..."
+                placeholder="Describe your property in detail..."
               />
             </div>
 
@@ -375,7 +423,6 @@ export default function NewProperty() {
           {/* Contact Information */}
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-gray-900">Contact Information</h2>
-            <p className="text-sm text-gray-600">Provide your contact details so interested renters can reach you.</p>
             
             <div>
               <label htmlFor="ownerPhone" className="block text-sm font-medium text-gray-700 mb-1">
@@ -391,7 +438,6 @@ export default function NewProperty() {
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
                 placeholder="+250 788 123 456"
               />
-              <p className="mt-1 text-xs text-gray-500">Your email will be automatically included from your account</p>
             </div>
           </div>
 
@@ -432,80 +478,115 @@ export default function NewProperty() {
           {/* Images */}
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-gray-900">Property Images</h2>
+            <p className="text-sm text-gray-600">Upload up to 10 images. First image will be the main display.</p>
             
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Upload Images (Max 10)
-              </label>
-              
-              <div className="flex items-center justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
-                <div className="space-y-1 text-center">
-                  <Camera className="mx-auto h-12 w-12 text-gray-400" />
-                  <div className="flex text-sm text-gray-600">
-                    <label htmlFor="images" className="relative cursor-pointer rounded-md font-medium text-red-600 hover:text-red-500">
-                      <span>Upload images</span>
-                      <input
-                        id="images"
-                        name="images"
-                        type="file"
-                        multiple
-                        accept="image/*"
-                        onChange={handleImageChange}
-                        className="sr-only"
-                      />
-                    </label>
-                    <p className="pl-1">or drag and drop</p>
-                  </div>
-                  <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB each</p>
-                </div>
-              </div>
-
-              {/* Image previews */}
-              {preview.length > 0 && (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
-                  {preview.map((url, index) => (
-                    <div key={index} className="relative aspect-square">
+            {/* Existing Images */}
+            {existingImages.length > 0 && (
+              <div>
+                <p className="text-sm font-medium text-gray-700 mb-2">Current Images ({existingImages.length})</p>
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                  {existingImages.map((img, idx) => (
+                    <div key={idx} className="relative group aspect-square">
                       <img
-                        src={url}
-                        alt={`Preview ${index + 1}`}
-                        className="w-full h-full object-cover rounded-lg"
+                        src={img}
+                        alt={`Property ${idx + 1}`}
+                        className="w-full h-full object-cover rounded-lg border border-gray-200"
                       />
                       <button
                         type="button"
-                        onClick={() => removeImage(index)}
-                        className="absolute top-1 right-1 bg-white rounded-full p-1 shadow-md hover:bg-gray-100"
+                        onClick={() => removeExistingImage(idx)}
+                        className="absolute top-1 right-1 p-1.5 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                        title="Remove image"
                       >
-                        <svg className="h-4 w-4 text-gray-600" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-                          <path d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                        <X className="h-3 w-3" />
                       </button>
+                      {idx === 0 && (
+                        <div className="absolute bottom-1 left-1 px-2 py-0.5 bg-blue-600 text-white text-xs rounded">
+                          Main
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
+
+            {/* New Image Previews */}
+            {newImagePreviews.length > 0 && (
+              <div>
+                <p className="text-sm font-medium text-gray-700 mb-2">New Images to Upload ({newImagePreviews.length})</p>
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                  {newImagePreviews.map((preview, idx) => (
+                    <div key={idx} className="relative group aspect-square">
+                      <img
+                        src={preview}
+                        alt={`New ${idx + 1}`}
+                        className="w-full h-full object-cover rounded-lg border border-green-300"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeNewImage(idx)}
+                        className="absolute top-1 right-1 p-1.5 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                        title="Remove image"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                      <div className="absolute bottom-1 left-1 px-2 py-0.5 bg-green-600 text-white text-xs rounded">
+                        New
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Upload Button */}
+            {(existingImages.length + newImages.length) < 10 && (
+              <div>
+                <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
+                  <div className="flex flex-col items-center justify-center">
+                    <Camera className="w-8 h-8 text-gray-400 mb-2" />
+                    <p className="text-sm text-gray-600 font-medium">Click to add images</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {existingImages.length + newImages.length} / 10 images
+                    </p>
+                  </div>
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    multiple
+                    onChange={handleNewImageChange}
+                  />
+                </label>
+              </div>
+            )}
           </div>
 
-          {/* Submit Button */}
-          <div className="flex justify-end pt-6">
+          {/* Submit Buttons */}
+          <div className="flex gap-4">
+            <Link
+              href={`/properties/${id}`}
+              className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors text-center"
+            >
+              Cancel
+            </Link>
             <button
               type="submit"
-              disabled={loading}
-              className="px-6 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+              disabled={saving}
+              className="flex-1 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
             >
-              {loading ? (
+              {saving ? (
                 <>
-                  <Loader2 className="animate-spin h-5 w-5" />
-                  <span>Creating...</span>
+                  <Loader2 className="animate-spin h-5 w-5 mr-2" />
+                  Saving...
                 </>
               ) : (
-                <span>List Property</span>
+                'Save Changes'
               )}
             </button>
           </div>
         </form>
-          </>
-        )}
       </div>
     </div>
   )

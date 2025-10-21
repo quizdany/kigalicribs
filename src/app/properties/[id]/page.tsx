@@ -1,0 +1,523 @@
+"use client"
+
+import React, { useState, useEffect, use } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { supabase } from '@/lib/supabase'
+import { MapPin, Bed, Bath, Square, Phone, Mail, Edit, ArrowLeft, X, ChevronLeft, ChevronRight, Heart, Loader2, Copy } from 'lucide-react'
+
+export default function PropertyDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
+  const [property, setProperty] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [isOwner, setIsOwner] = useState(false)
+  const [currentUser, setCurrentUser] = useState<any>(null)
+  const [showImageModal, setShowImageModal] = useState(false)
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [showContactModal, setShowContactModal] = useState(false)
+  const [contactLoading, setContactLoading] = useState(false)
+  const [contactError, setContactError] = useState<string | null>(null)
+  const [contactInfo, setContactInfo] = useState<any | null>(null)
+  const router = useRouter()
+
+  useEffect(() => {
+    fetchProperty()
+    checkAuth()
+  }, [id])
+
+  const checkAuth = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      setCurrentUser(session?.user || null)
+    } catch (err) {
+      console.error('Auth check error:', err)
+    }
+  }
+
+  const fetchProperty = async () => {
+    try {
+      setLoading(true)
+      const res = await fetch(`/api/properties/${id}`)
+      const json = await res.json()
+      
+      if (!json?.success) {
+        throw new Error(json?.error || 'Failed to load property')
+      }
+      
+      setProperty(json.data)
+      
+      // Check if current user is the owner
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session?.user && json.data?.owner_id === session.user.id) {
+        setIsOwner(true)
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to load property')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const openContact = async () => {
+    try {
+      setShowContactModal(true)
+      setContactLoading(true)
+      setContactError(null)
+      setContactInfo(null)
+      const res = await fetch(`/api/properties/${id}/contact`)
+      const json = await res.json()
+      if (!json?.success) {
+        throw new Error(json?.error || 'Failed to load contact info')
+      }
+      setContactInfo(json.data)
+    } catch (err: any) {
+      console.error('Contact fetch error:', err)
+      setContactError(err?.message || 'Failed to load contact info')
+    } finally {
+      setContactLoading(false)
+    }
+  }
+
+  const copyToClipboard = async (text?: string) => {
+    if (!text) return
+    try {
+      await navigator.clipboard.writeText(text)
+    } catch (e) {
+      console.warn('Clipboard copy failed')
+    }
+  }
+
+  const openImageGallery = (index: number) => {
+    setCurrentImageIndex(index)
+    setShowImageModal(true)
+  }
+
+  const nextImage = () => {
+    if (property?.images && currentImageIndex < property.images.length - 1) {
+      setCurrentImageIndex(prev => prev + 1)
+    }
+  }
+
+  const prevImage = () => {
+    if (currentImageIndex > 0) {
+      setCurrentImageIndex(prev => prev - 1)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Loader2 className="animate-spin h-8 w-8 text-red-600" />
+      </div>
+    )
+  }
+
+  if (error || !property) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{error || 'Property not found'}</p>
+          <Link href="/properties" className="text-red-600 hover:text-red-700">
+            Back to properties
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Navigation */}
+      <nav className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16 items-center">
+            <Link href="/properties" className="flex items-center text-gray-700 hover:text-gray-900">
+              <ArrowLeft className="h-5 w-5 mr-2" />
+              Back to properties
+            </Link>
+            {isOwner && (
+              <Link
+                href={`/properties/${id}/edit`}
+                className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              >
+                <Edit className="h-4 w-4 mr-2" />
+                Edit Property
+              </Link>
+            )}
+          </div>
+        </div>
+      </nav>
+
+      {/* Property Details */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Images Gallery */}
+        <div className="mb-8">
+          {property.images && property.images.length > 0 ? (
+            <div className="relative">
+              {/* Desktop Grid Layout */}
+              <div className="hidden md:grid md:grid-cols-4 md:grid-rows-2 gap-2 h-[500px] rounded-lg overflow-hidden">
+                {/* Large left image */}
+                <div 
+                  className="col-span-2 row-span-2 relative cursor-pointer group"
+                  onClick={() => openImageGallery(0)}
+                >
+                  <img
+                    src={property.images[0]}
+                    alt={property.title}
+                    className="w-full h-full object-cover group-hover:brightness-90 transition-all"
+                  />
+                </div>
+                
+                {/* Right grid - 4 smaller images */}
+                {property.images.slice(1, 5).map((img: string, idx: number) => (
+                  <div 
+                    key={idx} 
+                    className="relative cursor-pointer group"
+                    onClick={() => openImageGallery(idx + 1)}
+                  >
+                    <img
+                      src={img}
+                      alt={`${property.title} - ${idx + 2}`}
+                      className="w-full h-full object-cover group-hover:brightness-90 transition-all"
+                    />
+                    {/* Show all photos button on last visible image if more exist */}
+                    {idx === 3 && property.images.length > 5 && (
+                      <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                        <div className="text-white text-center">
+                          <span className="text-lg font-semibold">+{property.images.length - 5} more</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+                
+                {/* Fill empty slots if less than 5 images */}
+                {property.images.length < 5 && Array.from({ length: 5 - property.images.length }).map((_, idx) => (
+                  <div key={`empty-${idx}`} className="bg-gray-200"></div>
+                ))}
+              </div>
+
+              {/* Mobile: Single image carousel */}
+              <div className="md:hidden relative">
+                <img
+                  src={property.images[0]}
+                  alt={property.title}
+                  className="w-full h-64 object-cover rounded-lg cursor-pointer"
+                  onClick={() => openImageGallery(0)}
+                />
+                {property.images.length > 1 && (
+                  <div className="absolute bottom-4 right-4 px-3 py-1 bg-black bg-opacity-70 text-white text-sm rounded-full">
+                    1 / {property.images.length}
+                  </div>
+                )}
+              </div>
+
+              {/* Show all photos button - bottom right corner */}
+              <button
+                onClick={() => openImageGallery(0)}
+                className="absolute bottom-4 right-4 px-4 py-2 bg-white border border-gray-900 rounded-lg shadow-md hover:bg-gray-50 transition-colors flex items-center gap-2 text-sm font-medium"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Show all photos
+              </button>
+
+              {/* Favorite button - top right */}
+              <button className="absolute top-4 right-4 p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors">
+                <Heart className="h-5 w-5 text-gray-600" />
+              </button>
+            </div>
+          ) : (
+            <div className="w-full h-[500px] bg-gradient-to-br from-gray-200 to-gray-300 rounded-lg flex items-center justify-center">
+              <span className="text-gray-500">No images available</span>
+            </div>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Title and Price */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900 mb-2">{property.title}</h1>
+                  <div className="flex items-center text-gray-600">
+                    <MapPin className="h-5 w-5 mr-2" />
+                    <span>{property.address || property.location}, {property.district}</span>
+                  </div>
+                </div>
+                <span className="px-3 py-1 bg-red-100 text-red-600 text-sm font-medium rounded">
+                  {property.property_type || property.type}
+                </span>
+              </div>
+              
+              <div className="flex items-baseline">
+                <span className="text-4xl font-bold text-gray-900">
+                  {Number(property.price).toLocaleString()}
+                </span>
+                <span className="text-xl text-gray-600 ml-2">RWF/month</span>
+              </div>
+            </div>
+
+            {/* Features */}
+            {(property.bedrooms || property.bathrooms || property.size) && (
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Property Features</h2>
+                <div className="grid grid-cols-3 gap-4">
+                  {property.bedrooms && (
+                    <div className="flex items-center">
+                      <Bed className="h-6 w-6 mr-3 text-gray-600" />
+                      <div>
+                        <div className="text-2xl font-bold text-gray-900">{property.bedrooms}</div>
+                        <div className="text-sm text-gray-600">Bedrooms</div>
+                      </div>
+                    </div>
+                  )}
+                  {property.bathrooms && (
+                    <div className="flex items-center">
+                      <Bath className="h-6 w-6 mr-3 text-gray-600" />
+                      <div>
+                        <div className="text-2xl font-bold text-gray-900">{property.bathrooms}</div>
+                        <div className="text-sm text-gray-600">Bathrooms</div>
+                      </div>
+                    </div>
+                  )}
+                  {property.size && (
+                    <div className="flex items-center">
+                      <Square className="h-6 w-6 mr-3 text-gray-600" />
+                      <div>
+                        <div className="text-2xl font-bold text-gray-900">{property.size}</div>
+                        <div className="text-sm text-gray-600">sqft</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Description */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Description</h2>
+              <p className="text-gray-700 whitespace-pre-line">{property.description}</p>
+            </div>
+
+            {/* Amenities */}
+            {property.amenities && property.amenities.length > 0 && (
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Amenities</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {property.amenities.map((amenity: string, idx: number) => (
+                    <div key={idx} className="flex items-center text-gray-700">
+                      <div className="w-2 h-2 bg-red-600 rounded-full mr-3"></div>
+                      <span className="capitalize">{amenity}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Sidebar - Contact Card */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-lg shadow-sm p-6 sticky top-4">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Interested in this property?</h3>
+              
+              {!isOwner && (
+                <>
+                  <button
+                    onClick={openContact}
+                    className="w-full flex items-center justify-center px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors mb-3"
+                  >
+                    <Phone className="h-5 w-5 mr-2" />
+                    Contact Owner
+                  </button>
+                  
+                  {currentUser && (
+                    <Link
+                      href={`/contracts/new?propertyId=${id}`}
+                      className="w-full flex items-center justify-center px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
+                    >
+                      Start Lease Agreement
+                    </Link>
+                  )}
+                </>
+              )}
+              
+              {isOwner && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                  <p className="text-sm text-green-800 font-medium">You own this property</p>
+                  <p className="text-xs text-green-600 mt-1">You can edit the details anytime</p>
+                </div>
+              )}
+
+              <div className="mt-6 pt-6 border-t">
+                <h4 className="text-sm font-semibold text-gray-900 mb-3">Property Details</h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Property Type</span>
+                    <span className="font-medium capitalize">{property.property_type || property.type}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">District</span>
+                    <span className="font-medium">{property.district}</span>
+                  </div>
+                  {property.created_at && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Listed</span>
+                      <span className="font-medium">
+                        {new Date(property.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Image Gallery Modal */}
+      {showImageModal && property.images && (
+        <div className="fixed inset-0 bg-black bg-opacity-95 z-50 flex items-center justify-center p-4">
+          <button
+            onClick={() => setShowImageModal(false)}
+            className="absolute top-4 right-4 p-2 text-white hover:bg-white hover:bg-opacity-20 rounded-full transition-colors z-10"
+          >
+            <X className="h-6 w-6" />
+          </button>
+          
+          <button
+            onClick={prevImage}
+            disabled={currentImageIndex === 0}
+            className="absolute left-4 p-2 text-white hover:bg-white hover:bg-opacity-20 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed z-10"
+          >
+            <ChevronLeft className="h-8 w-8" />
+          </button>
+          
+          <div className="max-w-4xl w-full flex flex-col items-center">
+            <img
+              src={property.images[currentImageIndex]}
+              alt={`${property.title} - Image ${currentImageIndex + 1}`}
+              className="max-w-full max-h-[75vh] w-auto h-auto object-contain rounded-lg"
+            />
+            <div className="text-white text-center mt-4 text-lg font-medium">
+              {currentImageIndex + 1} / {property.images.length}
+            </div>
+          </div>
+          
+          <button
+            onClick={nextImage}
+            disabled={currentImageIndex === property.images.length - 1}
+            className="absolute right-4 p-2 text-white hover:bg-white hover:bg-opacity-20 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed z-10"
+          >
+            <ChevronRight className="h-8 w-8" />
+          </button>
+        </div>
+      )}
+
+      {/* Contact Modal */}
+      {showContactModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h3 className="text-lg font-semibold">Owner Contact</h3>
+              <button
+                onClick={() => {
+                  setShowContactModal(false)
+                  setContactInfo(null)
+                  setContactError(null)
+                }}
+                className="p-2 rounded hover:bg-gray-100"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="p-4">
+              {contactLoading && (
+                <p className="text-gray-600">Loading contact…</p>
+              )}
+              {contactError && (
+                <p className="text-red-600 text-sm">{contactError}</p>
+              )}
+              {!contactLoading && !contactError && contactInfo && (
+                <div className="space-y-4">
+                  {contactInfo.title && (
+                    <div>
+                      <p className="text-sm text-gray-500">Property</p>
+                      <p className="font-medium">{contactInfo.title}</p>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-500">Email</p>
+                      <p className="font-medium break-all">{contactInfo.owner_email || 'Not provided'}</p>
+                    </div>
+                    {contactInfo.owner_email && (
+                      <div className="flex items-center gap-2">
+                        <a
+                          href={`mailto:${contactInfo.owner_email}`}
+                          className="px-3 py-1 text-sm rounded bg-red-600 text-white hover:bg-red-700 flex items-center"
+                        >
+                          Email
+                        </a>
+                        <button
+                          onClick={() => copyToClipboard(contactInfo.owner_email)}
+                          className="p-2 rounded border hover:bg-gray-50"
+                          title="Copy"
+                        >
+                          <Copy className="h-4 w-4" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-500">Phone</p>
+                      <p className="font-medium">{contactInfo.owner_phone || 'Not provided'}</p>
+                    </div>
+                    {contactInfo.owner_phone && (
+                      <div className="flex items-center gap-2">
+                        <a
+                          href={`tel:${contactInfo.owner_phone}`}
+                          className="px-3 py-1 text-sm rounded bg-green-600 text-white hover:bg-green-700 flex items-center"
+                        >
+                          Call
+                        </a>
+                        <button
+                          onClick={() => copyToClipboard(contactInfo.owner_phone)}
+                          className="p-2 rounded border hover:bg-gray-50"
+                          title="Copy"
+                        >
+                          <Copy className="h-4 w-4" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="p-4 border-t flex justify-end gap-2">
+              {currentUser && (
+                <Link
+                  href={`/contracts/new?propertyId=${id}`}
+                  className="px-4 py-2 rounded bg-gray-100 text-gray-800 hover:bg-gray-200"
+                >
+                  Start lease agreement
+                </Link>
+              )}
+              <button
+                onClick={() => setShowContactModal(false)}
+                className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

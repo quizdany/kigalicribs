@@ -4,11 +4,16 @@ import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import AuthButton from '@/components/AuthButton'
 import Link from 'next/link'
-import { MapPin, Bed, Bath, Square, Heart, Loader2 } from 'lucide-react'
+import { MapPin, Bed, Bath, Square, Heart, Loader2, Phone, X, Copy } from 'lucide-react'
 
 export default function PropertiesList() {
   const [properties, setProperties] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [showContactModal, setShowContactModal] = useState(false)
+  const [contactLoading, setContactLoading] = useState(false)
+  const [contactError, setContactError] = useState<string | null>(null)
+  const [contactInfo, setContactInfo] = useState<any | null>(null)
+  const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -27,6 +32,36 @@ export default function PropertiesList() {
       console.error('Error fetching properties:', err)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const openContact = async (propertyId: string) => {
+    try {
+      setSelectedPropertyId(propertyId)
+      setShowContactModal(true)
+      setContactLoading(true)
+      setContactError(null)
+      setContactInfo(null)
+      const res = await fetch(`/api/properties/${propertyId}/contact`)
+      const json = await res.json()
+      if (!json?.success) {
+        throw new Error(json?.error || 'Failed to load contact info')
+      }
+      setContactInfo(json.data)
+    } catch (err: any) {
+      console.error('Contact fetch error:', err)
+      setContactError(err?.message || 'Failed to load contact info')
+    } finally {
+      setContactLoading(false)
+    }
+  }
+
+  const copyToClipboard = async (text?: string) => {
+    if (!text) return
+    try {
+      await navigator.clipboard.writeText(text)
+    } catch (e) {
+      console.warn('Clipboard copy failed')
     }
   }
 
@@ -78,32 +113,39 @@ export default function PropertiesList() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {properties.map((property) => (
               <div key={property.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-                <div className="relative">
-                  {property.images && property.images.length > 0 ? (
-                    <img 
-                      src={property.images[0]} 
-                      alt={property.title} 
-                      className="w-full h-48 object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
-                      <span className="text-gray-400">No image</span>
-                    </div>
-                  )}
-                  <button className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md hover:bg-gray-50">
-                    <Heart className="h-4 w-4 text-gray-600" />
-                  </button>
-                </div>
+                <Link href={`/properties/${property.id}`}>
+                  <div className="relative cursor-pointer">
+                    {property.images && property.images.length > 0 ? (
+                      <img 
+                        src={property.images[0]} 
+                        alt={property.title} 
+                        className="w-full h-48 object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+                        <span className="text-gray-400">No image</span>
+                      </div>
+                    )}
+                    <button 
+                      onClick={(e) => e.preventDefault()}
+                      className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md hover:bg-gray-50"
+                    >
+                      <Heart className="h-4 w-4 text-gray-600" />
+                    </button>
+                  </div>
+                </Link>
                 
                 <div className="p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-semibold text-gray-900 text-lg line-clamp-1">{property.title}</h3>
-                  </div>
-                  
-                  <p className="text-gray-600 text-sm mb-3 flex items-center">
-                    <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
-                    <span className="line-clamp-1">{property.address || property.location}, {property.district}</span>
-                  </p>
+                  <Link href={`/properties/${property.id}`} className="block mb-3">
+                    <div className="flex justify-between items-start mb-2 cursor-pointer">
+                      <h3 className="font-semibold text-gray-900 text-lg line-clamp-1 hover:text-red-600 transition-colors">{property.title}</h3>
+                    </div>
+                    
+                    <p className="text-gray-600 text-sm flex items-center">
+                      <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
+                      <span className="line-clamp-1">{property.address || property.location}, {property.district}</span>
+                    </p>
+                  </Link>
                   
                   {(property.bedrooms || property.bathrooms || property.size) && (
                     <div className="flex items-center space-x-4 text-sm text-gray-600 mb-3">
@@ -135,11 +177,20 @@ export default function PropertiesList() {
                       </span>
                       <span className="text-gray-600 text-sm"> RWF/month</span>
                     </div>
-                    {(property.property_type || property.type) && (
-                      <span className="px-2 py-1 bg-red-100 text-red-600 text-xs font-medium rounded">
-                        {property.property_type || property.type}
-                      </span>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {(property.property_type || property.type) && (
+                        <span className="px-2 py-1 bg-red-100 text-red-600 text-xs font-medium rounded">
+                          {property.property_type || property.type}
+                        </span>
+                      )}
+                      <button
+                        onClick={() => openContact(property.id)}
+                        className="flex items-center text-red-600 hover:text-red-700 font-medium text-sm"
+                      >
+                        <Phone className="h-4 w-4 mr-1" />
+                        Contact
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -147,6 +198,103 @@ export default function PropertiesList() {
           </div>
         )}
       </div>
+
+      {showContactModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h3 className="text-lg font-semibold">Owner contact</h3>
+              <button
+                onClick={() => {
+                  setShowContactModal(false)
+                  setSelectedPropertyId(null)
+                  setContactInfo(null)
+                  setContactError(null)
+                }}
+                className="p-2 rounded hover:bg-gray-100"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="p-4">
+              {contactLoading && (
+                <p className="text-gray-600">Loading contact…</p>
+              )}
+              {contactError && (
+                <p className="text-red-600 text-sm">{contactError}</p>
+              )}
+              {!contactLoading && !contactError && contactInfo && (
+                <div className="space-y-4">
+                  {contactInfo.title && (
+                    <div>
+                      <p className="text-sm text-gray-500">Property</p>
+                      <p className="font-medium">{contactInfo.title}</p>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-500">Email</p>
+                      <p className="font-medium break-all">{contactInfo.owner_email || 'Not provided'}</p>
+                    </div>
+                    {contactInfo.owner_email && (
+                      <div className="flex items-center gap-2">
+                        <a
+                          href={`mailto:${contactInfo.owner_email}`}
+                          className="px-3 py-1 text-sm rounded bg-red-600 text-white hover:bg-red-700"
+                        >Email</a>
+                        <button
+                          onClick={() => copyToClipboard(contactInfo.owner_email)}
+                          className="p-2 rounded border hover:bg-gray-50"
+                          title="Copy"
+                        >
+                          <Copy className="h-4 w-4" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-500">Phone</p>
+                      <p className="font-medium">{contactInfo.owner_phone || 'Not provided'}</p>
+                    </div>
+                    {contactInfo.owner_phone && (
+                      <div className="flex items-center gap-2">
+                        <a
+                          href={`tel:${contactInfo.owner_phone}`}
+                          className="px-3 py-1 text-sm rounded bg-green-600 text-white hover:bg-green-700"
+                        >Call</a>
+                        <button
+                          onClick={() => copyToClipboard(contactInfo.owner_phone)}
+                          className="p-2 rounded border hover:bg-gray-50"
+                          title="Copy"
+                        >
+                          <Copy className="h-4 w-4" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="p-4 border-t flex justify-end gap-2">
+              {selectedPropertyId && (
+                <Link
+                  href={`/contracts/new?propertyId=${selectedPropertyId}`}
+                  className="px-4 py-2 rounded bg-gray-100 text-gray-800 hover:bg-gray-200"
+                >
+                  Start lease agreement
+                </Link>
+              )}
+              <button
+                onClick={() => setShowContactModal(false)}
+                className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

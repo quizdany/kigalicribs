@@ -10,12 +10,44 @@ export async function GET(request: Request) {
     const page = parseInt(searchParams.get('page') || '1', 10)
     const perPage = parseInt(searchParams.get('perPage') || '20', 10)
     const q = searchParams.get('q') || undefined
+    const location = searchParams.get('location') || undefined
+    const propertyType = searchParams.get('propertyType') || undefined
+    const minPrice = searchParams.get('minPrice') ? parseInt(searchParams.get('minPrice')!) : undefined
+    const maxPrice = searchParams.get('maxPrice') ? parseInt(searchParams.get('maxPrice')!) : undefined
+    const amenities = searchParams.get('amenities') || undefined
 
     let query = supabase.from('properties').select('*')
 
+    // Text search across title and description
     if (q) {
-      // simple text search across title and description
-      query = query.ilike('title', `%${q}%`).or(`description.ilike.%${q}%`)
+      query = query.or(`title.ilike.%${q}%,description.ilike.%${q}%`)
+    }
+
+    // Location filter (search in address, district, or location fields)
+    if (location) {
+      query = query.or(`address.ilike.%${location}%,district.ilike.%${location}%,location.ilike.%${location}%`)
+    }
+
+    // Property type filter
+    if (propertyType && propertyType !== 'all') {
+      query = query.eq('property_type', propertyType)
+    }
+
+    // Price range filter
+    if (minPrice !== undefined) {
+      query = query.gte('price', minPrice)
+    }
+    if (maxPrice !== undefined) {
+      query = query.lte('price', maxPrice)
+    }
+
+    // Amenities filter (check if property has all requested amenities)
+    if (amenities) {
+      const amenitiesList = amenities.split(',').map(a => a.trim())
+      // For PostgreSQL array contains operation
+      amenitiesList.forEach(amenity => {
+        query = query.contains('amenities', [amenity])
+      })
     }
 
     const from = (page - 1) * perPage
@@ -77,6 +109,7 @@ export async function POST(request: Request) {
       images,
       type,
       property_type,
+      ownerPhone,
     } = body || {}
 
     // derive required fields for legacy schema compatibility
@@ -116,6 +149,8 @@ export async function POST(request: Request) {
       property_type: finalPropertyType,
       location: derivedLocation,
       owner_id: userData.user.id,
+      owner_email: userData.user.email ?? null,
+      owner_phone: ownerPhone ?? null,
     }
 
     // Perform insert with authed client so RLS sees auth.uid()
