@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment System Diagnostic</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .status-box {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .error { color: #dc2626; font-weight: bold; }
+        .success { color: #16a34a; font-weight: bold; }
+        .warning { color: #ea580c; font-weight: bold; }
+        pre {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        .step {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Payment System Diagnostic</h1>
+    
+    <div class="status-box">
+        <h2>Current Issue</h2>
+        <p class="error">❌ Payment failed: {}</p>
+        <p><strong>Root Cause:</strong> The <code>payments</code> table does not exist in your Supabase database.</p>
+        <p>The API is trying to insert payment records but failing because the table is missing.</p>
+    </div>
+
+    <div class="status-box">
+        <h2>What's Happening</h2>
+        <ol>
+            <li>User clicks "Pay" in PaymentModal</li>
+            <li>API call to <code>/api/payments/initiate</code> succeeds</li>
+            <li>Payment provider (mock mode) returns success</li>
+            <li><span class="error">Database insert fails (table doesn't exist)</span></li>
+            <li>API returns 500 error</li>
+            <li>Frontend logs empty object <code>{}</code></li>
+        </ol>
+    </div>
+
+    <div class="status-box">
+        <h2>✅ Solution (3 Steps)</h2>
+        
+        <div class="step">
+            <h3>Step 1: Open Supabase SQL Editor</h3>
+            <button onclick="window.open('https://supabase.com/dashboard', '_blank')">
+                Open Supabase Dashboard
+            </button>
+            <p>Navigate to: Project → SQL Editor → New Query</p>
+        </div>
+
+        <div class="step">
+            <h3>Step 2: Copy and Run Migration Script</h3>
+            <p>File location: <code>SETUP_DATABASE.sql</code> in your project root</p>
+            <button onclick="copyMigrationPath()">Copy File Path</button>
+            <pre id="migration-path">C:\Users\quizd\turaneza\SETUP_DATABASE.sql</pre>
+            <p>Copy all SQL from that file and paste into Supabase SQL Editor, then click Run.</p>
+        </div>
+
+        <div class="step">
+            <h3>Step 3: Verify & Test</h3>
+            <button onclick="testPaymentAPI()">Test Payment API</button>
+            <button onclick="checkTables()">Check Tables Status</button>
+            <div id="test-result"></div>
+        </div>
+    </div>
+
+    <div class="status-box">
+        <h2>📋 Manual Verification</h2>
+        <p>After running the migration, run this query in Supabase SQL Editor:</p>
+        <pre>SELECT table_name 
+FROM information_schema.tables 
+WHERE table_schema = 'public' 
+AND table_name IN ('payments', 'premium_users', 'contact_unlocks');</pre>
+        <p class="success">Expected: 3 rows (payments, premium_users, contact_unlocks)</p>
+    </div>
+
+    <div class="status-box">
+        <h2>🐛 Debug Information</h2>
+        <button onclick="showDebugInfo()">Show Current Error Details</button>
+        <div id="debug-info"></div>
+    </div>
+
+    <script>
+        function copyMigrationPath() {
+            const path = document.getElementById('migration-path').textContent;
+            navigator.clipboard.writeText(path);
+            alert('Path copied! Open this file and copy its contents.');
+        }
+
+        async function testPaymentAPI() {
+            const result = document.getElementById('test-result');
+            result.innerHTML = '<p>Testing payment API...</p>';
+            
+            try {
+                const response = await fetch('/api/payments/initiate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        phoneNumber: '0781234567',
+                        purpose: 'contact_unlock',
+                        provider: 'momo'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                result.innerHTML = `
+                    <h4>API Response:</h4>
+                    <pre>${JSON.stringify({
+                        status: response.status,
+                        statusText: response.statusText,
+                        data: data
+                    }, null, 2)}</pre>
+                    ${response.ok ? 
+                        '<p class="success">✅ API working! Payment initiated successfully.</p>' : 
+                        '<p class="error">❌ API failed. Error: ' + (data.error || 'Unknown error') + '</p>'
+                    }
+                    ${!response.ok && data.error?.includes('payments') ? 
+                        '<p class="warning">⚠️ This error confirms the payments table is missing. Run the SQL migration!</p>' :
+                        ''
+                    }
+                `;
+            } catch (error) {
+                result.innerHTML = `
+                    <p class="error">Error: ${error.message}</p>
+                    <p>Make sure you're logged in and the dev server is running.</p>
+                `;
+            }
+        }
+
+        async function checkTables() {
+            const result = document.getElementById('test-result');
+            result.innerHTML = '<p class="warning">⚠️ Cannot check database directly from browser.</p><p>Please run VERIFY_DATABASE.sql in Supabase SQL Editor.</p>';
+        }
+
+        function showDebugInfo() {
+            const debug = document.getElementById('debug-info');
+            debug.innerHTML = `
+                <h4>Error Stack Trace:</h4>
+                <pre>Console Error: Payment failed: {}
+
+Location: src/components/PaymentModal.tsx (104:17)
+Function: handleSubmit
+
+What this means:
+- The payment API returned an error response
+- The response data is an empty object {}
+- This happens when the database operation fails
+- The API caught the error and returned a 500 status
+
+Common causes:
+1. ❌ payments table doesn't exist (MOST LIKELY)
+2. ❌ RLS policies blocking access
+3. ❌ Invalid user session
+4. ❌ Network error
+
+Fix:
+Run SETUP_DATABASE.sql to create missing tables.</pre>
+            `;
+        }
+
+        // Auto-show debug info on page load
+        window.addEventListener('load', () => {
+            showDebugInfo();
+        });
+    </script>
+</body>
+</html>

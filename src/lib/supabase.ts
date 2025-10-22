@@ -25,6 +25,8 @@ export type User = {
 export type Property = {
   id: string
   owner_id: string
+  owner_email?: string
+  owner_phone?: string
   title: string
   description: string
   price: number
@@ -72,6 +74,44 @@ export type Payment = {
   created_at: string
 }
 
+export type PremiumPayment = {
+  id: string
+  user_id: string
+  amount: number
+  currency: string
+  provider: 'momo' | 'airtel'
+  phone_number: string
+  status: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled'
+  transaction_id: string
+  external_reference?: string
+  purpose: 'premium_monthly' | 'premium_yearly' | 'contact_unlock' | 'featured_listing'
+  property_id?: string
+  expires_at?: string
+  metadata: Json
+  created_at: string
+  updated_at: string
+}
+
+export type PremiumUser = {
+  id: string
+  user_id: string
+  subscription_type: 'monthly' | 'yearly'
+  starts_at: string
+  expires_at: string
+  is_active: boolean
+  payment_id?: string
+  created_at: string
+  updated_at: string
+}
+
+export type ContactUnlock = {
+  id: string
+  user_id: string
+  property_id: string
+  payment_id?: string
+  unlocked_at: string
+}
+
 export type Review = {
   id: string
   property_id: string
@@ -100,10 +140,25 @@ export interface Database {
         Insert: Omit<Lease, 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Omit<Lease, 'id'>>
       }
-      payments: {
+      lease_payments: {
         Row: Payment
         Insert: Omit<Payment, 'id' | 'created_at'>
         Update: Partial<Omit<Payment, 'id'>>
+      }
+      payments: {
+        Row: PremiumPayment
+        Insert: Omit<PremiumPayment, 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Omit<PremiumPayment, 'id'>>
+      }
+      premium_users: {
+        Row: PremiumUser
+        Insert: Omit<PremiumUser, 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Omit<PremiumUser, 'id'>>
+      }
+      contact_unlocks: {
+        Row: ContactUnlock
+        Insert: Omit<ContactUnlock, 'id' | 'unlocked_at'>
+        Update: Partial<Omit<ContactUnlock, 'id'>>
       }
       reviews: {
         Row: Review

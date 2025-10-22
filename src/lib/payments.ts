@@ -97,22 +97,36 @@ async function getAirtelAccessToken(): Promise<string> {
  */
 async function initiateMoMoPayment(request: PaymentRequest): Promise<PaymentResponse> {
   try {
+    console.log('Getting MoMo access token...')
     const accessToken = await getMoMoAccessToken()
-    const referenceId = generateReferenceId()
+    const referenceId = generateReferenceId() // UUID v4 for MTN MoMo
+    const transactionId = generateTransactionId() // Readable ID for our records
+    
+    // MTN MoMo sandbox only supports EUR, not RWF
+    // For production, you would use RWF
+    const currency = MOMO_CONFIG.environment === 'sandbox' ? 'EUR' : 'RWF'
+    
+    const paymentPayload = {
+      amount: request.amount.toString(),
+      currency: currency,
+      externalId: transactionId,
+      payer: {
+        partyIdType: 'MSISDN',
+        partyId: formatPhoneNumber(request.phoneNumber)
+      },
+      payerMessage: getPaymentMessage(request.purpose),
+      payeeNote: `KigaliCribs - ${request.purpose}`
+    }
+
+    console.log('MoMo payment payload:', JSON.stringify(paymentPayload, null, 2))
+    console.log('MoMo X-Reference-Id (UUID):', referenceId)
+    console.log('MoMo Currency (sandbox uses EUR):', currency)
+    console.log('MoMo API URL:', `${MOMO_CONFIG.baseUrl}/collection/v1_0/requesttopay`)
+    console.log('MoMo environment:', MOMO_CONFIG.environment)
     
     const response = await axios.post(
       `${MOMO_CONFIG.baseUrl}/collection/v1_0/requesttopay`,
-      {
-        amount: request.amount.toString(),
-        currency: 'RWF',
-        externalId: referenceId,
-        payer: {
-          partyIdType: 'MSISDN',
-          partyId: formatPhoneNumber(request.phoneNumber)
-        },
-        payerMessage: getPaymentMessage(request.purpose),
-        payeeNote: `KigaliCribs - ${request.purpose}`
-      },
+      paymentPayload,
       {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -124,19 +138,27 @@ async function initiateMoMoPayment(request: PaymentRequest): Promise<PaymentResp
       }
     )
 
+    console.log('MoMo response:', response.status, response.data)
+
     return {
       success: true,
-      transactionId: referenceId,
-      externalReference: referenceId,
+      transactionId: referenceId, // Use UUID for status checks
+      externalReference: transactionId,
       status: 'pending',
       message: 'Payment initiated successfully'
     }
   } catch (error: any) {
     console.error('MoMo payment error:', error.response?.data || error.message)
+    console.error('MoMo error details:', {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      headers: error.response?.headers
+    })
     return {
       success: false,
       status: 'failed',
-      error: error.response?.data?.message || 'Payment initiation failed'
+      error: error.response?.data?.message || error.message || 'Payment initiation failed'
     }
   }
 }
@@ -251,9 +273,73 @@ export async function checkAirtelPaymentStatus(transactionId: string): Promise<P
 }
 
 /**
+ * Mock payment function for development
+ */
+async function initiateMockPayment(request: PaymentRequest): Promise<PaymentResponse> {
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 1000))
+  
+  const referenceId = generateReferenceId()
+  const transactionId = generateTransactionId()
+  
+  // Simulate different scenarios based on phone number
+  const phone = request.phoneNumber
+  
+  if (phone.includes('111')) {
+    // Simulate failure for testing
+    return {
+      success: false,
+      status: 'failed',
+      error: 'Mock payment failed - test phone number ends with 111'
+    }
+  }
+  
+  if (phone.includes('000')) {
+    // Simulate network error for testing
+    throw new Error('Mock network error - test phone number ends with 000')
+  }
+  
+  // Default success case
+  return {
+    success: true,
+    transactionId: referenceId,
+    externalReference: transactionId,
+    status: 'pending',
+    message: 'Mock payment initiated successfully. In development mode.'
+  }
+}
+
+/**
+ * Check if we should use mock mode
+ */
+function shouldUseMockMode(): boolean {
+  // Use mock mode if explicitly enabled OR if required env vars are missing
+  const mockModeEnabled = process.env.PAYMENT_MOCK_MODE === 'true'
+  const hasRequiredEnvVars = (
+    (MOMO_CONFIG.subscriptionKey && MOMO_CONFIG.apiUser && MOMO_CONFIG.apiKey) ||
+    (AIRTEL_CONFIG.clientId && AIRTEL_CONFIG.clientSecret)
+  )
+  
+  console.log('Payment mode check:', {
+    mockModeEnabled,
+    hasRequiredEnvVars,
+    momoConfigured: !!(MOMO_CONFIG.subscriptionKey && MOMO_CONFIG.apiUser && MOMO_CONFIG.apiKey),
+    airtelConfigured: !!(AIRTEL_CONFIG.clientId && AIRTEL_CONFIG.clientSecret)
+  })
+  
+  return mockModeEnabled || !hasRequiredEnvVars
+}
+
+/**
  * Main payment initiation function
  */
 export async function initiatePayment(request: PaymentRequest): Promise<PaymentResponse> {
+  // Check if we should use mock mode
+  if (shouldUseMockMode()) {
+    console.log('Using mock payment mode - check environment variables or set PAYMENT_MOCK_MODE=false')
+    return await initiateMockPayment(request)
+  }
+  
   if (request.provider === 'momo') {
     return await initiateMoMoPayment(request)
   } else if (request.provider === 'airtel') {
@@ -268,12 +354,38 @@ export async function initiatePayment(request: PaymentRequest): Promise<PaymentR
 }
 
 /**
+ * Mock payment status check for development
+ */
+async function checkMockPaymentStatus(transactionId: string): Promise<PaymentStatus> {
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 500))
+  
+  // Simulate payment completion after 30 seconds (for testing)
+  const transactionTime = parseInt(transactionId.split('-')[1]) || Date.now()
+  const elapsed = Date.now() - transactionTime
+  
+  if (elapsed > 30000) { // 30 seconds
+    return 'completed'
+  } else if (elapsed > 15000) { // 15 seconds
+    return 'processing'
+  } else {
+    return 'pending'
+  }
+}
+
+/**
  * Check payment status (provider-agnostic)
  */
 export async function checkPaymentStatus(
   transactionId: string,
   provider: PaymentProvider
 ): Promise<PaymentStatus> {
+  // Check if we should use mock mode
+  if (shouldUseMockMode()) {
+    console.log('Using mock payment status check')
+    return await checkMockPaymentStatus(transactionId)
+  }
+  
   if (provider === 'momo') {
     return await checkMoMoPaymentStatus(transactionId)
   } else if (provider === 'airtel') {
@@ -285,6 +397,12 @@ export async function checkPaymentStatus(
 
 // Helper functions
 function generateReferenceId(): string {
+  // Generate a proper UUID v4 for MTN MoMo compatibility
+  return crypto.randomUUID()
+}
+
+function generateTransactionId(): string {
+  // Generate a readable transaction ID for our internal use
   return `KIGCR-${Date.now()}-${Math.random().toString(36).substring(2, 9).toUpperCase()}`
 }
 

@@ -1,7 +1,7 @@
 -- Create payments table to track all transactions
 CREATE TABLE IF NOT EXISTS payments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL,
   amount DECIMAL(10, 2) NOT NULL,
   currency VARCHAR(3) DEFAULT 'RWF',
   provider VARCHAR(20) NOT NULL CHECK (provider IN ('momo', 'airtel')),
@@ -24,7 +24,7 @@ CREATE INDEX IF NOT EXISTS idx_payments_transaction_id ON payments(transaction_i
 -- Create premium_users table to track active subscriptions
 CREATE TABLE IF NOT EXISTS premium_users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL UNIQUE,
   subscription_type VARCHAR(20) NOT NULL CHECK (subscription_type IN ('monthly', 'yearly')),
   starts_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
@@ -43,12 +43,12 @@ ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can view their own payments"
   ON payments FOR SELECT
   TO authenticated
-  USING (auth.uid() = user_id);
+  USING (user_id = auth.uid());
 
 CREATE POLICY "Users can create their own payments"
   ON payments FOR INSERT
   TO authenticated
-  WITH CHECK (auth.uid() = user_id);
+  WITH CHECK (user_id = auth.uid());
 
 -- RLS Policies for premium_users
 ALTER TABLE premium_users ENABLE ROW LEVEL SECURITY;
@@ -56,7 +56,7 @@ ALTER TABLE premium_users ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can view their own premium status"
   ON premium_users FOR SELECT
   TO authenticated
-  USING (auth.uid() = user_id);
+  USING (user_id = auth.uid());
 
 -- Function to automatically update updated_at
 CREATE OR REPLACE FUNCTION update_updated_at_column()

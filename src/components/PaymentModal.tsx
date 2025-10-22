@@ -47,12 +47,20 @@ export default function PaymentModal({ isOpen, onClose, purpose, onSuccess }: Pa
     setMessage('')
 
     try {
-      const token = localStorage.getItem('supabase_token')
-      if (!token) {
+      // Get Supabase session token
+      const { supabase } = await import('@/lib/supabase')
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+      
+      if (sessionError || !session?.access_token) {
         setMessage('Please login to continue')
+        setStatus('failed')
         setLoading(false)
         return
       }
+
+      const token = session.access_token
+
+      console.log('Initiating payment:', { phoneNumber, purpose, provider })
 
       const response = await fetch('/api/payments/initiate', {
         method: 'POST',
@@ -67,19 +75,51 @@ export default function PaymentModal({ isOpen, onClose, purpose, onSuccess }: Pa
         })
       })
 
-      const data = await response.json()
+      console.log('Raw response status:', response.status, response.statusText)
 
-      if (data.success) {
+      let data: any = {}
+      try {
+        data = await response.json()
+      } catch (parseError: any) {
+        console.log('Failed to parse response as JSON:', parseError.message)
+        setStatus('failed')
+        setMessage('Server response error. Please try again.')
+        return
+      }
+
+      console.log('Payment response:', { 
+        status: response.status, 
+        statusText: response.statusText,
+        data 
+      })
+
+      if (response.ok && data.success) {
         setTransactionId(data.payment.transactionId)
         setStatus('processing')
         setMessage('Payment initiated. Please check your phone and enter your PIN to complete the transaction.')
       } else {
         setStatus('failed')
-        setMessage(data.error || 'Payment initiation failed')
+        const errorMessage = data.error || data.message || `HTTP ${response.status}: ${response.statusText}`
+        setMessage(errorMessage)
+        // Log to console but don't use console.error to avoid error overlay
+        console.log('[Payment Failed]', {
+          httpStatus: response.status,
+          httpStatusText: response.statusText,
+          responseData: data,
+          errorMessage
+        })
       }
     } catch (error: any) {
       setStatus('failed')
-      setMessage(error.message || 'An error occurred')
+      const errorMessage = error.message || 'An unexpected error occurred'
+      setMessage(errorMessage)
+      // Log to console but don't use console.error
+      console.log('[Payment Error]', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+        errorObject: error
+      })
     } finally {
       setLoading(false)
     }
@@ -89,19 +129,28 @@ export default function PaymentModal({ isOpen, onClose, purpose, onSuccess }: Pa
     if (!transactionId) return
 
     try {
-      const token = localStorage.getItem('supabase_token')
+      // Get Supabase session token
+      const { supabase } = await import('@/lib/supabase')
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session?.access_token) return
+
       const response = await fetch(
         `/api/payments/status?transactionId=${transactionId}`,
         {
           headers: {
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${session.access_token}`
           }
         }
       )
 
       const data = await response.json()
+      console.log('Payment status check response:', {
+        status: response.status,
+        data
+      })
 
-      if (data.success) {
+      if (response.ok && data.success) {
         if (data.payment.status === 'completed') {
           setStatus('completed')
           setMessage('Payment completed successfully!')
@@ -115,9 +164,18 @@ export default function PaymentModal({ isOpen, onClose, purpose, onSuccess }: Pa
           setStatus('failed')
           setMessage('Payment failed. Please try again.')
         }
+      } else {
+        console.log('[Payment Status Check Failed]', {
+          httpStatus: response.status,
+          responseData: data
+        })
       }
-    } catch (error) {
-      console.error('Status check error:', error)
+    } catch (error: any) {
+      console.log('[Status Check Error]', {
+        name: error.name,
+        message: error.message,
+        errorObject: error
+      })
     }
   }
 

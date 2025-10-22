@@ -21,6 +21,8 @@ export interface Database {
         Row: {
           id: string
           owner_id: string
+          owner_email?: string
+          owner_phone?: string
           title: string
           description: string
           price: number
@@ -41,6 +43,53 @@ export interface Database {
         Insert: Omit<Database['public']['Tables']['properties']['Row'], 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Database['public']['Tables']['properties']['Row']>
       }
+      payments: {
+        Row: {
+          id: string
+          user_id: string
+          amount: number
+          currency: string
+          provider: 'momo' | 'airtel'
+          phone_number: string
+          status: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled'
+          transaction_id: string
+          external_reference?: string
+          purpose: 'premium_monthly' | 'premium_yearly' | 'contact_unlock' | 'featured_listing'
+          property_id?: string
+          expires_at?: string
+          metadata: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['payments']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['payments']['Row']>
+      }
+      premium_users: {
+        Row: {
+          id: string
+          user_id: string
+          subscription_type: 'monthly' | 'yearly'
+          starts_at: string
+          expires_at: string
+          is_active: boolean
+          payment_id?: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['premium_users']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['premium_users']['Row']>
+      }
+      contact_unlocks: {
+        Row: {
+          id: string
+          user_id: string
+          property_id: string
+          payment_id?: string
+          unlocked_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['contact_unlocks']['Row'], 'id' | 'unlocked_at'>
+        Update: Partial<Database['public']['Tables']['contact_unlocks']['Row']>
+      }
       leases: {
         Row: {
           id: string
@@ -59,7 +108,7 @@ export interface Database {
         Insert: Omit<Database['public']['Tables']['leases']['Row'], 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Database['public']['Tables']['leases']['Row']>
       }
-      payments: {
+      lease_payments: {
         Row: {
           id: string
           lease_id: string
@@ -73,8 +122,8 @@ export interface Database {
           paid_at: string | null
           created_at: string
         }
-        Insert: Omit<Database['public']['Tables']['payments']['Row'], 'id' | 'created_at'>
-        Update: Partial<Database['public']['Tables']['payments']['Row']>
+        Insert: Omit<Database['public']['Tables']['lease_payments']['Row'], 'id' | 'created_at'>
+        Update: Partial<Database['public']['Tables']['lease_payments']['Row']>
       }
       reviews: {
         Row: {
