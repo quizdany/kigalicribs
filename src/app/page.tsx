@@ -1,10 +1,12 @@
 'use client'
 
-import { Search, MapPin, Filter, Heart, Star, Bed, Bath, Square, Phone, User, Menu, X, Shield, Copy } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { Search, MapPin, Filter, Heart, Star, Bed, Bath, Square, Phone, User, Menu, X, Shield, Copy, ChevronDown, Crown } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import AuthButton from '@/components/AuthButton'
+import PremiumModal from '@/components/PremiumModal'
+import PaymentModal from '@/components/PaymentModal'
 
 export default function HomePage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -12,21 +14,47 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true)
   const [showFiltersModal, setShowFiltersModal] = useState(false)
   const [showContactModal, setShowContactModal] = useState(false)
+  const [showPremiumModal, setShowPremiumModal] = useState(false)
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
+  const [paymentPurpose, setPaymentPurpose] = useState<'contact_unlock'>('contact_unlock')
   const [contactLoading, setContactLoading] = useState(false)
   const [contactError, setContactError] = useState<string | null>(null)
   const [contactInfo, setContactInfo] = useState<any | null>(null)
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null)
+  const [showAmenitiesDropdown, setShowAmenitiesDropdown] = useState(false)
+  const amenitiesRef = useRef<HTMLDivElement | null>(null)
   
   // Search filters state
-  const [filters, setFilters] = useState({
+  type FiltersState = {
+    location: string
+    propertyType: string
+    budget: string
+    amenities: string[]
+    bedrooms: string
+    bathrooms: string
+  }
+  const [filters, setFilters] = useState<FiltersState>({
     location: '',
     propertyType: 'all',
     budget: 'any',
-    amenities: [] as string[],
+    amenities: [],
+    bedrooms: '',
+    bathrooms: ''
   })
 
   useEffect(() => {
     fetchFeaturedProperties()
+  }, [])
+
+  // Close amenities dropdown on outside click
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (amenitiesRef.current && !amenitiesRef.current.contains(e.target as Node)) {
+        setShowAmenitiesDropdown(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
   }, [])
 
   const fetchFeaturedProperties = async () => {
@@ -73,6 +101,15 @@ export default function HomePage() {
       if (filters.amenities.length > 0) {
         params.append('amenities', filters.amenities.join(','))
       }
+      // Bedrooms/Bathrooms filters
+      if (filters.bedrooms) {
+        if (filters.bedrooms === '5+') params.append('minBedrooms', '5')
+        else params.append('bedrooms', filters.bedrooms)
+      }
+      if (filters.bathrooms) {
+        if (filters.bathrooms === '5+') params.append('minBathrooms', '5')
+        else params.append('bathrooms', filters.bathrooms)
+      }
       
       params.append('perPage', '20')
       
@@ -104,8 +141,25 @@ export default function HomePage() {
       setContactLoading(true)
       setContactError(null)
       setContactInfo(null)
-      const res = await fetch(`/api/properties/${propertyId}/contact`)
+      
+      // Get auth token
+      const { supabase } = await import('@/lib/supabase')
+      const { data: { session } } = await supabase.auth.getSession()
+      const token = session?.access_token
+      
+      const res = await fetch(`/api/properties/${propertyId}/contact-premium`, {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      })
       const json = await res.json()
+      
+      // Handle payment required
+      if (res.status === 402) {
+        setShowContactModal(false)
+        setPaymentPurpose('contact_unlock')
+        setShowPaymentModal(true)
+        return
+      }
+      
       if (!json?.success) {
         throw new Error(json?.error || 'Failed to load contact info')
       }
@@ -154,7 +208,13 @@ export default function HomePage() {
             <div className="hidden md:flex items-center space-x-4">
               <Link href="/properties" className="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors duration-200 border border-transparent hover:border-red-100">Find a Property</Link>
               <Link href="/properties/new" className="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors duration-200 border border-transparent hover:border-red-100">List a Property</Link>
-              <button className="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors duration-200 border border-transparent hover:border-red-100">Pay Rent</button>
+              <button 
+                onClick={() => setShowPremiumModal(true)}
+                className="flex items-center px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white font-medium rounded-lg hover:from-red-700 hover:to-red-800 transition-all duration-200 shadow-sm"
+              >
+                <Crown className="h-4 w-4 mr-2" />
+                Go Premium
+              </button>
             </div>
 
             {/* Auth Button & Mobile Menu */}
@@ -175,8 +235,13 @@ export default function HomePage() {
             <div className="p-3 space-y-2">
               <Link href="/properties" className="w-full text-left px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors duration-200 border border-transparent hover:border-red-100 block">Find a Property</Link>
               <Link href="/properties/new" className="w-full text-left px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors duration-200 border border-transparent hover:border-red-100 block">List Property</Link>
-              <button className="w-full text-left px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors duration-200 border border-transparent hover:border-red-100">Pay Rent</button>
-              <button className="w-full text-left px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors duration-200 border border-transparent hover:border-red-100">Help</button>
+              <button 
+                onClick={() => setShowPremiumModal(true)}
+                className="w-full text-left px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white font-medium rounded-lg flex items-center"
+              >
+                <Crown className="h-4 w-4 mr-2" />
+                Go Premium
+              </button>
               <Link href="/auth" className="w-full text-left px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors duration-200 border border-transparent hover:border-red-100 flex items-center">
                 <User className="h-4 w-4 mr-2" />
                 Login
@@ -187,92 +252,184 @@ export default function HomePage() {
       </nav>
 
       
-      <div className="bg-white py-8">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative py-16 min-h-[500px]" style={{ backgroundImage: 'url(/images/kigali-city.jpg)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
+        {/* Overlay for better text readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-black/50"></div>
+        
+        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          {/* Hero Text */}
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
+            Discover Your New Home
+          </h1>
+          <p className="text-lg md:text-xl text-white/90 mb-8">
+            Helping renters find their perfect fit in Kigali.
+          </p>
           
           {/* Search Form */}
-          <form onSubmit={handleSearch} className="bg-white border border-gray-200 rounded-xl shadow-sm p-8">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end">
-              {/* Location - Takes up more space */}
-              <div className="lg:col-span-5">
-                <label className="block text-sm font-semibold text-gray-700 mb-3">
-                  Location
-                </label>
-                <div className="relative">
-                  <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <input
-                    type="text"
-                    value={filters.location}
-                    onChange={(e) => setFilters(prev => ({ ...prev, location: e.target.value }))}
-                    placeholder="Search Kigali, Gasabo, Kicukiro..."
-                    className="w-full pl-12 pr-4 py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm bg-gray-50 hover:bg-white transition-colors"
-                  />
-                </div>
+          <form onSubmit={handleSearch} className="max-w-2xl mx-auto">
+            {/* Main Search Box */}
+            <div className="bg-white rounded-full shadow-lg p-2 flex items-center gap-2">
+              <div className="flex-1 relative">
+                <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <input
+                  type="text"
+                  value={filters.location}
+                  onChange={(e) => setFilters(prev => ({ ...prev, location: e.target.value }))}
+                  placeholder="Location, School, or Point of Interest"
+                  className="w-full pl-12 pr-4 py-3 rounded-full focus:outline-none text-base"
+                />
               </div>
-              
-              {/* Property Type */}
-              <div className="lg:col-span-3">
-                <label className="block text-sm font-semibold text-gray-700 mb-3">
-                  Property Type
-                </label>
-                <select 
-                  value={filters.propertyType}
-                  onChange={(e) => setFilters(prev => ({ ...prev, propertyType: e.target.value }))}
-                  className="w-full px-4 py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm bg-gray-50 hover:bg-white transition-colors"
-                >
-                  <option value="all">All Types</option>
-                  <option value="apartment">Apartment</option>
-                  <option value="house">House</option>
-                  <option value="studio">Studio</option>
-                  <option value="room">Room</option>
-                </select>
-              </div>
-              
-              {/* Budget */}
-              <div className="lg:col-span-2">
-                <label className="block text-sm font-semibold text-gray-700 mb-3">
-                  Budget
-                </label>
-                <select 
-                  value={filters.budget}
-                  onChange={(e) => setFilters(prev => ({ ...prev, budget: e.target.value }))}
-                  className="w-full px-4 py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm bg-gray-50 hover:bg-white transition-colors"
-                >
-                  <option value="any">Any Budget</option>
-                  <option value="under-50k">Under 50K</option>
-                  <option value="50k-100k">50K - 100K</option>
-                  <option value="100k-200k">100K - 200K</option>
-                  <option value="200k-500k">200K - 500K</option>
-                  <option value="above-500k">Above 500K</option>
-                </select>
-              </div>
-              
-              {/* Search Button */}
-              <div className="lg:col-span-2">
-                <button type="submit" className="w-full flex items-center justify-center px-6 py-4 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold transition-colors shadow-sm">
-                  <Search className="mr-2 h-5 w-5" />
-                  <span className="hidden sm:inline">Search</span>
-                  <span className="sm:hidden">Find</span>
-                </button>
-              </div>
-            </div>
-            
-            {/* More Filters Button - Separate row */}
-            <div className="mt-6 flex justify-center">
               <button 
-                type="button"
-                onClick={() => setShowFiltersModal(true)}
-                className="flex items-center px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
+                type="submit" 
+                className="bg-red-600 text-white rounded-full p-3 hover:bg-red-700 transition-colors flex-shrink-0"
               >
-                <Filter className="mr-2 h-4 w-4" />
-                More Filters
-                {filters.amenities.length > 0 && (
-                  <span className="ml-2 px-2 py-0.5 bg-red-600 text-white text-xs rounded-full">
-                    {filters.amenities.length}
-                  </span>
-                )}
+                <Search className="h-5 w-5" />
               </button>
             </div>
+
+            {/* Additional Filters - Show when location has text */}
+            {filters.location && (
+              <div className="mt-4 bg-white rounded-2xl shadow-lg p-6 animate-fadeIn">
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                  {/* Property Type */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Property Type
+                    </label>
+                    <select 
+                      value={filters.propertyType}
+                      onChange={(e) => setFilters(prev => ({ ...prev, propertyType: e.target.value }))}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm"
+                    >
+                      <option value="all">All Types</option>
+                      <option value="apartment">Apartment</option>
+                      <option value="house">House</option>
+                      <option value="studio">Studio</option>
+                      <option value="room">Room</option>
+                    </select>
+                  </div>
+                  
+                  {/* Budget */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Budget
+                    </label>
+                    <select 
+                      value={filters.budget}
+                      onChange={(e) => setFilters(prev => ({ ...prev, budget: e.target.value }))}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm"
+                    >
+                      <option value="any">Any Budget</option>
+                      <option value="under-50k">Under 50K</option>
+                      <option value="50k-100k">50K - 100K</option>
+                      <option value="100k-200k">100K - 200K</option>
+                      <option value="200k-500k">200K - 500K</option>
+                      <option value="above-500k">Above 500K</option>
+                    </select>
+                  </div>
+
+                  {/* Bedrooms */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Bedrooms</label>
+                    <select 
+                      value={filters.bedrooms}
+                      onChange={(e) => setFilters(prev => ({ ...prev, bedrooms: e.target.value }))}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm"
+                    >
+                      <option value="">Any</option>
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                      <option value="4">4</option>
+                      <option value="5+">5+</option>
+                    </select>
+                  </div>
+
+                  {/* Bathrooms */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Bathrooms</label>
+                    <select 
+                      value={filters.bathrooms}
+                      onChange={(e) => setFilters(prev => ({ ...prev, bathrooms: e.target.value }))}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm"
+                    >
+                      <option value="">Any</option>
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                      <option value="4">4</option>
+                      <option value="5+">5+</option>
+                    </select>
+                  </div>
+
+                  {/* Amenities Dropdown */}
+                  <div className="relative" ref={amenitiesRef}>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Amenities
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setShowAmenitiesDropdown(prev => !prev)}
+                      className="relative w-full flex items-center justify-center px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
+                      aria-expanded={showAmenitiesDropdown}
+                      aria-haspopup="true"
+                    >
+                      <span className="pointer-events-none">All</span>
+                      {filters.amenities.length > 0 && (
+                        <span className="absolute right-10 px-2 py-0.5 bg-red-600 text-white text-xs rounded-full">
+                          {filters.amenities.length}
+                        </span>
+                      )}
+                      <ChevronDown className={`absolute right-4 h-4 w-4 transition-transform ${showAmenitiesDropdown ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {showAmenitiesDropdown && (
+                      <div className="absolute right-0 mt-2 w-72 bg-white border border-gray-200 rounded-lg shadow-lg p-3 z-20 text-left">
+                        <div className="grid grid-cols-2 gap-3">
+                          {[
+                            'furnished',
+                            'parking',
+                            'security',
+                            'internet',
+                            'water tank',
+                            'generator',
+                            'garden',
+                            'balcony',
+                            'swimming pool'
+                          ].map((amenity) => (
+                            <label key={amenity} className="flex items-center space-x-2 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={filters.amenities.includes(amenity)}
+                                onChange={() => toggleAmenity(amenity)}
+                                className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+                              />
+                              <span className="text-sm text-gray-700 capitalize">{amenity}</span>
+                            </label>
+                          ))}
+                        </div>
+                        <div className="mt-3 flex justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setFilters(prev => ({ ...prev, amenities: [] }))}
+                            className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
+                          >
+                            Clear
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => { setShowAmenitiesDropdown(false); handleSearch(); }}
+                            className="px-3 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700"
+                          >
+                            Apply
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </form>
         </div>
       </div>
@@ -376,83 +533,75 @@ export default function HomePage() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {properties.map((property) => (
-              <div key={property.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-                <Link href={`/properties/${property.id}`}>
-                  <div className="relative cursor-pointer">
+              <Link 
+                key={property.id} 
+                href={`/properties/${property.id}`}
+                className="group cursor-pointer"
+              >
+                <div className="relative mb-3">
+                  {/* Image with rounded corners */}
+                  <div className="relative aspect-[4/3] overflow-hidden rounded-xl">
                     {property.images && property.images.length > 0 ? (
                       <img 
                         src={property.images[0]} 
                         alt={property.title} 
-                        className="w-full h-48 object-cover"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                     ) : (
-                      <div className="w-full h-48 bg-gradient-to-br from-red-100 to-red-200 flex items-center justify-center">
-                        <span className="text-red-400 text-sm">No image</span>
+                      <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                        <span className="text-gray-400 text-sm">No image</span>
                       </div>
                     )}
-                    <button 
-                      onClick={(e) => e.preventDefault()}
-                      className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md hover:bg-gray-50"
-                    >
-                      <Heart className="h-4 w-4 text-gray-600" />
-                    </button>
-                    <div className="absolute bottom-3 left-3 bg-green-600 text-white px-2 py-1 rounded text-sm font-medium">
-                      Verified
+                  </div>
+                  
+                  {/* Heart icon - top right */}
+                  <button 
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                    }}
+                    className="absolute top-3 right-3 p-2 hover:scale-110 transition-transform"
+                  >
+                    <Heart className="h-5 w-5 text-white stroke-white stroke-2 fill-transparent hover:fill-red-500 transition-colors" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))' }} />
+                  </button>
+                </div>
+
+                {/* Property details */}
+                <div className="space-y-1">
+                  {/* Title and rating */}
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="font-semibold text-gray-900 line-clamp-1 group-hover:underline">
+                      {property.title}
+                    </h3>
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <Star className="h-3.5 w-3.5 text-gray-900 fill-current" />
+                      <span className="text-sm text-gray-900 font-medium">
+                        {property.rating || '5.0'}
+                      </span>
                     </div>
                   </div>
-                </Link>
-                <div className="p-4">
-                  <Link href={`/properties/${property.id}`} className="block mb-3">
-                    <div className="flex justify-between items-start mb-2 cursor-pointer">
-                      <h3 className="font-semibold text-gray-900 text-lg line-clamp-1 hover:text-red-600 transition-colors">{property.title}</h3>
-                      <div className="flex items-center">
-                        <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                        <span className="text-sm text-gray-600 ml-1">New</span>
-                      </div>
-                    </div>
-                    <p className="text-gray-600 text-sm flex items-center">
-                      <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
-                      <span className="line-clamp-1">{property.address || property.location}, {property.district}</span>
-                    </p>
-                  </Link>
-                  {(property.bedrooms || property.bathrooms || property.size) && (
-                    <div className="flex items-center space-x-4 text-sm text-gray-600 mb-3">
-                      {property.bedrooms ? (
-                        <div className="flex items-center">
-                          <Bed className="h-4 w-4 mr-1" />
-                          <span>{property.bedrooms} Bed</span>
-                        </div>
-                      ) : null}
-                      {property.bathrooms ? (
-                        <div className="flex items-center">
-                          <Bath className="h-4 w-4 mr-1" />
-                          <span>{property.bathrooms} Bath</span>
-                        </div>
-                      ) : null}
-                      {property.size ? (
-                        <div className="flex items-center">
-                          <Square className="h-4 w-4 mr-1" />
-                          <span>{property.size} sqft</span>
-                        </div>
-                      ) : null}
-                    </div>
-                  )}
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <span className="text-xl font-bold text-gray-900">
-                        {Number(property.price).toLocaleString()}
-                      </span>
-                      <span className="text-gray-600 text-sm"> RWF/month</span>
-                    </div>
-                    <button onClick={() => openContact(property.id)} className="flex items-center text-red-600 hover:text-red-700 font-medium">
-                      <Phone className="h-4 w-4 mr-1" />
-                      Contact
-                    </button>
+                  
+                  {/* Location */}
+                  <p className="text-sm text-gray-600 line-clamp-1">
+                    {property.district}, Kigali
+                  </p>
+                  
+                  {/* Property type or bedrooms info */}
+                  <p className="text-sm text-gray-600">
+                    {property.bedrooms ? `${property.bedrooms} bedroom${property.bedrooms > 1 ? 's' : ''}` : property.property_type || property.type}
+                  </p>
+                  
+                  {/* Price */}
+                  <div className="pt-1">
+                    <span className="font-semibold text-gray-900">
+                      {Number(property.price).toLocaleString()} RWF
+                    </span>
+                    <span className="text-gray-600 text-sm"> / month</span>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
@@ -668,6 +817,28 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
+
+      {/* Premium Modal */}
+      <PremiumModal
+        isOpen={showPremiumModal}
+        onClose={() => setShowPremiumModal(false)}
+      />
+
+      {/* Payment Modal */}
+      {selectedPropertyId && (
+        <PaymentModal
+          isOpen={showPaymentModal}
+          onClose={() => setShowPaymentModal(false)}
+          purpose={paymentPurpose}
+          onSuccess={() => {
+            setShowPaymentModal(false)
+            // Retry fetching contact info after payment
+            if (selectedPropertyId) {
+              openContact(selectedPropertyId)
+            }
+          }}
+        />
+      )}
     </div>
   )
 }
