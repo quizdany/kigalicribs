@@ -1,11 +1,10 @@
 'use client'
 
-import { Search, MapPin, Filter, Heart, Star, Bed, Bath, Square, Phone, User, Menu, X, Shield, Copy, ChevronDown, Crown } from 'lucide-react'
+import { Search, MapPin, Filter, Heart, Star, Bed, Bath, Square, Phone, User, Menu, X, Shield, Copy, ChevronDown } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import AuthButton from '@/components/AuthButton'
-import PremiumModal from '@/components/PremiumModal'
 import PaymentModal from '@/components/PaymentModal'
 
 export default function HomePage() {
@@ -14,9 +13,8 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true)
   const [showFiltersModal, setShowFiltersModal] = useState(false)
   const [showContactModal, setShowContactModal] = useState(false)
-  const [showPremiumModal, setShowPremiumModal] = useState(false)
   const [showPaymentModal, setShowPaymentModal] = useState(false)
-  const [paymentPurpose, setPaymentPurpose] = useState<'contact_unlock'>('contact_unlock')
+  const [paymentPurpose, setPaymentPurpose] = useState<'unlimited_contact_access'>('unlimited_contact_access')
   const [contactLoading, setContactLoading] = useState(false)
   const [contactError, setContactError] = useState<string | null>(null)
   const [contactInfo, setContactInfo] = useState<any | null>(null)
@@ -155,7 +153,7 @@ export default function HomePage() {
       // Handle payment required
       if (res.status === 402) {
         setShowContactModal(false)
-        setPaymentPurpose('contact_unlock')
+        setPaymentPurpose('unlimited_contact_access')
         setShowPaymentModal(true)
         return
       }
@@ -208,13 +206,6 @@ export default function HomePage() {
             <div className="hidden md:flex items-center space-x-4">
               <Link href="/properties" className="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors duration-200 border border-transparent hover:border-red-100">Find a Property</Link>
               <Link href="/properties/new" className="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors duration-200 border border-transparent hover:border-red-100">List a Property</Link>
-              <button 
-                onClick={() => setShowPremiumModal(true)}
-                className="flex items-center px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white font-medium rounded-lg hover:from-red-700 hover:to-red-800 transition-all duration-200 shadow-sm"
-              >
-                <Crown className="h-4 w-4 mr-2" />
-                Go Premium
-              </button>
             </div>
 
             {/* Auth Button & Mobile Menu */}
@@ -235,13 +226,6 @@ export default function HomePage() {
             <div className="p-3 space-y-2">
               <Link href="/properties" className="w-full text-left px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors duration-200 border border-transparent hover:border-red-100 block">Find a Property</Link>
               <Link href="/properties/new" className="w-full text-left px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors duration-200 border border-transparent hover:border-red-100 block">List Property</Link>
-              <button 
-                onClick={() => setShowPremiumModal(true)}
-                className="w-full text-left px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white font-medium rounded-lg flex items-center"
-              >
-                <Crown className="h-4 w-4 mr-2" />
-                Go Premium
-              </button>
               <Link href="/auth" className="w-full text-left px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors duration-200 border border-transparent hover:border-red-100 flex items-center">
                 <User className="h-4 w-4 mr-2" />
                 Login
@@ -817,12 +801,6 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
-
-      {/* Premium Modal */}
-      <PremiumModal
-        isOpen={showPremiumModal}
-        onClose={() => setShowPremiumModal(false)}
-      />
 
       {/* Payment Modal */}
       {selectedPropertyId && (

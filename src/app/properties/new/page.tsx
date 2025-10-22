@@ -149,8 +149,13 @@ export default function NewProperty() {
       const json = await res.json()
       if (!json?.success) throw new Error(json?.error || 'Failed to create property')
       
-      // Redirect to properties page
-      router.push('/properties')
+      // Redirect to the new property page with upgrade prompt
+      const propertyId = json.data?.id
+      if (propertyId) {
+        router.push(`/properties/${propertyId}?showUpgrade=true`)
+      } else {
+        router.push('/properties')
+      }
     } catch (err: any) {
       setError(err.message || 'Unknown error occurred')
     } finally {

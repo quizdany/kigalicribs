@@ -8,7 +8,7 @@ import axios from 'axios'
 // Payment provider types
 export type PaymentProvider = 'momo' | 'airtel'
 export type PaymentStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled'
-export type PaymentPurpose = 'premium_monthly' | 'premium_yearly' | 'contact_unlock' | 'featured_listing'
+export type PaymentPurpose = 'verified_listing' | 'premium_verified_listing' | 'listing_refresh' | 'listing_extension' | 'unlimited_contact_access' | 'contact_unlock'
 
 export interface PaymentRequest {
   amount: number
@@ -426,20 +426,24 @@ function formatPhoneNumber(phone: string): string {
 
 function getPaymentMessage(purpose: PaymentPurpose): string {
   const messages: Record<PaymentPurpose, string> = {
-    premium_monthly: 'Premium Monthly Subscription',
-    premium_yearly: 'Premium Yearly Subscription',
-    contact_unlock: 'Unlock Property Contact',
-    featured_listing: 'Featured Property Listing'
+    verified_listing: 'Verified Property Listing (6 months)',
+    premium_verified_listing: 'Premium Verified Listing (6 months + Featured)',
+    listing_refresh: 'Refresh Property Listing (7 days)',
+    listing_extension: 'Extend Listing Validity (3 months)',
+    unlimited_contact_access: 'Unlimited Contact Access',
+    contact_unlock: 'Unlock Property Contact'
   }
   return messages[purpose] || 'KigaliCribs Payment'
 }
 
-// Pricing configuration
-export const PRICING = {
-  premium_monthly: 5000, // RWF
-  premium_yearly: 50000, // RWF
-  contact_unlock: 500, // RWF per property
-  featured_listing: 10000 // RWF per week
+// Pricing configuration (in RWF)
+export const PRICING: Record<PaymentPurpose, number> = {
+  verified_listing: 30000, // 6 months validity, requires admin approval
+  premium_verified_listing: 50000, // 6 months + featured (30 days) + priority (90 days)
+  listing_refresh: 10000, // Bump to top for 7 days
+  listing_extension: 10000, // Extend validity by 3 months
+  unlimited_contact_access: 10000, // Unlimited property contact unlocks (for tenants)
+  contact_unlock: 0 // Deprecated - will be replaced by free limits + unlimited access
 }
 
 export function getPricing(purpose: PaymentPurpose): number {

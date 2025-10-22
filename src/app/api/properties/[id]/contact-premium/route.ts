@@ -4,9 +4,11 @@ import { checkPremiumStatus } from '@/lib/premium'
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
+    
     const authHeader = req.headers.get('authorization')
     if (!authHeader?.startsWith('Bearer ')) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
@@ -19,8 +21,6 @@ export async function GET(
     if (authError || !user) {
       return NextResponse.json({ success: false, error: 'Invalid token' }, { status: 401 })
     }
-
-    const { id } = params
 
     // Get property details
     const { data: property, error } = await supabase

@@ -37,6 +37,14 @@ export interface Database {
           images: string[]
           verified: boolean
           featured: boolean
+          listing_type: 'basic' | 'verified' | 'premium_verified'
+          verification_status: 'none' | 'pending' | 'verified' | 'rejected'
+          verified_at?: string
+          listing_expires_at?: string
+          featured_until?: string
+          priority_until?: string
+          refresh_count: number
+          photo_count: number
           created_at: string
           updated_at: string
         }
@@ -54,7 +62,7 @@ export interface Database {
           status: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled'
           transaction_id: string
           external_reference?: string
-          purpose: 'premium_monthly' | 'premium_yearly' | 'contact_unlock' | 'featured_listing'
+          purpose: 'verified_listing' | 'premium_verified_listing' | 'listing_refresh' | 'listing_extension' | 'unlimited_contact_access' | 'contact_unlock'
           property_id?: string
           expires_at?: string
           metadata: Json
@@ -68,9 +76,9 @@ export interface Database {
         Row: {
           id: string
           user_id: string
-          subscription_type: 'monthly' | 'yearly'
+          subscription_type: 'unlimited_contact_access'
           starts_at: string
-          expires_at: string
+          expires_at?: string
           is_active: boolean
           payment_id?: string
           created_at: string
@@ -89,6 +97,24 @@ export interface Database {
         }
         Insert: Omit<Database['public']['Tables']['contact_unlocks']['Row'], 'id' | 'unlocked_at'>
         Update: Partial<Database['public']['Tables']['contact_unlocks']['Row']>
+      }
+      property_verifications: {
+        Row: {
+          id: string
+          property_id: string
+          landlord_id: string
+          payment_id?: string
+          verification_type: 'verified' | 'premium_verified'
+          status: 'pending' | 'approved' | 'rejected'
+          admin_id?: string
+          admin_notes?: string
+          requested_at: string
+          reviewed_at?: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['property_verifications']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['property_verifications']['Row']>
       }
       leases: {
         Row: {

@@ -4,7 +4,8 @@ import React, { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
-import { Camera, Loader2, ArrowLeft, X } from 'lucide-react'
+import { Camera, Loader2, ArrowLeft, X, ShieldCheck } from 'lucide-react'
+import ListingUpgradeModal from '@/components/PremiumModal'
 
 export default function EditPropertyPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -13,6 +14,7 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [isOwner, setIsOwner] = useState(false)
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const router = useRouter()
 
   const [form, setForm] = useState({
@@ -244,6 +246,48 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
 
       <div className="max-w-3xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Edit Property</h1>
+        
+        {/* Upgrade Banner for Basic Listings */}
+        {property?.listing_type === 'basic' && property?.verification_status !== 'pending' && (
+          <div className="mb-6 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-6">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <ShieldCheck className="h-8 w-8 text-blue-600" />
+              </div>
+              <div className="ml-4 flex-1">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Get Your Property Verified
+                </h3>
+                <p className="text-sm text-gray-600 mb-3">
+                  Upgrade to a verified or premium listing to stand out and attract more tenants. Verified properties get a trust badge and appear higher in search results.
+                </p>
+                <button
+                  onClick={() => setShowUpgradeModal(true)}
+                  className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium transition-all shadow-sm text-sm"
+                >
+                  Upgrade Now - From 30,000 RWF
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Pending Verification Notice */}
+        {property?.verification_status === 'pending' && (
+          <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div className="flex items-start">
+              <svg className="h-5 w-5 text-yellow-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd"/>
+              </svg>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-yellow-800">Verification Pending</h3>
+                <p className="text-xs text-yellow-700 mt-1">
+                  Your verification request is under review. You'll be notified once it's approved.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
         
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg">
@@ -588,6 +632,16 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
           </div>
         </form>
       </div>
+      
+      {/* Listing Upgrade Modal */}
+      {showUpgradeModal && (
+        <ListingUpgradeModal
+          isOpen={showUpgradeModal}
+          onCloseAction={() => setShowUpgradeModal(false)}
+          propertyId={id}
+          currentListingType={property?.listing_type}
+        />
+      )}
     </div>
   )
 }

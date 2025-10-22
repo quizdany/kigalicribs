@@ -1,18 +1,25 @@
 'use client'
 
 import { useState } from 'react'
-import { X, Crown, Star, Check, Zap } from 'lucide-react'
+import { X, Shield, ShieldCheck, Star, Check } from 'lucide-react'
 import PaymentModal from './PaymentModal'
 import { PaymentPurpose } from '@/lib/payments'
 
-interface PremiumModalProps {
+interface ListingUpgradeModalProps {
   isOpen: boolean
-  onClose: () => void
+  onCloseAction: () => void
+  propertyId?: string
+  currentListingType?: 'basic' | 'verified' | 'premium_verified'
 }
 
-export default function PremiumModal({ isOpen, onClose }: PremiumModalProps) {
+export default function ListingUpgradeModal({ 
+  isOpen, 
+  onCloseAction, 
+  propertyId,
+  currentListingType = 'basic'
+}: ListingUpgradeModalProps) {
   const [showPayment, setShowPayment] = useState(false)
-  const [selectedPlan, setSelectedPlan] = useState<PaymentPurpose>('premium_monthly')
+  const [selectedPlan, setSelectedPlan] = useState<PaymentPurpose>('verified_listing')
 
   const handleUpgrade = (plan: PaymentPurpose) => {
     setSelectedPlan(plan)
@@ -27,13 +34,13 @@ export default function PremiumModal({ isOpen, onClose }: PremiumModalProps) {
         isOpen={showPayment}
         onClose={() => {
           setShowPayment(false)
-          onClose()
+          onCloseAction()
         }}
         purpose={selectedPlan}
         onSuccess={() => {
           setShowPayment(false)
-          onClose()
-          // Reload to update premium status
+          onCloseAction()
+          // Reload to update listing status
           window.location.reload()
         }}
       />
@@ -46,147 +53,137 @@ export default function PremiumModal({ isOpen, onClose }: PremiumModalProps) {
         <div className="p-6">
           {/* Header */}
           <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center">
-              <Crown className="h-8 w-8 text-red-600 mr-3" />
-              <h2 className="text-2xl font-bold text-gray-900">Upgrade to Premium</h2>
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">Upgrade Your Listing</h2>
+              <p className="text-gray-600 mt-1">Choose the best plan for your property</p>
             </div>
             <button
-              onClick={onClose}
+              onClick={onCloseAction}
               className="p-2 hover:bg-gray-100 rounded-full transition-colors"
             >
               <X className="h-5 w-5" />
             </button>
           </div>
 
-          {/* Subtitle */}
-          <p className="text-gray-600 mb-8 text-center">
-            Unlock unlimited access and premium features to find your perfect home faster
-          </p>
+          {/* Current Status */}
+          {currentListingType !== 'basic' && (
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-700">
+                Current listing type: <strong className="capitalize">{currentListingType.replace('_', ' ')}</strong>
+              </p>
+            </div>
+          )}
 
-          {/* Plans Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            {/* Monthly Plan */}
-            <div className="border-2 border-gray-200 rounded-lg p-6 hover:border-red-500 transition-all">
-              <div className="text-center mb-4">
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Monthly</h3>
-                <div className="mb-4">
-                  <span className="text-4xl font-bold text-gray-900">5,000</span>
-                  <span className="text-gray-600"> RWF</span>
-                </div>
-                <p className="text-sm text-gray-500">Billed monthly</p>
+          {/* Pricing Plans */}
+          <div className="grid md:grid-cols-2 gap-6 mb-6">
+            {/* Verified Listing */}
+            <div className="border-2 border-blue-500 rounded-lg p-6 relative">
+              <div className="flex items-center gap-2 mb-4">
+                <ShieldCheck className="h-6 w-6 text-blue-600" />
+                <h3 className="text-xl font-bold text-gray-900">Verified Listing</h3>
+              </div>
+              
+              <div className="mb-4">
+                <span className="text-4xl font-bold text-gray-900">30,000</span>
+                <span className="text-gray-600 ml-2">RWF</span>
+                <p className="text-sm text-gray-600 mt-1">Valid for 6 months</p>
               </div>
 
               <ul className="space-y-3 mb-6">
-                <li className="flex items-start">
-                  <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-gray-700">Unlimited contact views</span>
+                <li className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700">Admin verification required</span>
                 </li>
-                <li className="flex items-start">
-                  <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-gray-700">Unlimited property listings</span>
+                <li className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700">8-10 professional photos</span>
                 </li>
-                <li className="flex items-start">
-                  <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-gray-700">Advanced search filters</span>
+                <li className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700">Verified badge on listing</span>
                 </li>
-                <li className="flex items-start">
-                  <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-gray-700">Priority support</span>
+                <li className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700">Higher trust from tenants</span>
                 </li>
-                <li className="flex items-start">
-                  <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-gray-700">Save favorite properties</span>
+                <li className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700">6 months validity</span>
                 </li>
               </ul>
 
               <button
-                onClick={() => handleUpgrade('premium_monthly')}
-                className="w-full px-4 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 font-medium transition-colors"
+                onClick={() => handleUpgrade('verified_listing')}
+                className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors"
+                disabled={currentListingType === 'verified' || currentListingType === 'premium_verified'}
               >
-                Choose Monthly
+                {currentListingType === 'basic' ? 'Upgrade Now' : 'Current Plan'}
               </button>
             </div>
 
-            {/* Yearly Plan - Highlighted */}
-            <div className="border-2 border-red-600 rounded-lg p-6 relative bg-red-50">
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 px-4 py-1 bg-red-600 text-white text-xs font-bold rounded-full">
-                BEST VALUE - SAVE 17%
+            {/* Premium Verified Listing */}
+            <div className="border-2 border-purple-500 rounded-lg p-6 relative bg-gradient-to-br from-purple-50 to-pink-50">
+              <div className="absolute -top-3 right-4 px-3 py-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-bold rounded-full">
+                BEST VALUE
               </div>
-
-              <div className="text-center mb-4 pt-2">
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Yearly</h3>
-                <div className="mb-2">
-                  <span className="text-4xl font-bold text-red-600">50,000</span>
-                  <span className="text-gray-600"> RWF</span>
-                </div>
-                <p className="text-sm text-green-600 font-medium">Save 10,000 RWF per year</p>
-                <p className="text-xs text-gray-500 mt-1">Billed annually</p>
+              
+              <div className="flex items-center gap-2 mb-4">
+                <Star className="h-6 w-6 text-purple-600" />
+                <h3 className="text-xl font-bold text-gray-900">Premium Verified</h3>
+              </div>
+              
+              <div className="mb-4">
+                <span className="text-4xl font-bold text-gray-900">50,000</span>
+                <span className="text-gray-600 ml-2">RWF</span>
+                <p className="text-sm text-gray-600 mt-1">Valid for 6 months</p>
               </div>
 
               <ul className="space-y-3 mb-6">
-                <li className="flex items-start">
-                  <Star className="h-5 w-5 text-red-600 fill-current mr-2 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-gray-700 font-medium">All monthly features</span>
+                <li className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700"><strong>Everything in Verified</strong> +</span>
                 </li>
-                <li className="flex items-start">
-                  <Zap className="h-5 w-5 text-red-600 mr-2 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-gray-700 font-medium">2 months free</span>
+                <li className="flex items-start gap-2">
+                  <Star className="h-5 w-5 text-yellow-500 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700"><strong>Featured for 30 days</strong></span>
                 </li>
-                <li className="flex items-start">
-                  <Zap className="h-5 w-5 text-red-600 mr-2 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-gray-700 font-medium">Featured listing discount (20% off)</span>
+                <li className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700">Priority listing for 90 days</span>
                 </li>
-                <li className="flex items-start">
-                  <Zap className="h-5 w-5 text-red-600 mr-2 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-gray-700 font-medium">VIP support (priority)</span>
+                <li className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700">Premium badge</span>
                 </li>
-                <li className="flex items-start">
-                  <Zap className="h-5 w-5 text-red-600 mr-2 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-gray-700 font-medium">Early access to new features</span>
+                <li className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700">Top search results</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700">Maximum visibility</span>
                 </li>
               </ul>
 
               <button
-                onClick={() => handleUpgrade('premium_yearly')}
-                className="w-full px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors shadow-md"
+                onClick={() => handleUpgrade('premium_verified_listing')}
+                className="w-full py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 font-medium transition-colors"
+                disabled={currentListingType === 'premium_verified'}
               >
-                Choose Yearly - Best Deal
+                {currentListingType === 'premium_verified' ? 'Current Plan' : 'Get Premium'}
               </button>
             </div>
           </div>
 
-          {/* Benefits Section */}
-          <div className="bg-gray-50 rounded-lg p-6">
-            <h3 className="font-bold text-gray-900 mb-4 text-center">Why Go Premium?</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="text-center">
-                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Crown className="h-6 w-6 text-red-600" />
-                </div>
-                <h4 className="font-semibold text-gray-900 mb-1">Unlimited Access</h4>
-                <p className="text-sm text-gray-600">View all property contacts without limits</p>
-              </div>
-              <div className="text-center">
-                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Zap className="h-6 w-6 text-red-600" />
-                </div>
-                <h4 className="font-semibold text-gray-900 mb-1">Find Faster</h4>
-                <p className="text-sm text-gray-600">Advanced filters and priority listings</p>
-              </div>
-              <div className="text-center">
-                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Star className="h-6 w-6 text-red-600" />
-                </div>
-                <h4 className="font-semibold text-gray-900 mb-1">Premium Support</h4>
-                <p className="text-sm text-gray-600">Get help when you need it most</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Payment Methods */}
-          <div className="mt-6 text-center text-sm text-gray-500">
-            <p>Payment via MTN Mobile Money or Airtel Money</p>
-            <p className="mt-1">Cancel anytime • Money-back guarantee</p>
+          {/* Info Box */}
+          <div className="bg-gray-50 rounded-lg p-4 text-sm text-gray-600">
+            <p className="mb-2">
+              <strong>Note:</strong> After payment, your listing will be marked as "Pending Verification". 
+              Our admin team will review and approve your listing within 24-48 hours.
+            </p>
+            <p>
+              All verified listings are valid for 6 months. You can extend validity before expiry for 10,000 RWF per 3 months.
+            </p>
           </div>
         </div>
       </div>

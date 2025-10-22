@@ -58,10 +58,11 @@ export async function POST(req: NextRequest) {
     }
 
     const validPurposes: PaymentPurpose[] = [
-      'premium_monthly',
-      'premium_yearly',
-      'contact_unlock',
-      'featured_listing'
+      'verified_listing',
+      'premium_verified_listing',
+      'listing_refresh',
+      'listing_extension',
+      'unlimited_contact_access'
     ]
     if (!validPurposes.includes(purpose as PaymentPurpose)) {
       return NextResponse.json(

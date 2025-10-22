@@ -5,9 +5,15 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { MapPin, Bed, Bath, Square, Phone, Mail, Edit, ArrowLeft, X, ChevronLeft, ChevronRight, Heart, Loader2, Copy } from 'lucide-react'
+import PropertyBadges from '@/components/PropertyBadges'
+import ContactUnlockButton from '@/components/ContactUnlockButton'
+import OwnerActions from '@/components/OwnerActions'
+import ListingUpgradeModal from '@/components/PremiumModal'
+import { useSearchParams } from 'next/navigation'
 
 export default function PropertyDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
+  const searchParams = useSearchParams()
   const [property, setProperty] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -19,12 +25,20 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
   const [contactLoading, setContactLoading] = useState(false)
   const [contactError, setContactError] = useState<string | null>(null)
   const [contactInfo, setContactInfo] = useState<any | null>(null)
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
     fetchProperty()
     checkAuth()
   }, [id])
+  
+  useEffect(() => {
+    // Auto-open upgrade modal if coming from property creation
+    if (searchParams.get('showUpgrade') === 'true' && isOwner && property?.listing_type === 'basic') {
+      setShowUpgradeModal(true)
+    }
+  }, [searchParams, isOwner, property])
 
   const checkAuth = async () => {
     try {
@@ -242,12 +256,20 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
             {/* Title and Price */}
             <div className="bg-white rounded-lg shadow-sm p-6">
               <div className="flex justify-between items-start mb-4">
-                <div>
+                <div className="flex-1">
                   <h1 className="text-3xl font-bold text-gray-900 mb-2">{property.title}</h1>
-                  <div className="flex items-center text-gray-600">
+                  <div className="flex items-center text-gray-600 mb-3">
                     <MapPin className="h-5 w-5 mr-2" />
                     <span>{property.address || property.location}, {property.district}</span>
                   </div>
+                  {/* Property Badges */}
+                  <PropertyBadges
+                    listing_type={property.listing_type}
+                    verification_status={property.verification_status}
+                    listing_expires_at={property.listing_expires_at}
+                    featured_until={property.featured_until}
+                    priority_until={property.priority_until}
+                  />
                 </div>
                 <span className="px-3 py-1 bg-red-100 text-red-600 text-sm font-medium rounded">
                   {property.property_type || property.type}
@@ -321,39 +343,118 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
           </div>
 
           {/* Sidebar - Contact Card */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm p-6 sticky top-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Interested in this property?</h3>
-              
-              {!isOwner && (
-                <>
-                  <button
-                    onClick={openContact}
-                    className="w-full flex items-center justify-center px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors mb-3"
+          <div className="lg:col-span-1 space-y-6">
+            {/* Contact Section for Non-Owners */}
+            {!isOwner && (
+              <div className="bg-white rounded-lg shadow-sm p-6 sticky top-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Interested in this property?</h3>
+                
+                <ContactUnlockButton
+                  propertyId={id}
+                  propertyTitle={property.title}
+                  onSuccess={(contactInfo) => setContactInfo(contactInfo)}
+                />
+                
+                {currentUser && (
+                  <Link
+                    href={`/contracts/new?propertyId=${id}`}
+                    className="mt-3 w-full flex items-center justify-center px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
                   >
-                    <Phone className="h-5 w-5 mr-2" />
-                    Contact Owner
-                  </button>
-                  
-                  {currentUser && (
-                    <Link
-                      href={`/contracts/new?propertyId=${id}`}
-                      className="w-full flex items-center justify-center px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
-                    >
-                      Start Lease Agreement
-                    </Link>
-                  )}
-                </>
-              )}
-              
-              {isOwner && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-                  <p className="text-sm text-green-800 font-medium">You own this property</p>
-                  <p className="text-xs text-green-600 mt-1">You can edit the details anytime</p>
-                </div>
-              )}
+                    Start Lease Agreement
+                  </Link>
+                )}
+              </div>
+            )}
 
-              <div className="mt-6 pt-6 border-t">
+            {/* Owner Actions */}
+            {isOwner && (
+              <>
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <p className="text-sm text-green-800 font-medium">You own this property</p>
+                  <p className="text-xs text-green-600 mt-1">Manage your listing below</p>
+                </div>
+                
+                {/* Upgrade to Verified/Premium */}
+                {property.listing_type === 'basic' && property.verification_status !== 'pending' && (
+                  <div className="bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-6">
+                    <div className="flex items-start mb-3">
+                      <div className="flex-shrink-0 w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                        </svg>
+                      </div>
+                      <div className="ml-3 flex-1">
+                        <h3 className="text-sm font-semibold text-gray-900 mb-1">
+                          Get Your Property Verified
+                        </h3>
+                        <p className="text-xs text-gray-600 mb-3">
+                          Stand out from the crowd with a verified badge and premium features
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <button
+                      onClick={() => setShowUpgradeModal(true)}
+                      className="w-full px-4 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium transition-all shadow-sm"
+                    >
+                      Upgrade Listing
+                    </button>
+                    
+                    <div className="mt-3 text-xs text-gray-500 space-y-1">
+                      <div className="flex items-center">
+                        <svg className="w-3 h-3 text-green-600 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+                        </svg>
+                        Verified badge & trust
+                      </div>
+                      <div className="flex items-center">
+                        <svg className="w-3 h-3 text-green-600 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+                        </svg>
+                        6 months validity
+                      </div>
+                      <div className="flex items-center">
+                        <svg className="w-3 h-3 text-green-600 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+                        </svg>
+                        From 30,000 RWF
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Pending Verification Notice */}
+                {property.verification_status === 'pending' && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0">
+                        <svg className="h-5 w-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd"/>
+                        </svg>
+                      </div>
+                      <div className="ml-3">
+                        <h3 className="text-sm font-medium text-yellow-800">Verification Pending</h3>
+                        <p className="text-xs text-yellow-700 mt-1">
+                          Your property is under review. You'll be notified once it's approved.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                <OwnerActions
+                  propertyId={id}
+                  listing_type={property.listing_type}
+                  listing_expires_at={property.listing_expires_at}
+                  updated_at={property.updated_at}
+                  onSuccess={fetchProperty}
+                />
+              </>
+            )}
+
+            {/* Property Details Section */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <div className="pt-2">
                 <h4 className="text-sm font-semibold text-gray-900 mb-3">Property Details</h4>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
@@ -517,6 +618,16 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
             </div>
           </div>
         </div>
+      )}
+      
+      {/* Listing Upgrade Modal */}
+      {showUpgradeModal && (
+        <ListingUpgradeModal
+          isOpen={showUpgradeModal}
+          onCloseAction={() => setShowUpgradeModal(false)}
+          propertyId={id}
+          currentListingType={property?.listing_type}
+        />
       )}
     </div>
   )

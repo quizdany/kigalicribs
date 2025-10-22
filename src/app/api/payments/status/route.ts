@@ -121,51 +121,120 @@ export async function GET(req: NextRequest) {
 // Handle post-payment actions
 async function handleCompletedPayment(payment: any, supabase: any) {
   try {
-    const { user_id, purpose } = payment
+    const { user_id, purpose, property_id } = payment
 
-    // Handle premium subscriptions
-    if (purpose === 'premium_monthly' || purpose === 'premium_yearly') {
-      const duration = purpose === 'premium_monthly' ? 30 : 365
-      const expiresAt = new Date()
-      expiresAt.setDate(expiresAt.getDate() + duration)
-
-      // Check if user already has active premium
-      const { data: existing } = await supabase
-        .from('premium_users')
-        .select('*')
-        .eq('user_id', user_id)
-        .eq('is_active', true)
-        .single()
-
-      if (existing) {
-        // Extend existing subscription
-        const currentExpiry = new Date(existing.expires_at)
-        const newExpiry = new Date(currentExpiry.getTime())
-        newExpiry.setDate(newExpiry.getDate() + duration)
-
-        await supabase
-          .from('premium_users')
-          .update({
-            expires_at: newExpiry.toISOString(),
-            subscription_type: purpose === 'premium_yearly' ? 'yearly' : 'monthly',
-            payment_id: payment.id
-          })
-          .eq('id', existing.id)
-      } else {
-        // Create new premium subscription
+    switch (purpose) {
+      case 'unlimited_contact_access':
+        // Create unlimited contact access subscription
         await supabase.from('premium_users').insert({
           user_id,
-          subscription_type: purpose === 'premium_yearly' ? 'yearly' : 'monthly',
+          subscription_type: 'unlimited_contact_access',
           starts_at: new Date().toISOString(),
-          expires_at: expiresAt.toISOString(),
+          expires_at: null, // No expiry - lifetime access
           is_active: true,
           payment_id: payment.id
         })
-      }
-    }
+        console.log(`Unlimited contact access granted to user ${user_id}`)
+        break
 
-    // Handle contact unlocks - could track in separate table if needed
-    // Handle featured listings - could update properties table
+      case 'verified_listing':
+      case 'premium_verified_listing':
+        if (!property_id) {
+          console.error('Property ID missing for listing payment')
+          break
+        }
+
+        // Create verification request
+        await supabase.from('property_verifications').insert({
+          property_id,
+          landlord_id: user_id,
+          payment_id: payment.id,
+          verification_type: purpose === 'verified_listing' ? 'verified' : 'premium_verified',
+          status: 'pending',
+          requested_at: new Date().toISOString()
+        })
+
+        // Update property status to pending verification
+        await supabase
+          .from('properties')
+          .update({
+            listing_type: purpose === 'verified_listing' ? 'verified' : 'premium_verified',
+            verification_status: 'pending'
+          })
+          .eq('id', property_id)
+
+        console.log(`Verification request created for property ${property_id}`)
+        break
+
+      case 'listing_refresh':
+        if (!property_id) {
+          console.error('Property ID missing for refresh payment')
+          break
+        }
+
+        // Bump to top for 7 days
+        const { data: property } = await supabase
+          .from('properties')
+          .select('refresh_count')
+          .eq('id', property_id)
+          .single()
+
+        await supabase
+          .from('properties')
+          .update({
+            refresh_count: (property?.refresh_count || 0) + 1,
+            updated_at: new Date().toISOString() // This bumps it to top
+          })
+          .eq('id', property_id)
+
+        console.log(`Property ${property_id} refreshed`)
+        break
+
+      case 'listing_extension':
+        if (!property_id) {
+          console.error('Property ID missing for extension payment')
+          break
+        }
+
+        // Extend validity by 3 months
+        const { data: currentProperty } = await supabase
+          .from('properties')
+          .select('listing_expires_at')
+          .eq('id', property_id)
+          .single()
+
+        const currentExpiry = currentProperty?.listing_expires_at 
+          ? new Date(currentProperty.listing_expires_at)
+          : new Date()
+        
+        const newExpiry = new Date(currentExpiry.getTime())
+        newExpiry.setMonth(newExpiry.getMonth() + 3)
+
+        await supabase
+          .from('properties')
+          .update({
+            listing_expires_at: newExpiry.toISOString()
+          })
+          .eq('id', property_id)
+
+        console.log(`Property ${property_id} validity extended to ${newExpiry.toISOString()}`)
+        break
+
+      case 'contact_unlock':
+        // Legacy - now handled by free limits + unlimited access
+        // Could create unlock record if property_id provided
+        if (property_id) {
+          await supabase.from('contact_unlocks').insert({
+            user_id,
+            property_id,
+            payment_id: payment.id
+          })
+        }
+        break
+
+      default:
+        console.log(`Unknown payment purpose: ${purpose}`)
+    }
 
     console.log(`Payment ${payment.id} completed successfully for user ${user_id}`)
   } catch (error) {

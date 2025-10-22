@@ -181,12 +181,26 @@ export default function PaymentModal({ isOpen, onClose, purpose, onSuccess }: Pa
 
   const getPurposeTitle = () => {
     const titles: Record<PaymentPurpose, string> = {
-      premium_monthly: 'Premium Monthly Subscription',
-      premium_yearly: 'Premium Yearly Subscription',
-      contact_unlock: 'Unlock Property Contact',
-      featured_listing: 'Featured Property Listing'
+      verified_listing: 'Verified Property Listing',
+      premium_verified_listing: 'Premium Verified Listing',
+      listing_refresh: 'Refresh Property Listing',
+      listing_extension: 'Extend Listing Validity',
+      unlimited_contact_access: 'Unlimited Contact Access',
+      contact_unlock: 'Unlock Property Contact'
     }
     return titles[purpose]
+  }
+
+  const getPurposeDescription = () => {
+    const descriptions: Record<PaymentPurpose, string> = {
+      verified_listing: '6 months validity with admin verification. Up to 10 professional photos.',
+      premium_verified_listing: '6 months validity + Featured for 30 days + Priority listing for 90 days.',
+      listing_refresh: 'Bump your listing to the top of search results for 7 days.',
+      listing_extension: 'Extend your listing validity by 3 more months.',
+      unlimited_contact_access: 'Unlock unlimited property contact information (lifetime access).',
+      contact_unlock: 'Unlock contact information for this property.'
+    }
+    return descriptions[purpose]
   }
 
   if (!isOpen) return null
@@ -208,10 +222,11 @@ export default function PaymentModal({ isOpen, onClose, purpose, onSuccess }: Pa
           </div>
 
           {/* Payment Details */}
-          <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-            <p className="text-sm text-gray-600 mb-1">Payment For</p>
-            <p className="font-semibold text-gray-900">{getPurposeTitle()}</p>
-            <p className="text-2xl font-bold text-red-600 mt-2">
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-600 mb-1">Payment For</p>
+            <p className="font-bold text-gray-900 text-lg">{getPurposeTitle()}</p>
+            <p className="text-sm text-gray-600 mt-1 mb-3">{getPurposeDescription()}</p>
+            <p className="text-3xl font-bold text-blue-600">
               {amount.toLocaleString()} RWF
             </p>
           </div>
