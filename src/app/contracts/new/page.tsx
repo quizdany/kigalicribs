@@ -2,8 +2,9 @@
 
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
+import { Suspense } from 'react'
 
-export default function NewContractPage() {
+function NewContractContent() {
   const params = useSearchParams()
   const propertyId = params.get('propertyId')
 
@@ -33,5 +34,13 @@ export default function NewContractPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function NewContractPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>}>
+      <NewContractContent />
+    </Suspense>
   )
 }
