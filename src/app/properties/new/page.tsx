@@ -20,6 +20,8 @@ export default function NewProperty() {
     size: '',
     address: '',
     district: '',
+    sector: '',
+    cell: '',
     ownerPhone: '',
   })
   const [amenities, setAmenities] = useState<string[]>([])
@@ -140,6 +142,8 @@ export default function NewProperty() {
           size: Number(form.size) || null,
           address: form.address,
           district: form.district,
+          sector: form.sector || null,
+          cell: form.cell || null,
           amenities,
           images: imageUrls,
           ownerPhone: form.ownerPhone,
@@ -375,6 +379,36 @@ export default function NewProperty() {
                 <option value="Nyarugenge">Nyarugenge</option>
               </select>
             </div>
+
+            <div>
+              <label htmlFor="sector" className="block text-sm font-medium text-gray-700 mb-1">
+                Sector
+              </label>
+              <input
+                type="text"
+                id="sector"
+                name="sector"
+                value={form.sector}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                placeholder="e.g., Kimironko"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="cell" className="block text-sm font-medium text-gray-700 mb-1">
+                Cell
+              </label>
+              <input
+                type="text"
+                id="cell"
+                name="cell"
+                value={form.cell}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                placeholder="e.g., Kibagabaga"
+              />
+            </div>
           </div>
 
           {/* Contact Information */}
@@ -414,7 +448,8 @@ export default function NewProperty() {
                 'Generator',
                 'Garden',
                 'Balcony',
-                'Swimming Pool'
+                'Swimming Pool',
+                'Tarmac Road'
               ].map((amenity) => (
                 <div key={amenity} className="flex items-center">
                   <input
@@ -488,6 +523,39 @@ export default function NewProperty() {
                   ))}
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* Verification Suggestion Card */}
+          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-lg p-6">
+            <div className="flex items-start space-x-4">
+              <div className="flex-shrink-0">
+                <svg className="h-10 w-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Get Your Property Verified! ✓
+                </h3>
+                <p className="text-sm text-gray-700 mb-3">
+                  Stand out from the crowd! Verified listings get <strong>3x more views</strong> and build trust with potential renters. After submitting, you can upgrade your listing to verified status.
+                </p>
+                <div className="flex flex-wrap gap-2 text-sm">
+                  <span className="inline-flex items-center px-3 py-1 bg-white rounded-full text-blue-700 font-medium border border-blue-200">
+                    ✓ Verified Badge
+                  </span>
+                  <span className="inline-flex items-center px-3 py-1 bg-white rounded-full text-blue-700 font-medium border border-blue-200">
+                    ⭐ Priority Display
+                  </span>
+                  <span className="inline-flex items-center px-3 py-1 bg-white rounded-full text-blue-700 font-medium border border-blue-200">
+                    📈 More Visibility
+                  </span>
+                </div>
+                <p className="text-xs text-gray-600 mt-3">
+                  Starting from 30,000 RWF for 6 months validity
+                </p>
+              </div>
             </div>
           </div>
 
