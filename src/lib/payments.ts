@@ -27,13 +27,23 @@ export interface PaymentResponse {
 }
 
 // MTN Mobile Money Configuration
+// Helper to get the app URL dynamically
+const getAppUrl = () => {
+  // In production (Vercel), use the deployment URL
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`
+  }
+  // In development, use the env variable or default to localhost
+  return process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+}
+
 const MOMO_CONFIG = {
   baseUrl: process.env.MOMO_API_URL || 'https://sandbox.momodeveloper.mtn.com',
   subscriptionKey: process.env.MOMO_SUBSCRIPTION_KEY || '',
   apiUser: process.env.MOMO_API_USER || '',
   apiKey: process.env.MOMO_API_KEY || '',
   environment: process.env.MOMO_ENVIRONMENT || 'sandbox', // sandbox or production
-  callbackUrl: process.env.NEXT_PUBLIC_APP_URL + '/api/payments/callback/momo'
+  callbackUrl: getAppUrl() + '/api/payments/callback/momo'
 }
 
 // Airtel Money Configuration
@@ -42,7 +52,7 @@ const AIRTEL_CONFIG = {
   clientId: process.env.AIRTEL_CLIENT_ID || '',
   clientSecret: process.env.AIRTEL_CLIENT_SECRET || '',
   environment: process.env.AIRTEL_ENVIRONMENT || 'staging', // staging or production
-  callbackUrl: process.env.NEXT_PUBLIC_APP_URL + '/api/payments/callback/airtel'
+  callbackUrl: getAppUrl() + '/api/payments/callback/airtel'
 }
 
 /**
