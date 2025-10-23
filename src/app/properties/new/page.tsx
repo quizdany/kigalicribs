@@ -536,35 +536,39 @@ export default function NewProperty() {
               </div>
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  Get Your Property Verified! ✓
+                  🎯 Recommended: Get Your Property Verified!
                 </h3>
                 <p className="text-sm text-gray-700 mb-3">
-                  Stand out from the crowd! Verified listings get <strong>3x more views</strong> and build trust with potential renters. After submitting, you can upgrade your listing to verified status.
+                  Verified listings get <strong>3x more views</strong> and build trust with potential renters. Choose verification now or upgrade later.
                 </p>
-                <div className="flex flex-wrap gap-2 text-sm">
-                  <span className="inline-flex items-center px-3 py-1 bg-white rounded-full text-blue-700 font-medium border border-blue-200">
-                    ✓ Verified Badge
-                  </span>
-                  <span className="inline-flex items-center px-3 py-1 bg-white rounded-full text-blue-700 font-medium border border-blue-200">
-                    ⭐ Priority Display
-                  </span>
-                  <span className="inline-flex items-center px-3 py-1 bg-white rounded-full text-blue-700 font-medium border border-blue-200">
-                    📈 More Visibility
-                  </span>
+                <div className="grid grid-cols-2 gap-3 mb-3">
+                  <div className="bg-white rounded-lg p-3 border border-gray-200">
+                    <p className="text-xs text-gray-600 mb-1">Basic (Free)</p>
+                    <ul className="text-xs text-gray-600 space-y-1">
+                      <li>✓ Standard listing</li>
+                      <li>✓ Basic visibility</li>
+                    </ul>
+                  </div>
+                  <div className="bg-blue-100 rounded-lg p-3 border-2 border-blue-400">
+                    <p className="text-xs font-semibold text-blue-900 mb-1">Verified (30,000 RWF)</p>
+                    <ul className="text-xs text-blue-900 space-y-1">
+                      <li>✓ Verified badge</li>
+                      <li>✓ 3x more visibility</li>
+                      <li>✓ Priority display</li>
+                      <li>✓ Valid for 6 months</li>
+                    </ul>
+                  </div>
                 </div>
-                <p className="text-xs text-gray-600 mt-3">
-                  Starting from 30,000 RWF for 6 months validity
-                </p>
               </div>
             </div>
           </div>
 
-          {/* Submit Button */}
-          <div className="flex justify-end pt-6">
+          {/* Submit Buttons - Side by Side */}
+          <div className="flex flex-col sm:flex-row gap-4 pt-6">
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+              className="flex-1 px-6 py-3 bg-gray-600 text-white font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
             >
               {loading ? (
                 <>
@@ -572,8 +576,27 @@ export default function NewProperty() {
                   <span>Creating...</span>
                 </>
               ) : (
-                <span>List Property</span>
+                <span>Continue with Free Listing</span>
               )}
+            </button>
+            
+            <button
+              type="button"
+              onClick={async (e) => {
+                // First submit the form to create the property
+                const submitEvent = new Event('submit', { bubbles: true, cancelable: true })
+                Object.defineProperty(submitEvent, 'target', { value: e.currentTarget.form, writable: false })
+                await handleSubmit(submitEvent as any)
+                // Note: After property is created, user will be redirected with showUpgrade=true
+                // which will automatically show the payment modal
+              }}
+              disabled={loading}
+              className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 shadow-lg"
+            >
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+              <span>List with Verification (30,000 RWF)</span>
             </button>
           </div>
         </form>
