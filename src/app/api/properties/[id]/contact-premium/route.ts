@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 import { checkPremiumStatus } from '@/lib/premium'
 
 export async function GET(
@@ -15,7 +15,6 @@ export async function GET(
     }
 
     const token = authHeader.substring(7)
-    const supabase = createClient()
     
     const { data: { user }, error: authError } = await supabase.auth.getUser(token)
     if (authError || !user) {

@@ -1,12 +1,10 @@
-import { createClient } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 
 /**
  * Check if a user has an active premium subscription
  */
 export async function checkPremiumStatus(userId: string): Promise<boolean> {
   try {
-    const supabase = createClient()
-    
     const { data, error } = await supabase
       .from('premium_users')
       .select('*')
@@ -31,8 +29,6 @@ export async function checkPremiumStatus(userId: string): Promise<boolean> {
  */
 export async function getPremiumDetails(userId: string) {
   try {
-    const supabase = createClient()
-    
     const { data, error } = await supabase
       .from('premium_users')
       .select('*')
@@ -64,8 +60,6 @@ export async function getPremiumDetails(userId: string) {
  */
 export async function getPaymentHistory(userId: string) {
   try {
-    const supabase = createClient()
-    
     const { data, error } = await supabase
       .from('payments')
       .select('*')
