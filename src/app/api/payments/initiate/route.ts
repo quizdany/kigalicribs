@@ -37,9 +37,9 @@ export async function POST(req: NextRequest) {
     console.log('User authenticated:', user.id)
 
     const body = await req.json()
-    const { phoneNumber, purpose, provider } = body
+    const { phoneNumber, purpose, provider, propertyId } = body
 
-    console.log('Payment request data:', { phoneNumber, purpose, provider })
+    console.log('Payment request data:', { phoneNumber, purpose, provider, propertyId })
 
     // Validate input
     if (!phoneNumber || !purpose || !provider) {
@@ -118,6 +118,7 @@ export async function POST(req: NextRequest) {
         transaction_id: paymentResponse.transactionId,
         external_reference: paymentResponse.externalReference,
         purpose,
+        property_id: propertyId || null, // Include property_id for listing payments
         expires_at: expiresAt.toISOString(),
         metadata: {
           initiated_at: new Date().toISOString(),

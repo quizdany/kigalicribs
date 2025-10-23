@@ -154,11 +154,10 @@ async function handleCompletedPayment(payment: any, supabase: any) {
           requested_at: new Date().toISOString()
         })
 
-        // Update property status to pending verification
+        // Update property status to pending verification (listing_type stays 'basic' until admin approves)
         await supabase
           .from('properties')
           .update({
-            listing_type: purpose === 'verified_listing' ? 'verified' : 'premium_verified',
             verification_status: 'pending'
           })
           .eq('id', property_id)

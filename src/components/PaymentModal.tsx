@@ -8,10 +8,11 @@ interface PaymentModalProps {
   isOpen: boolean
   onClose: () => void
   purpose: PaymentPurpose
+  propertyId?: string
   onSuccess?: () => void
 }
 
-export default function PaymentModal({ isOpen, onClose, purpose, onSuccess }: PaymentModalProps) {
+export default function PaymentModal({ isOpen, onClose, purpose, propertyId, onSuccess }: PaymentModalProps) {
   const [provider, setProvider] = useState<PaymentProvider>('momo')
   const [phoneNumber, setPhoneNumber] = useState('')
   const [loading, setLoading] = useState(false)
@@ -71,7 +72,8 @@ export default function PaymentModal({ isOpen, onClose, purpose, onSuccess }: Pa
         body: JSON.stringify({
           phoneNumber,
           purpose,
-          provider
+          provider,
+          propertyId // Include propertyId for listing-related payments
         })
       })
 

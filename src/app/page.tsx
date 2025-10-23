@@ -6,6 +6,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import AuthButton from '@/components/AuthButton'
 import PaymentModal from '@/components/PaymentModal'
+import PropertyBadges from '@/components/PropertyBadges'
+import { supabase } from '@/lib/supabase'
 
 export default function HomePage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -21,6 +23,7 @@ export default function HomePage() {
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null)
   const [showAmenitiesDropdown, setShowAmenitiesDropdown] = useState(false)
   const amenitiesRef = useRef<HTMLDivElement | null>(null)
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   
   // Search filters state
   type FiltersState = {
@@ -39,11 +42,21 @@ export default function HomePage() {
     bedrooms: '',
     bathrooms: ''
   })
-
   useEffect(() => {
     fetchFeaturedProperties()
+    fetchCurrentUser()
   }, [])
 
+  const fetchCurrentUser = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      setCurrentUserId(session?.user?.id || null)
+    } catch (err) {
+      console.error('Error fetching current user:', err)
+    }
+  }
+
+  // Close amenities dropdown on outside click
   // Close amenities dropdown on outside click
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -246,7 +259,7 @@ export default function HomePage() {
             Discover Your New Home
           </h1>
           <p className="text-lg md:text-xl text-white/90 mb-8">
-            Helping renters find their perfect fit in Kigali.
+            Directly connect with home owners in Kigali.
           </p>
           
           {/* Search Form */}
@@ -554,6 +567,13 @@ export default function HomePage() {
 
                 {/* Property details */}
                 <div className="space-y-1">
+                  {/* Verification Badges */}
+                  <PropertyBadges 
+                    listing_type={property.listing_type}
+                    verification_status={property.verification_status}
+                    isOwner={currentUserId === property.owner_id}
+                  />
+                  
                   {/* Title and rating */}
                   <div className="flex items-start justify-between gap-2">
                     <h3 className="font-semibold text-gray-900 line-clamp-1 group-hover:underline">
@@ -570,11 +590,6 @@ export default function HomePage() {
                   {/* Location */}
                   <p className="text-sm text-gray-600 line-clamp-1">
                     {property.district}, Kigali
-                  </p>
-                  
-                  {/* Property type or bedrooms info */}
-                  <p className="text-sm text-gray-600">
-                    {property.bedrooms ? `${property.bedrooms} bedroom${property.bedrooms > 1 ? 's' : ''}` : property.property_type || property.type}
                   </p>
                   
                   {/* Price */}
@@ -747,7 +762,7 @@ export default function HomePage() {
                 </span>
               </div>
               <p className="text-gray-400 text-sm">
-                Efficient. Secure. Affordable
+                Efficient. Reliable. Affordable
               </p>
               <div className="flex space-x-4 mt-4 justify-center md:justify-start">
                 <a href="https://facebook.com/kigalicribs" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">

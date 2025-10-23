@@ -4,24 +4,54 @@ import { createClient } from '@supabase/supabase-js'
 
 const supabase: any = supabaseClient
 
-export async function GET(request: any, context: any) {
+export async function GET(
+  request: any,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    let id = context?.params?.id
-    if (!id && context?.params && typeof context.params.then === 'function') {
-      const p = await context.params
-      id = p.id
+    const { id } = await params
+    
+    // Force fresh query - no caching
+    const { data, error } = await supabase
+      .from('properties')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle()
+    
+    if (error) {
+      console.error('Property fetch error:', error)
+      return NextResponse.json({ success: false, error: error.message }, { status: 500 })
     }
-    const { data, error } = await supabase.from('properties').select('*').eq('id', id).maybeSingle()
-    if (error) return NextResponse.json({ success: false, error: error.message }, { status: 500 })
-    if (!data) return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 })
-    return NextResponse.json({ success: true, data })
+    
+    if (!data) {
+      return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 })
+    }
+    
+    console.log('Property API returning:', {
+      id: data.id,
+      listing_type: data.listing_type,
+      verification_status: data.verification_status,
+      verified_at: data.verified_at
+    })
+    
+    return NextResponse.json({ success: true, data }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+        'Pragma': 'no-cache'
+      }
+    })
   } catch (err) {
+    console.error('Property API error:', err)
     return NextResponse.json({ success: false, error: err instanceof Error ? err.message : 'Unknown error' }, { status: 500 })
   }
 }
 
-export async function PATCH(request: any, context: any) {
+export async function PATCH(
+  request: any,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
+    const { id } = await params
     const authHeader = request.headers.get('authorization')
     if (!authHeader?.startsWith('Bearer ')) return NextResponse.json({ success: false, error: 'Missing token' }, { status: 401 })
     const token = authHeader.split(' ')[1]
@@ -42,11 +72,6 @@ export async function PATCH(request: any, context: any) {
     const { data: userData } = await (supabaseAuthed as any).auth.getUser()
     if (!userData?.user) return NextResponse.json({ success: false, error: 'Invalid token' }, { status: 401 })
 
-    let id = context?.params?.id
-    if (!id && context?.params && typeof context.params.then === 'function') {
-      const p = await context.params
-      id = p.id
-    }
     const body = await request.json()
 
     // verify owner
@@ -63,8 +88,12 @@ export async function PATCH(request: any, context: any) {
   }
 }
 
-export async function DELETE(request: any, context: any) {
+export async function DELETE(
+  request: any,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
+    const { id } = await params
     const authHeader = request.headers.get('authorization')
     if (!authHeader?.startsWith('Bearer ')) return NextResponse.json({ success: false, error: 'Missing token' }, { status: 401 })
     const token = authHeader.split(' ')[1]
@@ -84,12 +113,6 @@ export async function DELETE(request: any, context: any) {
 
     const { data: userData } = await (supabaseAuthed as any).auth.getUser()
     if (!userData?.user) return NextResponse.json({ success: false, error: 'Invalid token' }, { status: 401 })
-
-    let id = context?.params?.id
-    if (!id && context?.params && typeof context.params.then === 'function') {
-      const p = await context.params
-      id = p.id
-    }
 
     const existingRes: any = await (supabaseAuthed as any).from('properties').select('owner_id').eq('id', id).maybeSingle()
     const existing = existingRes.data

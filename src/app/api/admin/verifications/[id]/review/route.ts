@@ -93,12 +93,36 @@ export async function POST(
       return NextResponse.json({ success: false, error: updateError.message }, { status: 500 })
     }
 
-    // If approved, update property listing
+    // If approved, update property listing using service role to bypass RLS
     if (action === 'approve') {
+      // Create service role client for property updates (bypasses RLS)
+      const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+      
+      if (!serviceRoleKey) {
+        console.error('SUPABASE_SERVICE_ROLE_KEY is not defined in environment variables')
+        return NextResponse.json({ 
+          success: false, 
+          error: 'Server configuration error: Service role key missing' 
+        }, { status: 500 })
+      }
+
+      console.log('Creating service role client...')
+      const supabaseServiceRole = createClient<Database>(
+        supabaseUrl,
+        serviceRoleKey,
+        {
+          auth: {
+            autoRefreshToken: false,
+            persistSession: false
+          }
+        }
+      )
+
       const expiresAt = new Date()
       expiresAt.setMonth(expiresAt.getMonth() + 6) // 6 months validity
 
       const updates: any = {
+        listing_type: verification.verification_type === 'verified' ? 'verified' : 'premium_verified',
         verification_status: 'verified',
         verified_at: now,
         listing_expires_at: expiresAt.toISOString()
@@ -117,15 +141,43 @@ export async function POST(
         updates.featured = true
       }
 
-      const { error: propertyError } = await supabase
+      console.log('Attempting to update property:', verification.property_id)
+      console.log('Update values:', JSON.stringify(updates, null, 2))
+
+      const { data: updatedProperty, error: propertyError } = await supabaseServiceRole
         .from('properties')
         .update(updates)
         .eq('id', verification.property_id)
+        .select()
+        .single()
 
       if (propertyError) {
-        console.error('Error updating property:', propertyError)
-        return NextResponse.json({ success: false, error: propertyError.message }, { status: 500 })
+        console.error('Error updating property:', {
+          message: propertyError.message,
+          details: propertyError.details,
+          hint: propertyError.hint,
+          code: propertyError.code
+        })
+        return NextResponse.json({ 
+          success: false, 
+          error: `Failed to update property: ${propertyError.message}` 
+        }, { status: 500 })
       }
+
+      if (!updatedProperty) {
+        console.error('Property update returned no data')
+        return NextResponse.json({ 
+          success: false, 
+          error: 'Property update failed - no data returned' 
+        }, { status: 500 })
+      }
+
+      console.log('Property updated successfully:', {
+        id: updatedProperty.id,
+        listing_type: updatedProperty.listing_type,
+        verification_status: updatedProperty.verification_status,
+        verified_at: updatedProperty.verified_at
+      })
     } else {
       // If rejected, revert property to basic
       const { error: propertyError } = await supabase

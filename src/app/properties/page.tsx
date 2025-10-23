@@ -6,15 +6,27 @@ import AuthButton from '@/components/AuthButton'
 import PropertyBadges from '@/components/PropertyBadges'
 import Link from 'next/link'
 import { MapPin, Bed, Bath, Square, Heart, Loader2, Phone } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
 
 export default function PropertiesList() {
   const [properties, setProperties] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const router = useRouter()
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
 
   useEffect(() => {
     fetchProperties()
+    fetchCurrentUser()
   }, [])
+
+  const fetchCurrentUser = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      setCurrentUserId(session?.user?.id || null)
+    } catch (err) {
+      console.error('Error fetching current user:', err)
+    }
+  }
 
   const fetchProperties = async () => {
     setLoading(true)
@@ -119,6 +131,7 @@ export default function PropertiesList() {
                       listing_expires_at={property.listing_expires_at}
                       featured_until={property.featured_until}
                       priority_until={property.priority_until}
+                      isOwner={currentUserId === property.owner_id}
                     />
                   </Link>
                   
@@ -153,17 +166,11 @@ export default function PropertiesList() {
                       <span className="text-gray-600 text-sm"> RWF/month</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      {(property.property_type || property.type) && (
-                        <span className="px-2 py-1 bg-red-100 text-red-600 text-xs font-medium rounded">
-                          {property.property_type || property.type}
-                        </span>
-                      )}
                       <Link
                         href={`/properties/${property.id}`}
-                        className="flex items-center text-red-600 hover:text-red-700 font-medium text-sm"
+                        className="px-4 py-2 bg-green-100 text-green-700 hover:bg-green-200 font-medium text-sm rounded-lg transition-colors"
                       >
-                        <Phone className="h-4 w-4 mr-1" />
-                        Contact
+                        Contact Owner
                       </Link>
                     </div>
                   </div>

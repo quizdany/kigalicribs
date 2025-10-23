@@ -46,12 +46,21 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url)
     const status = searchParams.get('status') || 'pending'
 
-    // Fetch verification requests
+    // Fetch verification requests with property details
     const { data: verifications, error } = await supabase
       .from('property_verifications')
       .select(`
-        *,
-        properties:property_id (
+        id,
+        property_id,
+        landlord_id,
+        payment_id,
+        verification_type,
+        status,
+        requested_at,
+        reviewed_at,
+        admin_id,
+        admin_notes,
+        properties!property_id (
           id,
           title,
           description,

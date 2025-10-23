@@ -37,6 +37,7 @@ export default function ListingUpgradeModal({
           onCloseAction()
         }}
         purpose={selectedPlan}
+        propertyId={propertyId}
         onSuccess={() => {
           setShowPayment(false)
           onCloseAction()

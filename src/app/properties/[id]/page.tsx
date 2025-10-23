@@ -59,6 +59,12 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
         throw new Error(json?.error || 'Failed to load property')
       }
       
+      console.log('Property data fetched:', {
+        listing_type: json.data?.listing_type,
+        verification_status: json.data?.verification_status,
+        verified_at: json.data?.verified_at
+      })
+      
       setProperty(json.data)
       
       // Check if current user is the owner
@@ -269,6 +275,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                     listing_expires_at={property.listing_expires_at}
                     featured_until={property.featured_until}
                     priority_until={property.priority_until}
+                    isOwner={isOwner}
                   />
                 </div>
                 <span className="px-3 py-1 bg-red-100 text-red-600 text-sm font-medium rounded">
@@ -423,21 +430,60 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                   </div>
                 )}
                 
-                {/* Pending Verification Notice */}
+                {/* Awaiting Verification Notice - Replaces upgrade card after payment */}
                 {property.verification_status === 'pending' && (
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <div className="flex items-start">
-                      <div className="flex-shrink-0">
-                        <svg className="h-5 w-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd"/>
+                  <div className="bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-300 rounded-lg p-6 shadow-sm">
+                    <div className="flex items-start mb-4">
+                      <div className="flex-shrink-0 w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center">
+                        <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                       </div>
-                      <div className="ml-3">
-                        <h3 className="text-sm font-medium text-yellow-800">Verification Pending</h3>
-                        <p className="text-xs text-yellow-700 mt-1">
-                          Your property is under review. You'll be notified once it's approved.
+                      <div className="ml-4 flex-1">
+                        <h3 className="text-lg font-bold text-gray-900 mb-1">
+                          Awaiting Verification
+                        </h3>
+                        <p className="text-sm text-gray-700 mb-3">
+                          Your payment has been received! Our admin team is reviewing your property for verification.
                         </p>
+                        <div className="bg-white bg-opacity-60 rounded-lg p-3 space-y-2">
+                          <div className="flex items-start">
+                            <svg className="w-4 h-4 text-blue-600 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                            </svg>
+                            <p className="text-xs text-gray-700">
+                              <strong>Payment confirmed</strong> - Thank you for upgrading
+                            </p>
+                          </div>
+                          <div className="flex items-start">
+                            <svg className="w-4 h-4 text-yellow-600 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd"/>
+                            </svg>
+                            <p className="text-xs text-gray-700">
+                              <strong>Under review</strong> - Usually takes 1-2 business days
+                            </p>
+                          </div>
+                          <div className="flex items-start">
+                            <svg className="w-4 h-4 text-gray-400 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                            </svg>
+                            <p className="text-xs text-gray-700">
+                              <strong>Get verified</strong> - You'll receive an email notification
+                            </p>
+                          </div>
+                        </div>
                       </div>
+                    </div>
+                    
+                    <div className="bg-blue-100 border border-blue-200 rounded-lg p-3 mt-4">
+                      <p className="text-xs text-blue-900 flex items-start">
+                        <svg className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"/>
+                        </svg>
+                        <span>
+                          Once approved, your property will display a <strong>verified badge</strong> and receive priority placement in search results.
+                        </span>
+                      </p>
                     </div>
                   </div>
                 )}
