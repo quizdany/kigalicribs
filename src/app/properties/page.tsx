@@ -90,7 +90,7 @@ export default function PropertiesList() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {properties.map((property) => (
-              <div key={property.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+              <div key={property.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow flex flex-col">
                 <Link href={`/properties/${property.id}`}>
                   <div className="relative cursor-pointer">
                     {property.images && property.images.length > 0 ? (
@@ -113,7 +113,7 @@ export default function PropertiesList() {
                   </div>
                 </Link>
                 
-                <div className="p-4">
+                <div className="p-4 flex flex-col flex-grow">
                   <Link href={`/properties/${property.id}`} className="block mb-3">
                     <div className="flex justify-between items-start mb-2 cursor-pointer">
                       <h3 className="font-semibold text-gray-900 text-lg line-clamp-1 hover:text-red-600 transition-colors">{property.title}</h3>
@@ -123,8 +123,10 @@ export default function PropertiesList() {
                       <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
                       <span className="line-clamp-1">{property.address || property.location}, {property.district}</span>
                     </p>
-                    
-                    {/* Property Badges */}
+                  </Link>
+                  
+                  {/* Property Badges - Fixed Height */}
+                  <div className="min-h-[32px] mb-3">
                     <PropertyBadges
                       listing_type={property.listing_type}
                       verification_status={property.verification_status}
@@ -133,32 +135,36 @@ export default function PropertiesList() {
                       priority_until={property.priority_until}
                       isOwner={currentUserId === property.owner_id}
                     />
-                  </Link>
+                  </div>
                   
-                  {(property.bedrooms || property.bathrooms || property.size) && (
-                    <div className="flex items-center space-x-4 text-sm text-gray-600 mb-3">
-                      {property.bedrooms && (
-                        <div className="flex items-center">
-                          <Bed className="h-4 w-4 mr-1" />
-                          <span>{property.bedrooms}</span>
-                        </div>
-                      )}
-                      {property.bathrooms && (
-                        <div className="flex items-center">
-                          <Bath className="h-4 w-4 mr-1" />
-                          <span>{property.bathrooms}</span>
-                        </div>
-                      )}
-                      {property.size && (
-                        <div className="flex items-center">
-                          <Square className="h-4 w-4 mr-1" />
-                          <span>{property.size} sqft</span>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                  {/* Property Details - Fixed Height */}
+                  <div className="min-h-[24px] mb-3">
+                    {(property.bedrooms || property.bathrooms || property.size) && (
+                      <div className="flex items-center space-x-4 text-sm text-gray-600">
+                        {property.bedrooms && (
+                          <div className="flex items-center">
+                            <Bed className="h-4 w-4 mr-1" />
+                            <span>{property.bedrooms}</span>
+                          </div>
+                        )}
+                        {property.bathrooms && (
+                          <div className="flex items-center">
+                            <Bath className="h-4 w-4 mr-1" />
+                            <span>{property.bathrooms}</span>
+                          </div>
+                        )}
+                        {property.size && (
+                          <div className="flex items-center">
+                            <Square className="h-4 w-4 mr-1" />
+                            <span>{property.size} sqft</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                   
-                  <div className="flex justify-between items-center pt-3 border-t">
+                  {/* Price and Contact - Push to bottom */}
+                  <div className="flex justify-between items-center pt-3 border-t mt-auto">
                     <div>
                       <span className="text-xl font-bold text-gray-900">
                         {Number(property.price).toLocaleString()}
