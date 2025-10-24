@@ -258,10 +258,11 @@ export default function PaymentModal({ isOpen, onClose, purpose, propertyId, onS
                       className="w-5 h-5 text-red-600 focus:ring-red-500"
                     />
                     <div className="ml-4 flex items-center flex-1">
-                      <div className="flex items-center justify-center px-4 py-2 bg-white rounded-lg border border-gray-200 shadow-sm">
-                        <svg viewBox="0 0 100 32" className="h-7">
-                          <text x="0" y="18" fill="#ED1C24" fontFamily="Arial, sans-serif" fontSize="18" fontWeight="bold">airtel</text>
-                          <text x="0" y="28" fill="#ED1C24" fontFamily="Arial, sans-serif" fontSize="9">money</text>
+                      <div className="flex items-center justify-center bg-white rounded-lg p-2 min-w-[80px]">
+                        <svg viewBox="0 0 120 50" className="h-10 w-auto">
+                          {/* Airtel logo */}
+                          <text x="10" y="28" fill="#ED1C24" fontFamily="Arial, sans-serif" fontSize="24" fontWeight="bold">airtel</text>
+                          <text x="10" y="42" fill="#ED1C24" fontFamily="Arial, sans-serif" fontSize="12">money</text>
                         </svg>
                       </div>
                       <span className="ml-4 font-semibold text-gray-900">Airtel|RW</span>
@@ -285,13 +286,14 @@ export default function PaymentModal({ isOpen, onClose, purpose, propertyId, onS
                       className="w-5 h-5 text-yellow-500 focus:ring-yellow-500"
                     />
                     <div className="ml-4 flex items-center flex-1">
-                      <div className="flex items-center justify-center px-4 py-2.5 bg-[#FFCB05] rounded-lg border border-yellow-600 shadow-sm">
-                        <svg viewBox="0 0 100 32" className="h-7">
-                          {/* MTN MoMo Logo */}
-                          <ellipse cx="12" cy="16" rx="10" ry="10" fill="#000" opacity="0.4"/>
-                          <ellipse cx="24" cy="16" rx="10" ry="10" fill="#000" opacity="0.4"/>
-                          <ellipse cx="36" cy="16" rx="10" ry="10" fill="#000" opacity="0.4"/>
-                          <text x="48" y="22" fill="#000" fontFamily="Arial, sans-serif" fontSize="14" fontWeight="bold">MoMo</text>
+                      <div className="flex items-center justify-center bg-[#FFCB05] rounded-lg p-2.5 min-w-[80px]">
+                        <svg viewBox="0 0 120 50" className="h-10 w-auto">
+                          {/* MTN Mobile Money logo */}
+                          <image 
+                            href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 50'%3E%3Ctext x='10' y='30' fill='%23000' font-family='Arial' font-size='18' font-weight='bold'%3EMTN%3C/text%3E%3Ctext x='8' y='45' fill='%23000' font-family='Arial' font-size='10'%3EMobile Money%3C/text%3E%3C/svg%3E"
+                            width="120"
+                            height="50"
+                          />
                         </svg>
                       </div>
                       <span className="ml-4 font-semibold text-gray-900">MTN</span>
