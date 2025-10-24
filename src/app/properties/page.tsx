@@ -60,7 +60,7 @@ export default function PropertiesList() {
             <div className="flex items-center gap-3">
               <Link 
                 href="/properties/new" 
-                className="px-6 py-2 bg-green-500 text-white font-medium rounded-lg hover:bg-green-600 transition-colors"
+                className="px-6 py-2 bg-green-50 text-green-700 font-medium rounded-lg hover:bg-green-100 border border-green-200 transition-colors"
               >
                 List a Property
               </Link>

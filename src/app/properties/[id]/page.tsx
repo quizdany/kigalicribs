@@ -152,10 +152,16 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
       <nav className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
-            <Link href="/properties" className="flex items-center text-gray-700 hover:text-gray-900">
-              <ArrowLeft className="h-5 w-5 mr-2" />
-              Back to properties
-            </Link>
+            <div className="flex items-center gap-3">
+              <Link href="/" className="flex items-center text-gray-700 hover:text-gray-900">
+                <ArrowLeft className="h-5 w-5 mr-2" />
+                Home
+              </Link>
+              <Link href="/properties" className="flex items-center text-gray-700 hover:text-gray-900">
+                <ArrowLeft className="h-5 w-5 mr-2" />
+                Back to properties
+              </Link>
+            </div>
             {isOwner && (
               <Link
                 href={`/properties/${id}/edit`}
@@ -258,14 +264,14 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4">
             {/* Title and Price */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <div className="flex justify-between items-start mb-4">
+            <div className="bg-white rounded-lg shadow-sm p-5">
+              <div className="flex justify-between items-start mb-3">
                 <div className="flex-1">
-                  <h1 className="text-3xl font-bold text-gray-900 mb-2">{property.title}</h1>
-                  <div className="flex items-center text-gray-600 mb-3">
-                    <MapPin className="h-5 w-5 mr-2" />
+                  <h1 className="text-2xl font-bold text-gray-900 mb-1">{property.title}</h1>
+                  <div className="flex items-center text-gray-600 mb-2 text-sm">
+                    <MapPin className="h-4 w-4 mr-1" />
                     <span>{property.address || property.location}, {property.district}</span>
                   </div>
                   {/* Property Badges */}
@@ -284,42 +290,42 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
               </div>
               
               <div className="flex items-baseline">
-                <span className="text-4xl font-bold text-gray-900">
+                <span className="text-3xl font-bold text-gray-900">
                   {Number(property.price).toLocaleString()}
                 </span>
-                <span className="text-xl text-gray-600 ml-2">RWF/month</span>
+                <span className="text-base text-gray-600 ml-2">RWF/month</span>
               </div>
             </div>
 
             {/* Features */}
             {(property.bedrooms || property.bathrooms || property.size) && (
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Property Features</h2>
+              <div className="bg-white rounded-lg shadow-sm p-5">
+                <h2 className="text-lg font-semibold text-gray-900 mb-3">Property Features</h2>
                 <div className="grid grid-cols-3 gap-4">
                   {property.bedrooms && (
                     <div className="flex items-center">
-                      <Bed className="h-6 w-6 mr-3 text-gray-600" />
+                      <Bed className="h-5 w-5 mr-2 text-gray-600" />
                       <div>
-                        <div className="text-2xl font-bold text-gray-900">{property.bedrooms}</div>
-                        <div className="text-sm text-gray-600">Bedrooms</div>
+                        <div className="text-xl font-bold text-gray-900">{property.bedrooms}</div>
+                        <div className="text-xs text-gray-600">Bedrooms</div>
                       </div>
                     </div>
                   )}
                   {property.bathrooms && (
                     <div className="flex items-center">
-                      <Bath className="h-6 w-6 mr-3 text-gray-600" />
+                      <Bath className="h-5 w-5 mr-2 text-gray-600" />
                       <div>
-                        <div className="text-2xl font-bold text-gray-900">{property.bathrooms}</div>
-                        <div className="text-sm text-gray-600">Bathrooms</div>
+                        <div className="text-xl font-bold text-gray-900">{property.bathrooms}</div>
+                        <div className="text-xs text-gray-600">Bathrooms</div>
                       </div>
                     </div>
                   )}
                   {property.size && (
                     <div className="flex items-center">
-                      <Square className="h-6 w-6 mr-3 text-gray-600" />
+                      <Square className="h-5 w-5 mr-2 text-gray-600" />
                       <div>
-                        <div className="text-2xl font-bold text-gray-900">{property.size}</div>
-                        <div className="text-sm text-gray-600">sqft</div>
+                        <div className="text-xl font-bold text-gray-900">{property.size}</div>
+                        <div className="text-xs text-gray-600">sqft</div>
                       </div>
                     </div>
                   )}
@@ -328,19 +334,19 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
             )}
 
             {/* Description */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Description</h2>
-              <p className="text-gray-700 whitespace-pre-line">{property.description}</p>
+            <div className="bg-white rounded-lg shadow-sm p-5">
+              <h2 className="text-lg font-semibold text-gray-900 mb-3">Description</h2>
+              <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">{property.description}</p>
             </div>
 
             {/* Amenities */}
             {property.amenities && property.amenities.length > 0 && (
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Amenities</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <div className="bg-white rounded-lg shadow-sm p-5">
+                <h2 className="text-lg font-semibold text-gray-900 mb-3">Amenities</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {property.amenities.map((amenity: string, idx: number) => (
-                    <div key={idx} className="flex items-center text-gray-700">
-                      <div className="w-2 h-2 bg-red-600 rounded-full mr-3"></div>
+                    <div key={idx} className="flex items-center text-gray-700 text-sm">
+                      <div className="w-1.5 h-1.5 bg-red-600 rounded-full mr-2"></div>
                       <span className="capitalize">{amenity}</span>
                     </div>
                   ))}
