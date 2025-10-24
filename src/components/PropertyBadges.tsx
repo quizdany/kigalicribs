@@ -44,7 +44,7 @@ export default function PropertyBadges({
       )}
       
       {listing_type === 'basic' && verification_status !== 'pending' && (
-        <span className="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-medium">
+        <span className="inline-flex items-center gap-1 px-3 py-1 bg-gray-50 text-gray-300 rounded-full text-sm font-medium">
           Basic Listing
         </span>
       )}
