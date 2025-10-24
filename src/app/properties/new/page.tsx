@@ -7,6 +7,57 @@ import { Camera, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 
+// Kigali administrative divisions data
+const KIGALI_DIVISIONS = {
+  Gasabo: {
+    sectors: {
+      Bumbogo: ['Bukoro', 'Bumbogo', 'Gikoro', 'Gisozi', 'Jabana', 'Kinyange', 'Murambi', 'Rutunga'],
+      Gatsata: ['Gasabo', 'Karuruma', 'Murambi', 'Remera', 'Rusororo'],
+      Gikomero: ['Birembo', 'Gihira', 'Gikomero', 'Murama', 'Nyagahinga', 'Nyarutovu'],
+      Gisozi: ['Akabahizi', 'Kamatamu', 'Kagugu', 'Nyagatovu', 'Rubungo'],
+      Jabana: ['Gashora', 'Jabana', 'Kinyange', 'Nyagahinga'],
+      Jali: ['Busanza', 'Gasiza', 'Gishali', 'Jali', 'Kinyana', 'Kiyovu', 'Nyamabuye'],
+      Kacyiru: ['Kamatamu', 'Kamutwa', 'Kibagabaga', 'Nyarutarama'],
+      Kimihurura: ['Kibaza', 'Kimihurura', 'Ryomboka'],
+      Kimironko: ['Bibare', 'Kibagabaga', 'Kimironko', 'Nyabisindu', 'Nyarutarama'],
+      Kinyinya: ['Gacurabwenge', 'Kagugu', 'Kinyinya', 'Masoro', 'Musezero'],
+      Ndera: ['Kabuga', 'Kinyange', 'Muhazi', 'Muyumbu', 'Nduba'],
+      Nduba: ['Gasagara', 'Kageyo', 'Karuruma', 'Muyange', 'Nduba'],
+      Remera: ['Gisagara', 'Karuruma', 'Nyabisindu', 'Nyagahinga', 'Rukiri'],
+      Rusororo: ['Gasagara', 'Muyange', 'Nganzo', 'Nyagasambu', 'Rusororo'],
+      Rutunga: ['Gashikiri', 'Kajevuba', 'Kibaya', 'Nyamabuye', 'Rutunga']
+    }
+  },
+  Kicukiro: {
+    sectors: {
+      Gahanga: ['Gahanga', 'Karembure', 'Kinyange', 'Muremure', 'Shyembe'],
+      Gatenga: ['Gatenga', 'Karama', 'Kibaza', 'Nyanza', 'Rebero'],
+      Gikondo: ['Gikondo', 'Kabeza', 'Mamba', 'Nyanza', 'Nyarurama'],
+      Kagarama: ['Busanza', 'Gahanga', 'Kagarama', 'Karembure', 'Nyanza'],
+      Kanombe: ['Busanza', 'Busoro', 'Gahama', 'Kabeza', 'Kanombe', 'Nyarurama'],
+      Kigarama: ['Buhoro', 'Gitega', 'Kigarama', 'Nyagasambu', 'Nyanza'],
+      Masaka: ['Gahanga', 'Kabeza', 'Kimisange', 'Masaka', 'Nyarurama'],
+      Niboye: ['Kibenga', 'Muyange', 'Niboye', 'Nyanza', 'Rebero'],
+      Nyarugunga: ['Kabeza', 'Kagarama', 'Murama', 'Nyarugunga', 'Rurembo'],
+      Gatenga: ['Gatenga', 'Karama', 'Kibaza', 'Nyanza', 'Rebero']
+    }
+  },
+  Nyarugenge: {
+    sectors: {
+      Gitega: ['Cyahafi', 'Gasharu', 'Gitega', 'Kanyinya', 'Rubungo'],
+      Kanyinya: ['Bibare', 'Gikondo', 'Kanyinya', 'Mburabuturo', 'Ruramba'],
+      Kigali: ['Biryogo', 'Gitega', 'Kiyovu', 'Nyabugogo', 'Nyarugenge', 'Rwampara'],
+      Kimisagara: ['Biryogo', 'Cyahafi', 'Gitega', 'Kamuhoza', 'Kimisagara'],
+      Mageragere: ['Cyahafi', 'Gasabo', 'Kabuye', 'Mageragere', 'Nyamirambo'],
+      Muhima: ['Amahoro', 'Gasharu', 'Gitega', 'Muhima', 'Rugenge'],
+      Nyakabanda: ['Cyivugiza', 'Gikondo', 'Kabeza', 'Kadahokwa', 'Nyakabanda'],
+      Nyamirambo: ['Biryogo', 'Cyahafi', 'Kamuhoza', 'Muhima', 'Nyamirambo', 'Rwezamenyo'],
+      Nyarugenge: ['Cyahafi', 'Cyivugiza', 'Nyarugenge', 'Rwampara', 'Ubumwe'],
+      Rwezamenyo: ['Cyahafi', 'Gasharu', 'Nyamirambo', 'Rwezamenyo', 'Ubumwe']
+    }
+  }
+}
+
 export default function NewProperty() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isCheckingAuth, setIsCheckingAuth] = useState(true)
@@ -31,6 +82,19 @@ export default function NewProperty() {
   const [error, setError] = useState('')
   const router = useRouter()
 
+  // Get available sectors based on selected district
+  const getAvailableSectors = () => {
+    if (!form.district) return []
+    return Object.keys(KIGALI_DIVISIONS[form.district as keyof typeof KIGALI_DIVISIONS]?.sectors || {})
+  }
+
+  // Get available cells based on selected district and sector
+  const getAvailableCells = () => {
+    if (!form.district || !form.sector) return []
+    const district = KIGALI_DIVISIONS[form.district as keyof typeof KIGALI_DIVISIONS]
+    return district?.sectors[form.sector as keyof typeof district.sectors] || []
+  }
+
   // Check authentication status
   useEffect(() => {
     checkAuth()
@@ -53,7 +117,15 @@ export default function NewProperty() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
-    setForm(prev => ({ ...prev, [name]: value }))
+    
+    // Reset dependent fields when district or sector changes
+    if (name === 'district') {
+      setForm(prev => ({ ...prev, [name]: value, sector: '', cell: '' }))
+    } else if (name === 'sector') {
+      setForm(prev => ({ ...prev, [name]: value, cell: '' }))
+    } else {
+      setForm(prev => ({ ...prev, [name]: value }))
+    }
   }
 
   const handleAmenityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -389,32 +461,13 @@ export default function NewProperty() {
                 name="sector"
                 value={form.sector}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                disabled={!form.district}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
               >
-                <option value="">Select sector</option>
-                <option value="Kacyiru">Kacyiru</option>
-                <option value="Kimironko">Kimironko</option>
-                <option value="Remera">Remera</option>
-                <option value="Gisozi">Gisozi</option>
-                <option value="Gaculiro">Gaculiro</option>
-                <option value="Kinyinya">Kinyinya</option>
-                <option value="Ndera">Ndera</option>
-                <option value="Nduba">Nduba</option>
-                <option value="Rusororo">Rusororo</option>
-                <option value="Rutunga">Rutunga</option>
-                <option value="Gikondo">Gikondo</option>
-                <option value="Niboye">Niboye</option>
-                <option value="Kagarama">Kagarama</option>
-                <option value="Kanombe">Kanombe</option>
-                <option value="Kicukiro">Kicukiro</option>
-                <option value="Gatenga">Gatenga</option>
-                <option value="Nyarugunga">Nyarugunga</option>
-                <option value="Kimihurura">Kimihurura</option>
-                <option value="Muhima">Muhima</option>
-                <option value="Nyarugenge">Nyarugenge</option>
-                <option value="Kigali">Kigali</option>
-                <option value="Nyamirambo">Nyamirambo</option>
-                <option value="Nyakabanda">Nyakabanda</option>
+                <option value="">{form.district ? 'Select sector' : 'Select district first'}</option>
+                {getAvailableSectors().map(sector => (
+                  <option key={sector} value={sector}>{sector}</option>
+                ))}
               </select>
             </div>
 
@@ -427,26 +480,13 @@ export default function NewProperty() {
                 name="cell"
                 value={form.cell}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                disabled={!form.sector}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
               >
-                <option value="">Select cell</option>
-                <option value="Kibagabaga">Kibagabaga</option>
-                <option value="Kagugu">Kagugu</option>
-                <option value="Rugando">Rugando</option>
-                <option value="Kamatamu">Kamatamu</option>
-                <option value="Nyagatovu">Nyagatovu</option>
-                <option value="Rebero">Rebero</option>
-                <option value="Nyabisindu">Nyabisindu</option>
-                <option value="Kabeza">Kabeza</option>
-                <option value="Kagarama">Kagarama</option>
-                <option value="Gahanga">Gahanga</option>
-                <option value="Kigarama">Kigarama</option>
-                <option value="Kanserege">Kanserege</option>
-                <option value="Gikondo">Gikondo</option>
-                <option value="Biryogo">Biryogo</option>
-                <option value="Gitega">Gitega</option>
-                <option value="Kiyovu">Kiyovu</option>
-                <option value="Nyakabanda">Nyakabanda</option>
+                <option value="">{form.sector ? 'Select cell' : 'Select sector first'}</option>
+                {getAvailableCells().map(cell => (
+                  <option key={cell} value={cell}>{cell}</option>
+                ))}
               </select>
             </div>
           </div>
@@ -631,12 +671,12 @@ export default function NewProperty() {
                 // which will automatically show the payment modal
               }}
               disabled={loading}
-              className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 shadow-lg"
+              className="flex-1 px-6 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 shadow-lg"
             >
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
-              <span>List with Verification (30,000 RWF)</span>
+              <span>List with Verification</span>
             </button>
           </div>
         </form>
