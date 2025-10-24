@@ -165,7 +165,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
             {isOwner && (
               <Link
                 href={`/properties/${id}/edit`}
-                className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                className="flex items-center px-6 py-2 bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition-colors font-medium"
               >
                 <Edit className="h-4 w-4 mr-2" />
                 Edit Property
@@ -284,9 +284,6 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                     isOwner={isOwner}
                   />
                 </div>
-                <span className="px-3 py-1 bg-red-100 text-red-600 text-sm font-medium rounded">
-                  {property.property_type || property.type}
-                </span>
               </div>
               
               <div className="flex items-baseline">

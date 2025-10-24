@@ -249,9 +249,9 @@ export default function HomePage() {
       </nav>
 
       
-      <div className="relative py-16 min-h-[500px]" style={{ backgroundImage: 'url(/images/kigali-city.jpg)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
+      <div className="relative py-16 min-h-[500px]" style={{ backgroundImage: 'url(https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&w=1920)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
         {/* Overlay for better text readability */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-black/50"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-black/70"></div>
         
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           {/* Hero Text */}
@@ -512,7 +512,6 @@ export default function HomePage() {
               <p className="text-sm text-gray-600 mt-1">{properties.length} properties found</p>
             )}
           </div>
-          <Link href="/properties" className="text-red-600 hover:text-red-700 font-medium">View All</Link>
         </div>
         
         {loading ? (
