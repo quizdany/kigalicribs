@@ -365,6 +365,8 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                 <ContactUnlockButton
                   propertyId={id}
                   propertyTitle={property.title}
+                  propertyPrice={property.price}
+                  propertyDistrict={property.district}
                   onSuccess={(contactInfo) => setContactInfo(contactInfo)}
                 />
                 

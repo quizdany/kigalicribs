@@ -1,20 +1,23 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Phone, Mail, Lock, Unlock, AlertCircle, Loader2 } from 'lucide-react'
+import { Phone, Mail, Lock, Unlock, AlertCircle, Loader2, MessageCircle } from 'lucide-react'
 import PaymentModal from './PaymentModal'
 import { supabase } from '@/lib/supabase'
 
 interface ContactUnlockButtonProps {
   propertyId: string
   propertyTitle: string
+  propertyPrice: number
+  propertyDistrict: string
   onSuccess?: (contactInfo: any) => void
 }
 
-export default function ContactUnlockButton({ propertyId, propertyTitle, onSuccess }: ContactUnlockButtonProps) {
+export default function ContactUnlockButton({ propertyId, propertyTitle, propertyPrice, propertyDistrict, onSuccess }: ContactUnlockButtonProps) {
   const [unlockStatus, setUnlockStatus] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [unlocking, setUnlocking] = useState(false)
+  const [whatsappUnlocking, setWhatsappUnlocking] = useState(false)
   const [error, setError] = useState('')
   const [contactInfo, setContactInfo] = useState<any>(null)
   const [showPaymentModal, setShowPaymentModal] = useState(false)
@@ -95,6 +98,56 @@ export default function ContactUnlockButton({ propertyId, propertyTitle, onSucce
     }
   }
 
+  const handleWhatsAppUnlock = async () => {
+    try {
+      setWhatsappUnlocking(true)
+      setError('')
+      
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        setError('Please login to continue')
+        return
+      }
+
+      const response = await fetch(`/api/properties/${propertyId}/contact`, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        // Open WhatsApp with pre-filled message
+        const phone = data.data.owner_phone.replace(/\D/g, '') // Remove non-digits
+        const message = encodeURIComponent(
+          `Hi, I'm interested in your property:\n\n` +
+          `${propertyTitle}\n` +
+          `Location: ${propertyDistrict}\n` +
+          `Price: ${propertyPrice.toLocaleString()} RWF/month\n\n` +
+          `Link: ${window.location.href}`
+        )
+        window.open(`https://wa.me/${phone}?text=${message}`, '_blank')
+        
+        setContactInfo(data.data)
+        if (onSuccess) {
+          onSuccess(data.data)
+        }
+        // Refresh unlock status
+        fetchUnlockStatus()
+      } else if (data.requiresPayment) {
+        // Show payment modal for unlimited access
+        setShowPaymentModal(true)
+      } else {
+        setError(data.error || 'Failed to unlock contact')
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to unlock contact')
+    } finally {
+      setWhatsappUnlocking(false)
+    }
+  }
+
   if (!isAuthenticated) {
     return (
       <a
@@ -118,26 +171,46 @@ export default function ContactUnlockButton({ propertyId, propertyTitle, onSucce
 
   if (contactInfo) {
     return (
-      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-        <div className="flex items-center gap-2 text-green-700 font-semibold mb-3">
-          <Unlock className="h-5 w-5" />
-          Contact Information
+      <div className="space-y-3">
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          <div className="flex items-center gap-2 text-green-700 font-semibold mb-3">
+            <Unlock className="h-5 w-5" />
+            Contact Information
+          </div>
+          {contactInfo.owner_email && (
+            <div className="flex items-center gap-2 text-gray-700 mb-2">
+              <Mail className="h-4 w-4" />
+              <a href={`mailto:${contactInfo.owner_email}`} className="hover:underline">
+                {contactInfo.owner_email}
+              </a>
+            </div>
+          )}
+          {contactInfo.owner_phone && (
+            <div className="flex items-center gap-2 text-gray-700">
+              <Phone className="h-4 w-4" />
+              <a href={`tel:${contactInfo.owner_phone}`} className="hover:underline">
+                {contactInfo.owner_phone}
+              </a>
+            </div>
+          )}
         </div>
-        {contactInfo.owner_email && (
-          <div className="flex items-center gap-2 text-gray-700 mb-2">
-            <Mail className="h-4 w-4" />
-            <a href={`mailto:${contactInfo.owner_email}`} className="hover:underline">
-              {contactInfo.owner_email}
-            </a>
-          </div>
-        )}
+        
+        {/* WhatsApp Quick Action */}
         {contactInfo.owner_phone && (
-          <div className="flex items-center gap-2 text-gray-700">
-            <Phone className="h-4 w-4" />
-            <a href={`tel:${contactInfo.owner_phone}`} className="hover:underline">
-              {contactInfo.owner_phone}
-            </a>
-          </div>
+          <a
+            href={`https://wa.me/${contactInfo.owner_phone.replace(/\D/g, '')}?text=${encodeURIComponent(
+              `Hi, I'm interested in your property:\n\n` +
+              `${propertyTitle}\n` +
+              `Location: ${propertyDistrict}\n` +
+              `Price: ${propertyPrice.toLocaleString()} RWF/month\n\n` +
+              `Link: ${window.location.href}`
+            )}`}
+            target="_blank"
+            className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+          >
+            <MessageCircle className="h-5 w-5" />
+            Chat on WhatsApp
+          </a>
         )}
       </div>
     )
@@ -173,24 +246,46 @@ export default function ContactUnlockButton({ propertyId, propertyTitle, onSucce
           </div>
         )}
 
-        {/* Unlock Button */}
-        <button
-          onClick={handleUnlock}
-          disabled={unlocking}
-          className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-        >
-          {unlocking ? (
-            <>
-              <Loader2 className="h-5 w-5 animate-spin" />
-              Unlocking...
-            </>
-          ) : (
-            <>
-              <Lock className="h-5 w-5" />
-              View Contact Information
-            </>
-          )}
-        </button>
+        {/* Unlock Buttons */}
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            onClick={handleUnlock}
+            disabled={unlocking || whatsappUnlocking}
+            className="inline-flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed text-sm"
+          >
+            {unlocking ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="hidden sm:inline">Unlocking...</span>
+              </>
+            ) : (
+              <>
+                <Phone className="h-4 w-4" />
+                <span className="hidden sm:inline">View Contact</span>
+                <span className="sm:hidden">Contact</span>
+              </>
+            )}
+          </button>
+
+          <button
+            onClick={handleWhatsAppUnlock}
+            disabled={unlocking || whatsappUnlocking}
+            className="inline-flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed text-sm"
+          >
+            {whatsappUnlocking ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="hidden sm:inline">Opening...</span>
+              </>
+            ) : (
+              <>
+                <MessageCircle className="h-4 w-4" />
+                <span className="hidden sm:inline">Chat WhatsApp</span>
+                <span className="sm:hidden">WhatsApp</span>
+              </>
+            )}
+          </button>
+        </div>
 
         {/* Pricing Info */}
         {unlockStatus && !unlockStatus.hasUnlimitedAccess && unlockStatus.remainingFreeUnlocks === 0 && (
