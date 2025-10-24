@@ -251,7 +251,7 @@ export default function ContactUnlockButton({ propertyId, propertyTitle, propert
           <button
             onClick={handleUnlock}
             disabled={unlocking || whatsappUnlocking}
-            className="inline-flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed text-sm"
+            className="inline-flex items-center justify-center gap-2 px-4 py-3 bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed text-sm font-medium"
           >
             {unlocking ? (
               <>
@@ -261,7 +261,7 @@ export default function ContactUnlockButton({ propertyId, propertyTitle, propert
             ) : (
               <>
                 <Phone className="h-4 w-4" />
-                <span className="hidden sm:inline">View Contact</span>
+                <span className="hidden sm:inline">Contact Owner</span>
                 <span className="sm:hidden">Contact</span>
               </>
             )}
@@ -270,7 +270,7 @@ export default function ContactUnlockButton({ propertyId, propertyTitle, propert
           <button
             onClick={handleWhatsAppUnlock}
             disabled={unlocking || whatsappUnlocking}
-            className="inline-flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed text-sm"
+            className="inline-flex items-center justify-center gap-2 px-4 py-3 bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed text-sm font-medium"
           >
             {whatsappUnlocking ? (
               <>
@@ -280,7 +280,7 @@ export default function ContactUnlockButton({ propertyId, propertyTitle, propert
             ) : (
               <>
                 <MessageCircle className="h-4 w-4" />
-                <span className="hidden sm:inline">Chat WhatsApp</span>
+                <span className="hidden sm:inline">WhatsApp Owner</span>
                 <span className="sm:hidden">WhatsApp</span>
               </>
             )}
