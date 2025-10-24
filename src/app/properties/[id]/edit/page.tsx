@@ -27,6 +27,8 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
     size: '',
     address: '',
     district: '',
+    sector: '',
+    cell: '',
     ownerPhone: '',
   })
   const [amenities, setAmenities] = useState<string[]>([])
@@ -80,6 +82,8 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
         size: prop.size?.toString() || '',
         address: prop.address || '',
         district: prop.district || '',
+        sector: prop.sector || '',
+        cell: prop.cell || '',
         ownerPhone: prop.owner_phone || '',
       })
       
@@ -192,6 +196,8 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
           size: Number(form.size) || null,
           address: form.address,
           district: form.district,
+          sector: form.sector || null,
+          cell: form.cell || null,
           amenities,
           images: allImages,
           owner_phone: form.ownerPhone,
@@ -460,6 +466,76 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
                 <option value="Gasabo">Gasabo</option>
                 <option value="Kicukiro">Kicukiro</option>
                 <option value="Nyarugenge">Nyarugenge</option>
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="sector" className="block text-sm font-medium text-gray-700 mb-1">
+                Sector
+              </label>
+              <select
+                id="sector"
+                name="sector"
+                value={form.sector}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+              >
+                <option value="">Select sector</option>
+                <option value="Kacyiru">Kacyiru</option>
+                <option value="Kimironko">Kimironko</option>
+                <option value="Remera">Remera</option>
+                <option value="Gisozi">Gisozi</option>
+                <option value="Gaculiro">Gaculiro</option>
+                <option value="Kinyinya">Kinyinya</option>
+                <option value="Ndera">Ndera</option>
+                <option value="Nduba">Nduba</option>
+                <option value="Rusororo">Rusororo</option>
+                <option value="Rutunga">Rutunga</option>
+                <option value="Gikondo">Gikondo</option>
+                <option value="Niboye">Niboye</option>
+                <option value="Kagarama">Kagarama</option>
+                <option value="Kanombe">Kanombe</option>
+                <option value="Kicukiro">Kicukiro</option>
+                <option value="Gatenga">Gatenga</option>
+                <option value="Nyarugunga">Nyarugunga</option>
+                <option value="Kimihurura">Kimihurura</option>
+                <option value="Muhima">Muhima</option>
+                <option value="Nyarugenge">Nyarugenge</option>
+                <option value="Kigali">Kigali</option>
+                <option value="Nyamirambo">Nyamirambo</option>
+                <option value="Nyakabanda">Nyakabanda</option>
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="cell" className="block text-sm font-medium text-gray-700 mb-1">
+                Cell
+              </label>
+              <select
+                id="cell"
+                name="cell"
+                value={form.cell}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+              >
+                <option value="">Select cell</option>
+                <option value="Kibagabaga">Kibagabaga</option>
+                <option value="Kagugu">Kagugu</option>
+                <option value="Rugando">Rugando</option>
+                <option value="Kamatamu">Kamatamu</option>
+                <option value="Nyagatovu">Nyagatovu</option>
+                <option value="Rebero">Rebero</option>
+                <option value="Nyabisindu">Nyabisindu</option>
+                <option value="Kabeza">Kabeza</option>
+                <option value="Kagarama">Kagarama</option>
+                <option value="Gahanga">Gahanga</option>
+                <option value="Kigarama">Kigarama</option>
+                <option value="Kanserege">Kanserege</option>
+                <option value="Gikondo">Gikondo</option>
+                <option value="Biryogo">Biryogo</option>
+                <option value="Gitega">Gitega</option>
+                <option value="Kiyovu">Kiyovu</option>
+                <option value="Nyakabanda">Nyakabanda</option>
               </select>
             </div>
           </div>

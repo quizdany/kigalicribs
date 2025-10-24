@@ -114,19 +114,19 @@ export default function PropertiesList() {
                 </Link>
                 
                 <div className="p-4 flex flex-col flex-grow">
-                  <Link href={`/properties/${property.id}`} className="block mb-3">
-                    <div className="flex justify-between items-start mb-2 cursor-pointer">
-                      <h3 className="font-semibold text-gray-900 text-lg line-clamp-1 hover:text-red-600 transition-colors">{property.title}</h3>
+                  <Link href={`/properties/${property.id}`} className="block">
+                    <div className="space-y-1 mb-2">
+                      <h3 className="font-semibold text-gray-900 text-lg line-clamp-1 hover:text-red-600 transition-colors cursor-pointer">{property.title}</h3>
+                      
+                      <p className="text-gray-600 text-sm flex items-center">
+                        <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
+                        <span className="line-clamp-1">{property.address || property.location}, {property.district}</span>
+                      </p>
                     </div>
-                    
-                    <p className="text-gray-600 text-sm flex items-center mb-2">
-                      <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
-                      <span className="line-clamp-1">{property.address || property.location}, {property.district}</span>
-                    </p>
                   </Link>
                   
                   {/* Property Badges - Fixed Height */}
-                  <div className="min-h-[32px] mb-3">
+                  <div className="min-h-[32px] mb-2">
                     <PropertyBadges
                       listing_type={property.listing_type}
                       verification_status={property.verification_status}
@@ -138,7 +138,7 @@ export default function PropertiesList() {
                   </div>
                   
                   {/* Property Details - Fixed Height */}
-                  <div className="min-h-[24px] mb-3">
+                  <div className="min-h-[24px] mb-2">
                     {(property.bedrooms || property.bathrooms || property.size) && (
                       <div className="flex items-center space-x-4 text-sm text-gray-600">
                         {property.bedrooms && (
