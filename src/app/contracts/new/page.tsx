@@ -68,12 +68,31 @@ function NewContractContent() {
     const { data: { session } } = await supabase.auth.getSession()
     if (session?.user) {
       setCurrentUser(session.user)
-      // Pre-fill landlord info
+      // Pre-fill landlord info and mark them as landlord
       setFormData(prev => ({
         ...prev,
         landlordEmail: session.user.email || '',
       }))
+      // Auto-sign landlord if their email matches
+      if (session.user.email === formData.landlordEmail && !signatures.landlordSigned) {
+        setSignatures(prev => ({
+          ...prev,
+          landlord: formData.landlordName,
+          landlordSigned: false // They still need to confirm
+        }))
+      }
     }
+  }
+
+  const isLandlord = currentUser?.email === formData.landlordEmail
+  const isTenant = currentUser?.email === formData.tenantEmail
+
+  const handleShareWithTenant = () => {
+    const subject = encodeURIComponent('Please Sign Lease Agreement')
+    const body = encodeURIComponent(
+      `Dear ${formData.tenantName},\n\nPlease review and sign the lease agreement for ${formData.propertyAddress}.\n\nAccess the agreement here: ${window.location.href}\n\nBest regards,\n${formData.landlordName}`
+    )
+    window.open(`mailto:${formData.tenantEmail}?subject=${subject}&body=${body}`, '_blank')
   }
 
   const fetchProperty = async () => {
@@ -436,9 +455,9 @@ function NewContractContent() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
               <div>
                 <h3 className="font-semibold text-gray-700 mb-4">
-                  {language === 'english' ? "LANDLORD'S SIGNATURE" : 'UMUKONO W\'UWUKODESHA'}
+                  {language === 'english' ? "LANDLORD/LADY'S SIGNATURE" : 'UMUKONO W\'UWUKODESHA'}
                 </h3>
-                {step === 'sign' && !signatures.landlordSigned ? (
+                {step === 'sign' && !signatures.landlordSigned && isLandlord ? (
                   <div className="print:hidden">
                     <input
                       type="text"
@@ -472,6 +491,14 @@ function NewContractContent() {
                     <p className="text-sm">Name: {formData.landlordName}</p>
                     <p className="text-sm">Date: {new Date().toLocaleDateString()}</p>
                   </div>
+                ) : step === 'sign' && !isLandlord ? (
+                  <div className="print:hidden bg-gray-50 border-2 border-gray-300 rounded-lg p-4">
+                    <p className="text-sm text-gray-600 text-center">
+                      {language === 'english' 
+                        ? 'Waiting for landlord/lady to sign...' 
+                        : 'Tegereza nyir\'inzu ashyire umukono...'}
+                    </p>
+                  </div>
                 ) : (
                   <div>
                     <div className="border-b-2 border-black mb-2 h-16"></div>
@@ -485,7 +512,7 @@ function NewContractContent() {
                 <h3 className="font-semibold text-gray-700 mb-4">
                   {language === 'english' ? "TENANT'S SIGNATURE" : 'UMUKONO W\'UWUKODESHWA'}
                 </h3>
-                {step === 'sign' && !signatures.tenantSigned ? (
+                {step === 'sign' && !signatures.tenantSigned && isTenant ? (
                   <div className="print:hidden">
                     <input
                       type="text"
@@ -518,6 +545,14 @@ function NewContractContent() {
                     </div>
                     <p className="text-sm">Name: {formData.tenantName}</p>
                     <p className="text-sm">Date: {new Date().toLocaleDateString()}</p>
+                  </div>
+                ) : step === 'sign' && !isTenant ? (
+                  <div className="print:hidden bg-gray-50 border-2 border-gray-300 rounded-lg p-4">
+                    <p className="text-sm text-gray-600 text-center">
+                      {language === 'english' 
+                        ? 'Waiting for tenant to sign...' 
+                        : 'Tegereza upakira ashyire umukono...'}
+                    </p>
                   </div>
                 ) : (
                   <div>
@@ -576,10 +611,31 @@ function NewContractContent() {
                 <button onClick={() => setStep('preview')} className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
                   {language === 'english' ? 'Back to Preview' : 'Subira Kureba'}
                 </button>
-                <button onClick={handlePrint} className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
-                  <Printer className="h-5 w-5" />
-                  {language === 'english' ? 'Print Agreement' : 'Icapira Amasezerano'}
-                </button>
+                
+                {/* Show Share button if landlord has signed but tenant hasn't */}
+                {isLandlord && signatures.landlordSigned && !signatures.tenantSigned && (
+                  <button 
+                    onClick={handleShareWithTenant}
+                    className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
+                  >
+                    <Mail className="h-5 w-5" />
+                    {language === 'english' ? 'Share with Tenant' : 'Ohereza Upakira'}
+                  </button>
+                )}
+
+                {/* Show Print/Download only when both have signed */}
+                {signatures.landlordSigned && signatures.tenantSigned && (
+                  <>
+                    <button onClick={handlePrint} className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                      <Printer className="h-5 w-5" />
+                      {language === 'english' ? 'Print Agreement' : 'Icapira Amasezerano'}
+                    </button>
+                    <button onClick={handleDownload} className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2">
+                      <Download className="h-5 w-5" />
+                      {language === 'english' ? 'Download PDF' : 'Pakurura PDF'}
+                    </button>
+                  </>
+                )}
               </>
             )}
           </div>
