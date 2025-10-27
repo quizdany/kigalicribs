@@ -194,6 +194,58 @@ function NewContractContent() {
           </div>
         </nav>
 
+        {/* Signature Status Banner - Only shown in sign mode */}
+        {step === 'sign' && (
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 print:hidden">
+            <div className={`rounded-lg p-4 ${
+              signatures.landlordSigned && signatures.tenantSigned 
+                ? 'bg-green-50 border-2 border-green-500' 
+                : 'bg-blue-50 border-2 border-blue-500'
+            }`}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">
+                    {language === 'english' ? 'Digital Signature Status' : 'Uko umukono wa digitale umeze'}
+                  </h3>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      {signatures.landlordSigned ? (
+                        <CheckCircle className="h-5 w-5 text-green-600" />
+                      ) : (
+                        <div className="h-5 w-5 rounded-full border-2 border-gray-400"></div>
+                      )}
+                      <span className="text-sm">
+                        {language === 'english' ? 'Landlord Signature' : 'Umukono w\'uwukodesha'}: 
+                        <span className={signatures.landlordSigned ? 'text-green-600 font-semibold ml-1' : 'text-gray-500 ml-1'}>
+                          {signatures.landlordSigned ? (language === 'english' ? 'Signed' : 'Yashyizweho') : (language === 'english' ? 'Pending' : 'Ntiyashyizweho')}
+                        </span>
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {signatures.tenantSigned ? (
+                        <CheckCircle className="h-5 w-5 text-green-600" />
+                      ) : (
+                        <div className="h-5 w-5 rounded-full border-2 border-gray-400"></div>
+                      )}
+                      <span className="text-sm">
+                        {language === 'english' ? 'Tenant Signature' : 'Umukono w\'upakira'}: 
+                        <span className={signatures.tenantSigned ? 'text-green-600 font-semibold ml-1' : 'text-gray-500 ml-1'}>
+                          {signatures.tenantSigned ? (language === 'english' ? 'Signed' : 'Yashyizweho') : (language === 'english' ? 'Pending' : 'Ntiyashyizweho')}
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                {signatures.landlordSigned && signatures.tenantSigned && (
+                  <div className="text-green-600">
+                    <CheckCircle className="h-12 w-12" />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <div ref={printRef} className="bg-white shadow-lg rounded-lg p-12 print:shadow-none">
             {/* Header */}
@@ -383,17 +435,97 @@ function NewContractContent() {
             {/* Signatures */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
               <div>
-                <h3 className="font-semibold text-gray-700 mb-4">LANDLORD'S SIGNATURE</h3>
-                <div className="border-b-2 border-black mb-2 h-16"></div>
-                <p className="text-sm">Name: {formData.landlordName}</p>
-                <p className="text-sm">Date: _____________________</p>
+                <h3 className="font-semibold text-gray-700 mb-4">
+                  {language === 'english' ? "LANDLORD'S SIGNATURE" : 'UMUKONO W\'UWUKODESHA'}
+                </h3>
+                {step === 'sign' && !signatures.landlordSigned ? (
+                  <div className="print:hidden">
+                    <input
+                      type="text"
+                      placeholder={language === 'english' ? "Type your full name to sign" : "Andika amazina yawe yose kugira ngo ushyire umukono"}
+                      value={signatures.landlord}
+                      onChange={(e) => setSignatures(prev => ({ ...prev, landlord: e.target.value }))}
+                      className="w-full px-4 py-2 border-2 border-blue-300 rounded-lg mb-3 focus:ring-2 focus:ring-blue-500"
+                    />
+                    <button
+                      onClick={() => {
+                        if (signatures.landlord.trim()) {
+                          setSignatures(prev => ({ ...prev, landlordSigned: true }))
+                        }
+                      }}
+                      disabled={!signatures.landlord.trim()}
+                      className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                      <CheckCircle className="h-4 w-4" />
+                      {language === 'english' ? 'Confirm Signature' : 'Emeza Umukono'}
+                    </button>
+                  </div>
+                ) : signatures.landlordSigned ? (
+                  <div>
+                    <div className="border-b-2 border-green-600 mb-2 h-16 flex items-end pb-2">
+                      <span className="text-2xl font-signature italic text-green-700">{signatures.landlord}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-green-600 text-sm mb-2">
+                      <CheckCircle className="h-4 w-4" />
+                      <span>{language === 'english' ? 'Digitally Signed' : 'Yashyizweho umukono wa digitale'}</span>
+                    </div>
+                    <p className="text-sm">Name: {formData.landlordName}</p>
+                    <p className="text-sm">Date: {new Date().toLocaleDateString()}</p>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="border-b-2 border-black mb-2 h-16"></div>
+                    <p className="text-sm">Name: {formData.landlordName}</p>
+                    <p className="text-sm">Date: _____________________</p>
+                  </div>
+                )}
               </div>
 
               <div>
-                <h3 className="font-semibold text-gray-700 mb-4">TENANT'S SIGNATURE</h3>
-                <div className="border-b-2 border-black mb-2 h-16"></div>
-                <p className="text-sm">Name: {formData.tenantName}</p>
-                <p className="text-sm">Date: _____________________</p>
+                <h3 className="font-semibold text-gray-700 mb-4">
+                  {language === 'english' ? "TENANT'S SIGNATURE" : 'UMUKONO W\'UWUKODESHWA'}
+                </h3>
+                {step === 'sign' && !signatures.tenantSigned ? (
+                  <div className="print:hidden">
+                    <input
+                      type="text"
+                      placeholder={language === 'english' ? "Type your full name to sign" : "Andika amazina yawe yose kugira ngo ushyire umukono"}
+                      value={signatures.tenant}
+                      onChange={(e) => setSignatures(prev => ({ ...prev, tenant: e.target.value }))}
+                      className="w-full px-4 py-2 border-2 border-blue-300 rounded-lg mb-3 focus:ring-2 focus:ring-blue-500"
+                    />
+                    <button
+                      onClick={() => {
+                        if (signatures.tenant.trim()) {
+                          setSignatures(prev => ({ ...prev, tenantSigned: true }))
+                        }
+                      }}
+                      disabled={!signatures.tenant.trim()}
+                      className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                      <CheckCircle className="h-4 w-4" />
+                      {language === 'english' ? 'Confirm Signature' : 'Emeza Umukono'}
+                    </button>
+                  </div>
+                ) : signatures.tenantSigned ? (
+                  <div>
+                    <div className="border-b-2 border-green-600 mb-2 h-16 flex items-end pb-2">
+                      <span className="text-2xl font-signature italic text-green-700">{signatures.tenant}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-green-600 text-sm mb-2">
+                      <CheckCircle className="h-4 w-4" />
+                      <span>{language === 'english' ? 'Digitally Signed' : 'Yashyizweho umukono wa digitale'}</span>
+                    </div>
+                    <p className="text-sm">Name: {formData.tenantName}</p>
+                    <p className="text-sm">Date: {new Date().toLocaleDateString()}</p>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="border-b-2 border-black mb-2 h-16"></div>
+                    <p className="text-sm">Name: {formData.tenantName}</p>
+                    <p className="text-sm">Date: _____________________</p>
+                  </div>
+                )}
               </div>
             </div>
 
