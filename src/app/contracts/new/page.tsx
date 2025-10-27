@@ -11,19 +11,28 @@ function NewContractContent() {
   const propertyId = params.get('propertyId')
   const [property, setProperty] = useState<any>(null)
   const [currentUser, setCurrentUser] = useState<any>(null)
-  const [step, setStep] = useState<'form' | 'preview'>('form')
+  const [step, setStep] = useState<'form' | 'preview' | 'sign'>('form')
+  const [language, setLanguage] = useState<'english' | 'kinyarwanda'>('english')
+  const [signatures, setSignatures] = useState({
+    landlord: '',
+    tenant: '',
+    landlordSigned: false,
+    tenantSigned: false,
+  })
   const printRef = useRef<HTMLDivElement>(null)
 
   // Form state
   const [formData, setFormData] = useState({
     // Landlord info
     landlordName: '',
+    landlordIdType: 'national-id',
     landlordId: '',
     landlordPhone: '',
     landlordEmail: '',
     
     // Tenant info
     tenantName: '',
+    tenantIdType: 'national-id',
     tenantId: '',
     tenantPhone: '',
     tenantEmail: '',
@@ -38,6 +47,7 @@ function NewContractContent() {
     
     // Property details (auto-filled)
     propertyAddress: '',
+    propertyLocation: '',
     propertyType: '',
     bedrooms: '',
     bathrooms: '',
@@ -47,7 +57,6 @@ function NewContractContent() {
     specialTerms: '',
     maintenanceResponsibility: 'landlord',
     petPolicy: 'not-allowed',
-    smokingPolicy: 'not-allowed',
   })
 
   useEffect(() => {
@@ -78,6 +87,7 @@ function NewContractContent() {
         setFormData(prev => ({
           ...prev,
           propertyAddress: `${prop.title}, ${prop.district}, ${prop.sector || ''}, Kigali`,
+          propertyLocation: `${prop.district}, ${prop.sector || ''}, ${prop.cell || ''}, Kigali, Rwanda`,
           propertyType: prop.property_type,
           bedrooms: prop.bedrooms?.toString() || '',
           bathrooms: prop.bathrooms?.toString() || '',
@@ -141,24 +151,45 @@ function NewContractContent() {
     }
   }
 
-  if (step === 'preview') {
+  if (step === 'preview' || step === 'sign') {
     return (
       <div className="min-h-screen bg-gray-50">
         <nav className="bg-white shadow-sm border-b print:hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <Link href="/" className="text-gray-900 font-semibold">KeyLinka</Link>
             <div className="flex items-center gap-3">
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value as 'english' | 'kinyarwanda')}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500"
+              >
+                <option value="english">English</option>
+                <option value="kinyarwanda">Kinyarwanda</option>
+              </select>
               <button onClick={() => setStep('form')} className="text-sm text-gray-600 hover:text-gray-900">
                 ← Edit Details
               </button>
-              <button onClick={handlePrint} className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
-                <Printer className="h-4 w-4" />
-                Print
-              </button>
-              <button onClick={handleDownload} className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-                <Download className="h-4 w-4" />
-                Download PDF
-              </button>
+              {step === 'preview' && (
+                <button 
+                  onClick={() => setStep('sign')} 
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  <FileSignature className="h-4 w-4" />
+                  Sign Agreement
+                </button>
+              )}
+              {step === 'sign' && (
+                <>
+                  <button onClick={handlePrint} className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
+                    <Printer className="h-4 w-4" />
+                    Print
+                  </button>
+                  <button onClick={handleDownload} className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                    <Download className="h-4 w-4" />
+                    Download PDF
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </nav>
@@ -167,47 +198,56 @@ function NewContractContent() {
           <div ref={printRef} className="bg-white shadow-lg rounded-lg p-12 print:shadow-none">
             {/* Header */}
             <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">RESIDENTIAL LEASE AGREEMENT</h1>
-              <p className="text-sm text-gray-600">Republic of Rwanda</p>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                {language === 'english' ? 'RESIDENTIAL LEASE AGREEMENT' : 'AMASEZERANO YO GUKODESHA INZU'}
+              </h1>
+              <p className="text-sm text-gray-600">
+                {language === 'english' ? 'Republic of Rwanda' : 'Repubulika y\'u Rwanda'}
+              </p>
             </div>
 
             {/* Agreement Introduction */}
             <div className="mb-8">
               <p className="text-sm leading-relaxed">
-                This Lease Agreement ("Agreement") is entered into on <span className="font-semibold">{new Date().toLocaleDateString()}</span>, 
-                between:
+                {language === 'english' ? (
+                  <>Entered into on <span className="font-semibold">{new Date().toLocaleDateString()}</span>, between:</>
+                ) : (
+                  <>Yakozwe ku wa <span className="font-semibold">{new Date().toLocaleDateString()}</span>, hagati ya:</>
+                )}
               </p>
             </div>
 
             {/* Parties */}
             <div className="mb-8">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">PARTIES TO THE AGREEMENT</h2>
+              <h2 className="text-xl font-bold text-gray-800 mb-4">
+                {language === 'english' ? 'PARTIES TO THE AGREEMENT' : 'ABANTU BAGIZE AMASEZERANO'}
+              </h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="border border-gray-300 rounded-lg p-4">
                   <h3 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
                     <Home className="h-5 w-5 text-green-600" />
-                    LANDLORD (Lessor)
+                    {language === 'english' ? 'LANDLORD (Lessor)' : 'NYIR\'INZU (Ukodesha)'}
                   </h3>
                   <div className="space-y-2 text-sm">
-                    <p><span className="font-medium">Name:</span> {formData.landlordName}</p>
-                    <p><span className="font-medium">ID Number:</span> {formData.landlordId}</p>
-                    <p><span className="font-medium">Phone:</span> {formData.landlordPhone}</p>
-                    <p><span className="font-medium">Email:</span> {formData.landlordEmail}</p>
+                    <p><span className="font-medium">{language === 'english' ? 'Name:' : 'Izina:'}</span> {formData.landlordName}</p>
+                    <p><span className="font-medium">{language === 'english' ? `${formData.landlordIdType === 'passport' ? 'Passport' : 'ID Number'}:` : `${formData.landlordIdType === 'passport' ? 'Pasiporo' : 'Nomero y\'indangamuntu'}:`}</span> {formData.landlordId}</p>
+                    <p><span className="font-medium">{language === 'english' ? 'Phone:' : 'Telefoni:'}</span> {formData.landlordPhone}</p>
+                    <p><span className="font-medium">{language === 'english' ? 'Email:' : 'Imeri:'}</span> {formData.landlordEmail}</p>
                   </div>
                 </div>
 
                 <div className="border border-gray-300 rounded-lg p-4">
                   <h3 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
                     <User className="h-5 w-5 text-blue-600" />
-                    TENANT (Lessee)
+                    {language === 'english' ? 'TENANT (Lessee)' : 'UPAKIRA (Ukodeshwa)'}
                   </h3>
                   <div className="space-y-2 text-sm">
-                    <p><span className="font-medium">Name:</span> {formData.tenantName}</p>
-                    <p><span className="font-medium">ID Number:</span> {formData.tenantId}</p>
-                    <p><span className="font-medium">Phone:</span> {formData.tenantPhone}</p>
-                    <p><span className="font-medium">Email:</span> {formData.tenantEmail}</p>
-                    <p><span className="font-medium">Occupation:</span> {formData.tenantOccupation}</p>
+                    <p><span className="font-medium">{language === 'english' ? 'Name:' : 'Izina:'}</span> {formData.tenantName}</p>
+                    <p><span className="font-medium">{language === 'english' ? `${formData.tenantIdType === 'passport' ? 'Passport' : 'ID Number'}:` : `${formData.tenantIdType === 'passport' ? 'Pasiporo' : 'Nomero y\'indangamuntu'}:`}</span> {formData.tenantId}</p>
+                    <p><span className="font-medium">{language === 'english' ? 'Phone:' : 'Telefoni:'}</span> {formData.tenantPhone}</p>
+                    <p><span className="font-medium">{language === 'english' ? 'Email:' : 'Imeri:'}</span> {formData.tenantEmail}</p>
+                    <p><span className="font-medium">{language === 'english' ? 'Occupation:' : 'Umwuga:'}</span> {formData.tenantOccupation}</p>
                   </div>
                 </div>
               </div>
@@ -215,13 +255,16 @@ function NewContractContent() {
 
             {/* Property Details */}
             <div className="mb-8">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">PROPERTY DESCRIPTION</h2>
+              <h2 className="text-xl font-bold text-gray-800 mb-4">
+                {language === 'english' ? 'PROPERTY DESCRIPTION' : 'IBISOBANURO BY\'INZU'}
+              </h2>
               <div className="bg-gray-50 border border-gray-300 rounded-lg p-4">
                 <div className="grid grid-cols-2 gap-4 text-sm">
-                  <p><span className="font-medium">Address:</span> {formData.propertyAddress}</p>
-                  <p><span className="font-medium">Type:</span> {formData.propertyType}</p>
-                  <p><span className="font-medium">Bedrooms:</span> {formData.bedrooms}</p>
-                  <p><span className="font-medium">Bathrooms:</span> {formData.bathrooms}</p>
+                  <p className="col-span-2"><span className="font-medium">{language === 'english' ? 'Address:' : 'Aderesi:'}</span> {formData.propertyAddress}</p>
+                  <p className="col-span-2"><span className="font-medium">{language === 'english' ? 'Location:' : 'Ahantu iherereye:'}</span> {formData.propertyLocation}</p>
+                  <p><span className="font-medium">{language === 'english' ? 'Type:' : 'Ubwoko:'}</span> {formData.propertyType}</p>
+                  <p><span className="font-medium">{language === 'english' ? 'Bedrooms:' : 'Ibyumba byo kuraramo:'}</span> {formData.bedrooms}</p>
+                  <p><span className="font-medium">{language === 'english' ? 'Bathrooms:' : 'Ubwiherero:'}</span> {formData.bathrooms}</p>
                 </div>
               </div>
             </div>
@@ -298,12 +341,10 @@ function NewContractContent() {
                 </div>
 
                 <div>
-                  <h3 className="font-semibold text-gray-700 mb-2">6. PETS AND SMOKING</h3>
+                  <h3 className="font-semibold text-gray-700 mb-2">6. PETS POLICY</h3>
                   <p className="ml-4 leading-relaxed">
-                    <span className="font-semibold">Pets:</span> {formData.petPolicy === 'allowed' ? 'Pets are allowed on the premises with prior written consent.' : 
-                    formData.petPolicy === 'allowed-with-deposit' ? 'Pets are allowed with an additional deposit.' : 'No pets are allowed on the premises.'}<br/>
-                    <span className="font-semibold">Smoking:</span> {formData.smokingPolicy === 'allowed' ? 'Smoking is permitted.' : 
-                    formData.smokingPolicy === 'outside-only' ? 'Smoking is only permitted outside the building.' : 'Smoking is strictly prohibited on the premises.'}
+                    {formData.petPolicy === 'allowed' ? 'Pets are allowed on the premises with prior written consent from the Landlord.' : 
+                    formData.petPolicy === 'allowed-with-deposit' ? 'Pets are allowed with an additional deposit and prior written consent from the Landlord.' : 'No pets are allowed on the premises without prior written consent from the Landlord.'}
                   </p>
                 </div>
 
@@ -356,22 +397,31 @@ function NewContractContent() {
               </div>
             </div>
 
-            {/* Witnesses (Optional) */}
+            {/* Witnesses and Notary */}
             <div className="mt-12 pt-8 border-t-2 border-gray-300">
-              <h3 className="font-semibold text-gray-700 mb-6">WITNESSES (Optional)</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+              <h3 className="font-semibold text-gray-700 mb-6">
+                {language === 'english' ? 'WITNESSES & PUBLIC NOTARY (Optional)' : 'ABATANGABUHAMYA N\'UMWE MU NOTAIRE YA LETA (Bitari ngombwa)'}
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div>
                   <div className="border-b-2 border-gray-400 mb-2 h-12"></div>
-                  <p className="text-sm">Witness 1 Signature</p>
-                  <p className="text-sm mt-2">Name: _____________________</p>
-                  <p className="text-sm">ID: _____________________</p>
+                  <p className="text-sm font-medium">{language === 'english' ? 'Witness 1 Signature' : 'Umwanzuro w\'Umutangabuhamya 1'}</p>
+                  <p className="text-sm mt-2">{language === 'english' ? 'Name:' : 'Izina:'} _____________________</p>
+                  <p className="text-sm">{language === 'english' ? 'ID:' : 'Indangamuntu:'} _____________________</p>
                 </div>
 
                 <div>
                   <div className="border-b-2 border-gray-400 mb-2 h-12"></div>
-                  <p className="text-sm">Witness 2 Signature</p>
-                  <p className="text-sm mt-2">Name: _____________________</p>
-                  <p className="text-sm">ID: _____________________</p>
+                  <p className="text-sm font-medium">{language === 'english' ? 'Witness 2 Signature' : 'Umwanzuro w\'Umutangabuhamya 2'}</p>
+                  <p className="text-sm mt-2">{language === 'english' ? 'Name:' : 'Izina:'} _____________________</p>
+                  <p className="text-sm">{language === 'english' ? 'ID:' : 'Indangamuntu:'} _____________________</p>
+                </div>
+
+                <div className="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-3">
+                  <div className="border-b-2 border-yellow-600 mb-2 h-12"></div>
+                  <p className="text-sm font-semibold text-yellow-900">{language === 'english' ? 'Public Notary Seal & Signature' : 'Kashe n\'Umwanzuro bya Notaire'}</p>
+                  <p className="text-sm mt-2">{language === 'english' ? 'Name:' : 'Izina:'} _____________________</p>
+                  <p className="text-sm">{language === 'english' ? 'License No:' : 'Nomero y\'uruhushya:'} _____________________</p>
                 </div>
               </div>
             </div>
@@ -379,13 +429,27 @@ function NewContractContent() {
 
           {/* Action buttons for print view */}
           <div className="mt-6 flex justify-center gap-4 print:hidden">
-            <button onClick={() => setStep('form')} className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
-              Edit Agreement
-            </button>
-            <button onClick={handlePrint} className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
-              <Printer className="h-5 w-5" />
-              Print Agreement
-            </button>
+            {step === 'preview' ? (
+              <>
+                <button onClick={() => setStep('form')} className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
+                  {language === 'english' ? 'Edit Agreement' : 'Hindura Amasezerano'}
+                </button>
+                <button onClick={() => setStep('sign')} className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                  <FileSignature className="h-5 w-5" />
+                  {language === 'english' ? 'Sign Agreement' : 'Shyira Umukono'}
+                </button>
+              </>
+            ) : (
+              <>
+                <button onClick={() => setStep('preview')} className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
+                  {language === 'english' ? 'Back to Preview' : 'Subira Kureba'}
+                </button>
+                <button onClick={handlePrint} className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                  <Printer className="h-5 w-5" />
+                  {language === 'english' ? 'Print Agreement' : 'Icapira Amasezerano'}
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -434,7 +498,21 @@ function NewContractContent() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">ID Number *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">ID Type *</label>
+                <select
+                  name="landlordIdType"
+                  value={formData.landlordIdType}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                >
+                  <option value="national-id">National ID</option>
+                  <option value="passport">Passport</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {formData.landlordIdType === 'passport' ? 'Passport Number *' : 'ID Number *'}
+                </label>
                 <input
                   type="text"
                   name="landlordId"
@@ -488,7 +566,21 @@ function NewContractContent() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">ID Number *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">ID Type *</label>
+                <select
+                  name="tenantIdType"
+                  value={formData.tenantIdType}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                >
+                  <option value="national-id">National ID</option>
+                  <option value="passport">Passport</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {formData.tenantIdType === 'passport' ? 'Passport Number *' : 'ID Number *'}
+                </label>
                 <input
                   type="text"
                   name="tenantId"
@@ -652,20 +744,6 @@ function NewContractContent() {
                     <option value="not-allowed">Not Allowed</option>
                     <option value="allowed">Allowed</option>
                     <option value="allowed-with-deposit">Allowed with Deposit</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Smoking Policy</label>
-                  <select
-                    name="smokingPolicy"
-                    value={formData.smokingPolicy}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  >
-                    <option value="not-allowed">Not Allowed</option>
-                    <option value="allowed">Allowed</option>
-                    <option value="outside-only">Outside Only</option>
                   </select>
                 </div>
               </div>
