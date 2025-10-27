@@ -74,7 +74,7 @@ export default function AuthPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
         <h2 className="text-2xl font-bold mb-6 text-center">
-          {isLogin ? 'Login to KigaliCribs' : 'Sign Up for KigaliCribs'}
+          {isLogin ? 'Login to KeyLinka' : 'Sign Up for KeyLinka'}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (

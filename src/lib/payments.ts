@@ -125,7 +125,7 @@ async function initiateMoMoPayment(request: PaymentRequest): Promise<PaymentResp
         partyId: formatPhoneNumber(request.phoneNumber)
       },
       payerMessage: getPaymentMessage(request.purpose),
-      payeeNote: `KigaliCribs - ${request.purpose}`
+      payeeNote: `KeyLinka - ${request.purpose}`
     }
 
     console.log('MoMo payment payload:', JSON.stringify(paymentPayload, null, 2))
@@ -443,7 +443,7 @@ function getPaymentMessage(purpose: PaymentPurpose): string {
     unlimited_contact_access: 'Unlimited Contact Access',
     contact_unlock: 'Unlock Property Contact'
   }
-  return messages[purpose] || 'KigaliCribs Payment'
+  return messages[purpose] || 'KeyLinka Payment'
 }
 
 // Pricing configuration (in RWF)
