@@ -250,7 +250,7 @@ function NewContractContent() {
                         <div className="h-5 w-5 rounded-full border-2 border-gray-400"></div>
                       )}
                       <span className="text-sm">
-                        {language === 'english' ? 'Landlord Signature' : 'Umukono w\'uwukodesha'}: 
+                        {language === 'english' ? 'Landlord Signature' : 'Umukono wa nyir\'inzu'}: 
                         <span className={signatures.landlordSigned ? 'text-gray-700 font-semibold ml-1' : 'text-gray-500 ml-1'}>
                           {signatures.landlordSigned ? (language === 'english' ? 'Signed' : 'Yashyizweho') : (language === 'english' ? 'Pending' : 'Ntiyashyizweho')}
                         </span>
@@ -263,7 +263,7 @@ function NewContractContent() {
                         <div className="h-5 w-5 rounded-full border-2 border-gray-400"></div>
                       )}
                       <span className="text-sm">
-                        {language === 'english' ? 'Tenant Signature' : 'Umukono w\'upakira'}: 
+                        {language === 'english' ? 'Tenant Signature' : 'Umukono w\'ukodesha'}: 
                         <span className={signatures.tenantSigned ? 'text-gray-700 font-semibold ml-1' : 'text-gray-500 ml-1'}>
                           {signatures.tenantSigned ? (language === 'english' ? 'Signed' : 'Yashyizweho') : (language === 'english' ? 'Pending' : 'Ntiyashyizweho')}
                         </span>
@@ -314,7 +314,7 @@ function NewContractContent() {
                 <div className="border border-gray-300 rounded-lg p-4">
                   <h3 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
                     <Home className="h-5 w-5 text-green-600" />
-                    {language === 'english' ? 'LANDLORD (Lessor)' : 'NYIR\'INZU (Ukodesha)'}
+                    {language === 'english' ? 'LANDLORD (Lessor)' : 'NYIR\'INZU (Uwukodesha)'}
                   </h3>
                   <div className="space-y-2 text-sm">
                     <p><span className="font-medium">{language === 'english' ? 'Name:' : 'Izina:'}</span> {formData.landlordName}</p>
@@ -327,7 +327,7 @@ function NewContractContent() {
                 <div className="border border-gray-300 rounded-lg p-4">
                   <h3 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
                     <User className="h-5 w-5 text-blue-600" />
-                    {language === 'english' ? 'TENANT (Lessee)' : 'UPAKIRA (Ukodeshwa)'}
+                    {language === 'english' ? 'TENANT (Lessee)' : 'UKODESHA (Uwukodeshwa)'}
                   </h3>
                   <div className="space-y-2 text-sm">
                     <p><span className="font-medium">{language === 'english' ? 'Name:' : 'Izina:'}</span> {formData.tenantName}</p>
@@ -358,101 +358,176 @@ function NewContractContent() {
 
             {/* Lease Terms */}
             <div className="mb-8">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">LEASE TERMS</h2>
+              <h2 className="text-xl font-bold text-gray-800 mb-4">
+                {language === 'english' ? 'LEASE TERMS' : 'AMATEGEKO Y\'UBUKODE'}
+              </h2>
               <div className="space-y-3 text-sm">
                 <div className="grid grid-cols-2 gap-4">
-                  <p><span className="font-medium">Lease Start Date:</span> {new Date(formData.startDate).toLocaleDateString()}</p>
-                  <p><span className="font-medium">Lease End Date:</span> {new Date(formData.endDate).toLocaleDateString()}</p>
-                  <p><span className="font-medium">Monthly Rent:</span> {parseInt(formData.monthlyRent).toLocaleString()} RWF</p>
-                  <p><span className="font-medium">Security Deposit:</span> {parseInt(formData.securityDeposit).toLocaleString()} RWF</p>
-                  <p><span className="font-medium">Payment Due:</span> Day {formData.paymentDueDay} of each month</p>
+                  <p><span className="font-medium">{language === 'english' ? 'Lease Start Date:' : 'Itariki yo gutangira:'}</span> {new Date(formData.startDate).toLocaleDateString()}</p>
+                  <p><span className="font-medium">{language === 'english' ? 'Lease End Date:' : 'Itariki yo kurangiza:'}</span> {new Date(formData.endDate).toLocaleDateString()}</p>
+                  <p><span className="font-medium">{language === 'english' ? 'Monthly Rent:' : 'Ubukode bwa buri kwezi:'}</span> {parseInt(formData.monthlyRent).toLocaleString()} RWF</p>
+                  <p><span className="font-medium">{language === 'english' ? 'Security Deposit:' : 'Ingwate:'}</span> {parseInt(formData.securityDeposit).toLocaleString()} RWF</p>
+                  <p><span className="font-medium">{language === 'english' ? 'Payment Due:' : 'Itariki yo kwishyura:'}</span> {language === 'english' ? `Day ${formData.paymentDueDay} of each month` : `Umunsi wa ${formData.paymentDueDay} wa buri kwezi`}</p>
                 </div>
               </div>
             </div>
 
             {/* Terms and Conditions */}
             <div className="mb-8">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">TERMS AND CONDITIONS</h2>
+              <h2 className="text-xl font-bold text-gray-800 mb-4">
+                {language === 'english' ? 'TERMS AND CONDITIONS' : 'AMABWIRIZA N\'AMATEGEKO'}
+              </h2>
               
               <div className="space-y-4 text-sm">
                 <div>
-                  <h3 className="font-semibold text-gray-700 mb-2">1. RENT PAYMENT</h3>
+                  <h3 className="font-semibold text-gray-700 mb-2">
+                    {language === 'english' ? '1. RENT PAYMENT' : '1. KWISHYURA UBUKODE'}
+                  </h3>
                   <p className="ml-4 leading-relaxed">
-                    The Tenant agrees to pay rent of <span className="font-semibold">{parseInt(formData.monthlyRent).toLocaleString()} RWF</span> per month, 
-                    due on the <span className="font-semibold">{formData.paymentDueDay}{getOrdinalSuffix(parseInt(formData.paymentDueDay))}</span> day of each month. 
-                    Payment shall be made via bank transfer, mobile money, or as otherwise agreed upon by both parties.
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold text-gray-700 mb-2">2. SECURITY DEPOSIT</h3>
-                  <p className="ml-4 leading-relaxed">
-                    The Tenant has paid a security deposit of <span className="font-semibold">{parseInt(formData.securityDeposit).toLocaleString()} RWF</span>. 
-                    This deposit will be refunded within 14 days after the lease termination, subject to deductions for any damages beyond normal wear and tear, 
-                    unpaid rent, or other breaches of this agreement.
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold text-gray-700 mb-2">3. UTILITIES</h3>
-                  <p className="ml-4 leading-relaxed">
-                    {formData.utilitiesIncluded.length > 0 ? (
-                      <>The following utilities are included in the rent: {formData.utilitiesIncluded.join(', ')}. 
-                      All other utilities shall be the responsibility of the Tenant.</>
+                    {language === 'english' ? (
+                      <>The Tenant agrees to pay rent of <span className="font-semibold">{parseInt(formData.monthlyRent).toLocaleString()} RWF</span> per month, 
+                      due on the <span className="font-semibold">{formData.paymentDueDay}{getOrdinalSuffix(parseInt(formData.paymentDueDay))}</span> day of each month. 
+                      Payment shall be made via bank transfer, mobile money, or as otherwise agreed upon by both parties.</>
                     ) : (
-                      <>All utilities including water, electricity, internet, and other services are the responsibility of the Tenant 
-                      and shall be paid directly to the respective service providers.</>
+                      <>Ukodesha yemera kwishyura ubukode bwa <span className="font-semibold">{parseInt(formData.monthlyRent).toLocaleString()} RWF</span> buri kwezi, 
+                      ku munsi wa <span className="font-semibold">{formData.paymentDueDay}</span> wa buri kwezi. 
+                      Kwishyura bikorwa binyuze kuri banki, mobile money, cyangwa mu bundi buryo impande zombi zemereranye.</>
                     )}
                   </p>
                 </div>
 
                 <div>
-                  <h3 className="font-semibold text-gray-700 mb-2">4. MAINTENANCE AND REPAIRS</h3>
+                  <h3 className="font-semibold text-gray-700 mb-2">
+                    {language === 'english' ? '2. SECURITY DEPOSIT' : '2. INGWATE'}
+                  </h3>
                   <p className="ml-4 leading-relaxed">
-                    {formData.maintenanceResponsibility === 'landlord' ? (
-                      <>The Landlord is responsible for major repairs and maintenance of the property's structure, plumbing, and electrical systems. 
-                      The Tenant is responsible for minor repairs and keeping the property in good condition.</>
+                    {language === 'english' ? (
+                      <>The Tenant has paid a security deposit of <span className="font-semibold">{parseInt(formData.securityDeposit).toLocaleString()} RWF</span>. 
+                      This deposit will be refunded within 14 days after the lease termination, subject to deductions for any damages beyond normal wear and tear, 
+                      unpaid rent, or other breaches of this agreement.</>
                     ) : (
-                      <>The Tenant is responsible for all maintenance and repairs during the lease period, except for structural issues 
-                      which remain the Landlord's responsibility.</>
+                      <>Ukodesha yishyuye ingwate ya <span className="font-semibold">{parseInt(formData.securityDeposit).toLocaleString()} RWF</span>. 
+                      Iyi ngwate izasubizwa mu minsi 14 nyuma yo kurangiza amasezerano, keretse ibyonenewe birenze ibisanzwe, 
+                      ubukode butagishyuwe, cyangwa ibindi byemezo by'amasezerano byaciwemo.</>
                     )}
                   </p>
                 </div>
 
                 <div>
-                  <h3 className="font-semibold text-gray-700 mb-2">5. USE OF PREMISES</h3>
+                  <h3 className="font-semibold text-gray-700 mb-2">
+                    {language === 'english' ? '3. UTILITIES' : '3. SERIVISI Z\'IBANZE'}
+                  </h3>
                   <p className="ml-4 leading-relaxed">
-                    The property shall be used solely for residential purposes. The Tenant shall not use the premises for any illegal activities 
-                    or purposes that violate Rwandan law.
+                    {language === 'english' ? (
+                      formData.utilitiesIncluded.length > 0 ? (
+                        <>The following utilities are included in the rent: {formData.utilitiesIncluded.join(', ')}. 
+                        All other utilities shall be the responsibility of the Tenant.</>
+                      ) : (
+                        <>All utilities including water, electricity, internet, and other services are the responsibility of the Tenant 
+                        and shall be paid directly to the respective service providers.</>
+                      )
+                    ) : (
+                      formData.utilitiesIncluded.length > 0 ? (
+                        <>Serivisi zikurikira ziri mu bukode: {formData.utilitiesIncluded.join(', ')}. 
+                        Izindi serivisi zose ni inshingano z'ukodesha.</>
+                      ) : (
+                        <>Serivisi zose harimo amazi, amashanyarazi, interineti, n'izindi serivisi ni inshingano z'ukodesha 
+                        kandi zigomba kwishyurwa bitaziguye ku batanga serivisi.</>
+                      )
+                    )}
                   </p>
                 </div>
 
                 <div>
-                  <h3 className="font-semibold text-gray-700 mb-2">6. PETS POLICY</h3>
+                  <h3 className="font-semibold text-gray-700 mb-2">
+                    {language === 'english' ? '4. MAINTENANCE AND REPAIRS' : '4. KUBUNGABUNGA NO GUSANA'}
+                  </h3>
                   <p className="ml-4 leading-relaxed">
-                    {formData.petPolicy === 'allowed' ? 'Pets are allowed on the premises with prior written consent from the Landlord.' : 
-                    formData.petPolicy === 'allowed-with-deposit' ? 'Pets are allowed with an additional deposit and prior written consent from the Landlord.' : 'No pets are allowed on the premises without prior written consent from the Landlord.'}
+                    {language === 'english' ? (
+                      formData.maintenanceResponsibility === 'landlord' ? (
+                        <>The Landlord is responsible for major repairs and maintenance of the property's structure, plumbing, and electrical systems. 
+                        The Tenant is responsible for minor repairs and keeping the property in good condition.</>
+                      ) : (
+                        <>The Tenant is responsible for all maintenance and repairs during the lease period, except for structural issues 
+                        which remain the Landlord's responsibility.</>
+                      )
+                    ) : (
+                      formData.maintenanceResponsibility === 'landlord' ? (
+                        <>Nyir'inzu ashinzwe gusana no kubungabunga inzu, imiyoboro n'amashanyarazi. 
+                        Ukodesha ashinzwe gusana ibintu bito no kubungabunga inzu neza.</>
+                      ) : (
+                        <>Ukodesha ashinzwe kubungabunga no gusana byose mu gihe cy'ubukode, usibye ibibazo by'imiterere y'inzu 
+                        bishingiye kuri nyir'inzu.</>
+                      )
+                    )}
                   </p>
                 </div>
 
                 <div>
-                  <h3 className="font-semibold text-gray-700 mb-2">7. TERMINATION</h3>
+                  <h3 className="font-semibold text-gray-700 mb-2">
+                    {language === 'english' ? '5. USE OF PREMISES' : '5. GUKORESHA INZU'}
+                  </h3>
                   <p className="ml-4 leading-relaxed">
-                    Either party may terminate this agreement with 30 days written notice. Early termination by the Tenant without proper notice 
-                    may result in forfeiture of the security deposit. The Landlord reserves the right to terminate immediately for breach of agreement.
+                    {language === 'english' ? (
+                      <>The property shall be used solely for residential purposes. The Tenant shall not use the premises for any illegal activities 
+                      or purposes that violate Rwandan law.</>
+                    ) : (
+                      <>Inzu igomba gukoreshwa mu guturamo gusa. Ukodesha ntashobora kuyikoresha mu bikorwa bitemewe n'amategeko 
+                      cyangwa ibinyuranyije n'amategeko y'u Rwanda.</>
+                    )}
                   </p>
                 </div>
 
                 <div>
-                  <h3 className="font-semibold text-gray-700 mb-2">8. PROPERTY INSPECTION</h3>
+                  <h3 className="font-semibold text-gray-700 mb-2">
+                    {language === 'english' ? '6. PETS POLICY' : '6. AMATEGEKO Y\'AMATUNGO'}
+                  </h3>
                   <p className="ml-4 leading-relaxed">
-                    The Landlord reserves the right to inspect the property with 24 hours notice to the Tenant, during reasonable hours.
+                    {language === 'english' ? (
+                      formData.petPolicy === 'allowed' ? 'Pets are allowed on the premises with prior written consent from the Landlord.' : 
+                      formData.petPolicy === 'allowed-with-deposit' ? 'Pets are allowed with an additional deposit and prior written consent from the Landlord.' : 
+                      'No pets are allowed on the premises without prior written consent from the Landlord.'
+                    ) : (
+                      formData.petPolicy === 'allowed' ? 'Amatungo yemerewe mu nzu iyo nyir\'inzu yemeje mu nyandiko mbere.' : 
+                      formData.petPolicy === 'allowed-with-deposit' ? 'Amatungo yemerewe hamwe n\'ingwate y\'inyongera iyo nyir\'inzu yemeje mu nyandiko mbere.' : 
+                      'Amatungo ntayemerewe mu nzu keretse nyir\'inzu yemeje mu nyandiko mbere.'
+                    )}
+                  </p>
+                </div>
+
+                <div>
+                  <h3 className="font-semibold text-gray-700 mb-2">
+                    {language === 'english' ? '7. TERMINATION' : '7. KURANGIZA AMASEZERANO'}
+                  </h3>
+                  <p className="ml-4 leading-relaxed">
+                    {language === 'english' ? (
+                      <>Either party may terminate this agreement with 30 days written notice. Early termination by the Tenant without proper notice 
+                      may result in forfeiture of the security deposit. The Landlord reserves the right to terminate immediately for breach of agreement.</>
+                    ) : (
+                      <>Buri ruhande rushobora kurangiza aya masezerano hamaze iminsi 30 nyuma yo kumenyesha mu nyandiko. Kurangiza amasezerano hakiri kare n'ukodesha atabanje kumenyesha neza 
+                      bishobora gutera kubura ingwate. Nyir'inzu afite uburenganzira bwo kurangiza ako kanya iyo amasezerano yaciwemo.</>
+                    )}
+                  </p>
+                </div>
+
+                <div>
+                  <h3 className="font-semibold text-gray-700 mb-2">
+                    {language === 'english' ? '8. PROPERTY INSPECTION' : '8. KUGENZURA INZU'}
+                  </h3>
+                  <p className="ml-4 leading-relaxed">
+                    {language === 'english' ? (
+                      <>The Landlord reserves the right to inspect the property with 24 hours notice to the Tenant, during reasonable hours.</>
+                    ) : (
+                      <>Nyir'inzu afite uburenganzira bwo kugenzura inzu nyuma yo kumenyesha ukodesha amasaha 24 mbere, mu gihe cy'amasaha akwiye.</>
+                    )}
                   </p>
                 </div>
 
                 {formData.specialTerms && (
                   <div>
-                    <h3 className="font-semibold text-gray-700 mb-2">9. SPECIAL TERMS</h3>
+                    <h3 className="font-semibold text-gray-700 mb-2">
+                      {language === 'english' ? '9. SPECIAL TERMS' : '9. AMABWIRIZA YIHARIYE'}
+                    </h3>
                     <p className="ml-4 leading-relaxed whitespace-pre-wrap">{formData.specialTerms}</p>
                   </div>
                 )}
@@ -462,8 +537,13 @@ function NewContractContent() {
             {/* Agreement Clause */}
             <div className="mb-12 bg-gray-50 border-l-4 border-gray-500 p-4">
               <p className="text-sm leading-relaxed text-gray-700">
-                Both parties have read and understood all terms of this agreement and agree to be bound by them. 
-                This agreement is governed by the laws of the Republic of Rwanda.
+                {language === 'english' ? (
+                  <>Both parties have read and understood all terms of this agreement and agree to be bound by them. 
+                  This agreement is governed by the laws of the Republic of Rwanda.</>
+                ) : (
+                  <>Impande zombi zasomye kandi zibyumvise amabwiriza yose y'aya masezerano kandi zemeye kuyubahiriza. 
+                  Aya masezerano ayobowe n'amategeko ya Repubulika y'u Rwanda.</>
+                )}
               </p>
             </div>
 
@@ -471,7 +551,7 @@ function NewContractContent() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
               <div>
                 <h3 className="font-semibold text-gray-700 mb-4">
-                  {language === 'english' ? "LANDLORD/LADY'S SIGNATURE" : 'UMUKONO W\'UWUKODESHA'}
+                  {language === 'english' ? "LANDLORD/LADY'S SIGNATURE" : 'UMUKONO WA NYIR\'INZU'}
                 </h3>
                 {step === 'sign' && !signatures.landlordSigned && isLandlord ? (
                   <div className="print:hidden">
@@ -526,7 +606,7 @@ function NewContractContent() {
 
               <div>
                 <h3 className="font-semibold text-gray-700 mb-4">
-                  {language === 'english' ? "TENANT'S SIGNATURE" : 'UMUKONO W\'UWUKODESHWA'}
+                  {language === 'english' ? "TENANT'S SIGNATURE" : 'UMUKONO W\'UKODESHA'}
                 </h3>
                 {step === 'sign' && !signatures.tenantSigned && isTenant ? (
                   <div className="print:hidden">
@@ -567,7 +647,7 @@ function NewContractContent() {
                     <p className="text-sm text-gray-600 text-center">
                       {language === 'english' 
                         ? 'Waiting for tenant to sign...' 
-                        : 'Tegereza upakira ashyire umukono...'}
+                        : 'Tegereza ukodesha ashyire umukono...'}
                     </p>
                   </div>
                 ) : (
@@ -635,7 +715,7 @@ function NewContractContent() {
                     className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 flex items-center gap-2"
                   >
                     <Mail className="h-5 w-5" />
-                    {language === 'english' ? 'Share with Tenant' : 'Ohereza Upakira'}
+                    {language === 'english' ? 'Share with Tenant' : 'Ohereza Ukodesha'}
                   </button>
                 )}
 
@@ -668,7 +748,7 @@ function NewContractContent() {
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">
-                {language === 'english' ? 'Share with Tenant' : 'Sangiza Umupfukura'}
+                {language === 'english' ? 'Share with Tenant' : 'Sangiza Ukodesha'}
               </h3>
               <button
                 onClick={() => setShowShareModal(false)}
