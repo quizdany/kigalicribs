@@ -13,6 +13,7 @@ export default function PropertiesList() {
   const [loading, setLoading] = useState(true)
   const router = useRouter()
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
     fetchProperties()
@@ -23,6 +24,22 @@ export default function PropertiesList() {
     try {
       const { data: { session } } = await supabase.auth.getSession()
       setCurrentUserId(session?.user?.id || null)
+      
+      // Check if user is admin
+      if (session?.user?.id) {
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select('role')
+          .eq('id', session.user.id)
+          .single()
+        
+        if (!userError && userData) {
+          const role = (userData as { role?: string }).role
+          if (role === 'admin') {
+            setIsAdmin(true)
+          }
+        }
+      }
     } catch (err) {
       console.error('Error fetching current user:', err)
     }
@@ -58,6 +75,14 @@ export default function PropertiesList() {
               </span>
             </Link>
             <div className="flex items-center gap-3">
+              {isAdmin && (
+                <Link 
+                  href="/admin/verifications" 
+                  className="px-6 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 border border-gray-300 transition-colors"
+                >
+                  Verify Properties
+                </Link>
+              )}
               <Link 
                 href="/properties/new" 
                 className="px-6 py-2 bg-green-50 text-green-700 font-medium rounded-lg hover:bg-green-100 border border-green-200 transition-colors"

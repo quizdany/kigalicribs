@@ -24,6 +24,7 @@ export default function HomePage() {
   const [showAmenitiesDropdown, setShowAmenitiesDropdown] = useState(false)
   const amenitiesRef = useRef<HTMLDivElement | null>(null)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
   
   // Search filters state
   type FiltersState = {
@@ -51,6 +52,22 @@ export default function HomePage() {
     try {
       const { data: { session } } = await supabase.auth.getSession()
       setCurrentUserId(session?.user?.id || null)
+      
+      // Check if user is admin
+      if (session?.user?.id) {
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select('role')
+          .eq('id', session.user.id)
+          .single()
+        
+        if (!userError && userData) {
+          const role = (userData as { role?: string }).role
+          if (role === 'admin') {
+            setIsAdmin(true)
+          }
+        }
+      }
     } catch (err) {
       console.error('Error fetching current user:', err)
     }
@@ -219,6 +236,9 @@ export default function HomePage() {
             <div className="hidden md:flex items-center space-x-4">
               <Link href="/properties" className="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors duration-200 border border-transparent hover:border-red-100">Find a Property</Link>
               <Link href="/properties/new" className="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors duration-200 border border-transparent hover:border-red-100">List a Property</Link>
+              {isAdmin && (
+                <Link href="/admin/verifications" className="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors duration-200 border border-transparent hover:border-red-100">Verify Properties</Link>
+              )}
             </div>
 
             {/* Auth Button & Mobile Menu */}
@@ -239,6 +259,9 @@ export default function HomePage() {
             <div className="p-3 space-y-2">
               <Link href="/properties" className="w-full text-left px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors duration-200 border border-transparent hover:border-red-100 block">Find a Property</Link>
               <Link href="/properties/new" className="w-full text-left px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors duration-200 border border-transparent hover:border-red-100 block">List Property</Link>
+              {isAdmin && (
+                <Link href="/admin/verifications" className="w-full text-left px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors duration-200 border border-transparent hover:border-red-100 block">Verify Properties</Link>
+              )}
               <Link href="/auth" className="w-full text-left px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors duration-200 border border-transparent hover:border-red-100 flex items-center">
                 <User className="h-4 w-4 mr-2" />
                 Login

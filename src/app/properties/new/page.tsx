@@ -61,6 +61,7 @@ const KIGALI_DIVISIONS = {
 export default function NewProperty() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isCheckingAuth, setIsCheckingAuth] = useState(true)
+  const [isAdmin, setIsAdmin] = useState(false)
   const [form, setForm] = useState({
     title: '',
     description: '',
@@ -106,6 +107,20 @@ export default function NewProperty() {
       setIsAuthenticated(!!session)
       if (!session) {
         setError('You must be logged in to list a property')
+      } else {
+        // Check if user is admin
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select('role')
+          .eq('id', session.user.id)
+          .single()
+        
+        if (!userError && userData) {
+          const role = (userData as { role?: string }).role
+          if (role === 'admin') {
+            setIsAdmin(true)
+          }
+        }
       }
     } catch (err) {
       console.error('Auth check error:', err)
@@ -253,7 +268,17 @@ export default function NewProperty() {
                 <span className="text-gray-600">inka</span>
               </span>
             </Link>
-            <AuthButton />
+            <div className="flex items-center gap-3">
+              {isAdmin && (
+                <Link 
+                  href="/admin/verifications" 
+                  className="px-6 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 border border-gray-300 transition-colors"
+                >
+                  Verify Properties
+                </Link>
+              )}
+              <AuthButton />
+            </div>
           </div>
         </div>
       </nav>
