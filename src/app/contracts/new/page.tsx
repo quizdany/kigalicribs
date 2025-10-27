@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Suspense, useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
-import { FileText, Download, Printer, Mail, CheckCircle, Calendar, Home, User, DollarSign, FileSignature } from 'lucide-react'
+import { FileText, Download, Printer, Mail, CheckCircle, Calendar, Home, User, DollarSign, FileSignature, MessageCircle, X } from 'lucide-react'
 
 function NewContractContent() {
   const params = useSearchParams()
@@ -13,6 +13,7 @@ function NewContractContent() {
   const [currentUser, setCurrentUser] = useState<any>(null)
   const [step, setStep] = useState<'form' | 'preview' | 'sign'>('form')
   const [language, setLanguage] = useState<'english' | 'kinyarwanda'>('english')
+  const [showShareModal, setShowShareModal] = useState(false)
   const [signatures, setSignatures] = useState({
     landlord: '',
     tenant: '',
@@ -88,11 +89,26 @@ function NewContractContent() {
   const isTenant = currentUser?.email === formData.tenantEmail
 
   const handleShareWithTenant = () => {
+    setShowShareModal(true)
+  }
+
+  const handleShareByEmail = () => {
     const subject = encodeURIComponent('Please Sign Lease Agreement')
     const body = encodeURIComponent(
       `Dear ${formData.tenantName},\n\nPlease review and sign the lease agreement for ${formData.propertyAddress}.\n\nAccess the agreement here: ${window.location.href}\n\nBest regards,\n${formData.landlordName}`
     )
     window.open(`mailto:${formData.tenantEmail}?subject=${subject}&body=${body}`, '_blank')
+    setShowShareModal(false)
+  }
+
+  const handleShareByWhatsApp = () => {
+    const message = encodeURIComponent(
+      `Dear ${formData.tenantName},\n\nPlease review and sign the lease agreement for ${formData.propertyAddress}.\n\nAccess the agreement here: ${window.location.href}\n\nBest regards,\n${formData.landlordName}`
+    )
+    // Remove any non-digit characters from phone
+    const phone = formData.tenantPhone.replace(/\D/g, '')
+    window.open(`https://wa.me/${phone}?text=${message}`, '_blank')
+    setShowShareModal(false)
   }
 
   const fetchProperty = async () => {
@@ -180,7 +196,7 @@ function NewContractContent() {
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value as 'english' | 'kinyarwanda')}
-                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500"
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gray-400"
               >
                 <option value="english">English</option>
                 <option value="kinyarwanda">Kinyarwanda</option>
@@ -191,7 +207,7 @@ function NewContractContent() {
               {step === 'preview' && (
                 <button 
                   onClick={() => setStep('sign')} 
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800"
                 >
                   <FileSignature className="h-4 w-4" />
                   Sign Agreement
@@ -203,7 +219,7 @@ function NewContractContent() {
                     <Printer className="h-4 w-4" />
                     Print
                   </button>
-                  <button onClick={handleDownload} className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                  <button onClick={handleDownload} className="flex items-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800">
                     <Download className="h-4 w-4" />
                     Download PDF
                   </button>
@@ -218,8 +234,8 @@ function NewContractContent() {
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 print:hidden">
             <div className={`rounded-lg p-4 ${
               signatures.landlordSigned && signatures.tenantSigned 
-                ? 'bg-green-50 border-2 border-green-500' 
-                : 'bg-blue-50 border-2 border-blue-500'
+                ? 'bg-gray-50 border-2 border-gray-400' 
+                : 'bg-gray-50 border-2 border-gray-300'
             }`}>
               <div className="flex items-center justify-between">
                 <div>
@@ -229,26 +245,26 @@ function NewContractContent() {
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       {signatures.landlordSigned ? (
-                        <CheckCircle className="h-5 w-5 text-green-600" />
+                        <CheckCircle className="h-5 w-5 text-gray-600" />
                       ) : (
                         <div className="h-5 w-5 rounded-full border-2 border-gray-400"></div>
                       )}
                       <span className="text-sm">
                         {language === 'english' ? 'Landlord Signature' : 'Umukono w\'uwukodesha'}: 
-                        <span className={signatures.landlordSigned ? 'text-green-600 font-semibold ml-1' : 'text-gray-500 ml-1'}>
+                        <span className={signatures.landlordSigned ? 'text-gray-700 font-semibold ml-1' : 'text-gray-500 ml-1'}>
                           {signatures.landlordSigned ? (language === 'english' ? 'Signed' : 'Yashyizweho') : (language === 'english' ? 'Pending' : 'Ntiyashyizweho')}
                         </span>
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
                       {signatures.tenantSigned ? (
-                        <CheckCircle className="h-5 w-5 text-green-600" />
+                        <CheckCircle className="h-5 w-5 text-gray-600" />
                       ) : (
                         <div className="h-5 w-5 rounded-full border-2 border-gray-400"></div>
                       )}
                       <span className="text-sm">
                         {language === 'english' ? 'Tenant Signature' : 'Umukono w\'upakira'}: 
-                        <span className={signatures.tenantSigned ? 'text-green-600 font-semibold ml-1' : 'text-gray-500 ml-1'}>
+                        <span className={signatures.tenantSigned ? 'text-gray-700 font-semibold ml-1' : 'text-gray-500 ml-1'}>
                           {signatures.tenantSigned ? (language === 'english' ? 'Signed' : 'Yashyizweho') : (language === 'english' ? 'Pending' : 'Ntiyashyizweho')}
                         </span>
                       </span>
@@ -256,7 +272,7 @@ function NewContractContent() {
                   </div>
                 </div>
                 {signatures.landlordSigned && signatures.tenantSigned && (
-                  <div className="text-green-600">
+                  <div className="text-gray-700">
                     <CheckCircle className="h-12 w-12" />
                   </div>
                 )}
@@ -444,8 +460,8 @@ function NewContractContent() {
             </div>
 
             {/* Agreement Clause */}
-            <div className="mb-12 bg-green-50 border-l-4 border-green-600 p-4">
-              <p className="text-sm leading-relaxed">
+            <div className="mb-12 bg-gray-50 border-l-4 border-gray-500 p-4">
+              <p className="text-sm leading-relaxed text-gray-700">
                 Both parties have read and understood all terms of this agreement and agree to be bound by them. 
                 This agreement is governed by the laws of the Republic of Rwanda.
               </p>
@@ -464,7 +480,7 @@ function NewContractContent() {
                       placeholder={language === 'english' ? "Type your full name to sign" : "Andika amazina yawe yose kugira ngo ushyire umukono"}
                       value={signatures.landlord}
                       onChange={(e) => setSignatures(prev => ({ ...prev, landlord: e.target.value }))}
-                      className="w-full px-4 py-2 border-2 border-blue-300 rounded-lg mb-3 focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg mb-3 focus:ring-2 focus:ring-gray-400"
                     />
                     <button
                       onClick={() => {
@@ -473,7 +489,7 @@ function NewContractContent() {
                         }
                       }}
                       disabled={!signatures.landlord.trim()}
-                      className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                       <CheckCircle className="h-4 w-4" />
                       {language === 'english' ? 'Confirm Signature' : 'Emeza Umukono'}
@@ -481,10 +497,10 @@ function NewContractContent() {
                   </div>
                 ) : signatures.landlordSigned ? (
                   <div>
-                    <div className="border-b-2 border-green-600 mb-2 h-16 flex items-end pb-2">
-                      <span className="text-2xl font-signature italic text-green-700">{signatures.landlord}</span>
+                    <div className="border-b-2 border-gray-600 mb-2 h-16 flex items-end pb-2">
+                      <span className="text-2xl font-signature italic text-gray-700">{signatures.landlord}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-green-600 text-sm mb-2">
+                    <div className="flex items-center gap-2 text-gray-600 text-sm mb-2">
                       <CheckCircle className="h-4 w-4" />
                       <span>{language === 'english' ? 'Digitally Signed' : 'Yashyizweho umukono wa digitale'}</span>
                     </div>
@@ -519,7 +535,7 @@ function NewContractContent() {
                       placeholder={language === 'english' ? "Type your full name to sign" : "Andika amazina yawe yose kugira ngo ushyire umukono"}
                       value={signatures.tenant}
                       onChange={(e) => setSignatures(prev => ({ ...prev, tenant: e.target.value }))}
-                      className="w-full px-4 py-2 border-2 border-blue-300 rounded-lg mb-3 focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg mb-3 focus:ring-2 focus:ring-gray-400"
                     />
                     <button
                       onClick={() => {
@@ -528,7 +544,7 @@ function NewContractContent() {
                         }
                       }}
                       disabled={!signatures.tenant.trim()}
-                      className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                       <CheckCircle className="h-4 w-4" />
                       {language === 'english' ? 'Confirm Signature' : 'Emeza Umukono'}
@@ -536,10 +552,10 @@ function NewContractContent() {
                   </div>
                 ) : signatures.tenantSigned ? (
                   <div>
-                    <div className="border-b-2 border-green-600 mb-2 h-16 flex items-end pb-2">
-                      <span className="text-2xl font-signature italic text-green-700">{signatures.tenant}</span>
+                    <div className="border-b-2 border-gray-600 mb-2 h-16 flex items-end pb-2">
+                      <span className="text-2xl font-signature italic text-gray-700">{signatures.tenant}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-green-600 text-sm mb-2">
+                    <div className="flex items-center gap-2 text-gray-600 text-sm mb-2">
                       <CheckCircle className="h-4 w-4" />
                       <span>{language === 'english' ? 'Digitally Signed' : 'Yashyizweho umukono wa digitale'}</span>
                     </div>
@@ -601,7 +617,7 @@ function NewContractContent() {
                 <button onClick={() => setStep('form')} className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
                   {language === 'english' ? 'Edit Agreement' : 'Hindura Amasezerano'}
                 </button>
-                <button onClick={() => setStep('sign')} className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                <button onClick={() => setStep('sign')} className="px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 flex items-center gap-2">
                   <FileSignature className="h-5 w-5" />
                   {language === 'english' ? 'Sign Agreement' : 'Shyira Umukono'}
                 </button>
@@ -616,7 +632,7 @@ function NewContractContent() {
                 {isLandlord && signatures.landlordSigned && !signatures.tenantSigned && (
                   <button 
                     onClick={handleShareWithTenant}
-                    className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
+                    className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 flex items-center gap-2"
                   >
                     <Mail className="h-5 w-5" />
                     {language === 'english' ? 'Share with Tenant' : 'Ohereza Upakira'}
@@ -626,11 +642,11 @@ function NewContractContent() {
                 {/* Show Print/Download only when both have signed */}
                 {signatures.landlordSigned && signatures.tenantSigned && (
                   <>
-                    <button onClick={handlePrint} className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                    <button onClick={handlePrint} className="px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 flex items-center gap-2">
                       <Printer className="h-5 w-5" />
                       {language === 'english' ? 'Print Agreement' : 'Icapira Amasezerano'}
                     </button>
-                    <button onClick={handleDownload} className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2">
+                    <button onClick={handleDownload} className="px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 flex items-center gap-2">
                       <Download className="h-5 w-5" />
                       {language === 'english' ? 'Download PDF' : 'Pakurura PDF'}
                     </button>
@@ -646,6 +662,46 @@ function NewContractContent() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Share Modal */}
+      {showShareModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">
+                {language === 'english' ? 'Share with Tenant' : 'Sangiza Umupfukura'}
+              </h3>
+              <button
+                onClick={() => setShowShareModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <p className="text-sm text-gray-600 mb-6">
+              {language === 'english' 
+                ? 'Choose how you want to share the agreement:' 
+                : 'Hitamo uburyo ushaka gusangiza amasezerano:'}
+            </p>
+            <div className="space-y-3">
+              <button
+                onClick={handleShareByEmail}
+                className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                <Mail className="h-5 w-5" />
+                <span>{language === 'english' ? 'Share via Email' : 'Sangiza kuri Email'}</span>
+              </button>
+              <button
+                onClick={handleShareByWhatsApp}
+                className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                <MessageCircle className="h-5 w-5" />
+                <span>{language === 'english' ? 'Share via WhatsApp' : 'Sangiza kuri WhatsApp'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <nav className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link href="/" className="text-gray-900 font-semibold">KeyLinka</Link>
@@ -658,8 +714,8 @@ function NewContractContent() {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Generate Lease Agreement</h1>
           <p className="text-gray-600">Fill in the details below to create a customized lease agreement</p>
           {property && (
-            <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-sm text-blue-800">
+            <div className="mt-4 bg-gray-50 border border-gray-200 rounded-lg p-4">
+              <p className="text-sm text-gray-700">
                 <span className="font-semibold">Property:</span> {property.title} - {parseInt(property.price).toLocaleString()} RWF/month
               </p>
             </div>
@@ -944,7 +1000,7 @@ function NewContractContent() {
                   onChange={handleInputChange}
                   rows={4}
                   placeholder="Add any special terms, conditions, or clauses specific to this lease..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-transparent"
                 />
               </div>
             </div>
@@ -957,7 +1013,7 @@ function NewContractContent() {
             </Link>
             <button
               onClick={handleGenerateLease}
-              className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2 font-semibold"
+              className="px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 flex items-center gap-2 font-semibold"
             >
               <FileText className="h-5 w-5" />
               Generate Lease Agreement
