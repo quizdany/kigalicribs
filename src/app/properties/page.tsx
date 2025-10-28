@@ -66,12 +66,12 @@ export default function PropertiesList() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <Link href="/" className="flex items-center">
-              <img src="/images/kigalicribsLogo.png" alt="KeyLinka Logo" className="h-8 w-auto mr-2" />
+              <img src="/images/kigalicribsLogo.png" alt="TuraNeza Logo" className="h-8 w-auto mr-2" />
               <span className="text-xl tracking-tighter">
-                <span className="font-bold text-gray-900">K</span>
-                <span className="text-gray-600">ey</span>
-                <span className="font-bold text-gray-900">L</span>
-                <span className="text-gray-600">inka</span>
+                <span className="font-bold text-gray-900">T</span>
+                <span className="text-gray-600">ura</span>
+                <span className="font-bold text-gray-900">N</span>
+                <span className="text-gray-600">eza</span>
               </span>
             </Link>
             <div className="flex items-center gap-3">

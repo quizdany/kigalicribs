@@ -191,7 +191,7 @@ function NewContractContent() {
       <div className="min-h-screen bg-gray-50">
         <nav className="bg-white shadow-sm border-b print:hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <Link href="/" className="text-gray-900 font-semibold">KeyLinka</Link>
+            <Link href="/" className="text-gray-900 font-semibold">TuraNeza</Link>
             <div className="flex items-center gap-3">
               <select
                 value={language}
@@ -784,7 +784,7 @@ function NewContractContent() {
 
       <nav className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <Link href="/" className="text-gray-900 font-semibold">KeyLinka</Link>
+          <Link href="/" className="text-gray-900 font-semibold">TuraNeza</Link>
           <Link href="/properties" className="text-sm text-gray-600 hover:text-gray-900">Back to properties</Link>
         </div>
       </nav>

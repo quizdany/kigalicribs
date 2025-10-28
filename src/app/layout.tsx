@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "KeyLinka - Find Your Perfect Home in Kigali",
-  description: "Discover affordable rentals in Kigali, Rwanda. Browse apartments, houses, and rooms with KeyLinka.",
+  title: "TuraNeza - Find Your Perfect Home in Kigali",
+  description: "Discover affordable rentals in Kigali, Rwanda. Browse apartments, houses, and rooms with TuraNeza.",
 };
 
 export default function RootLayout({
