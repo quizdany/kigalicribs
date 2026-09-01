@@ -38,8 +38,7 @@ const KIGALI_DIVISIONS = {
       Kigarama: ['Buhoro', 'Gitega', 'Kigarama', 'Nyagasambu', 'Nyanza'],
       Masaka: ['Gahanga', 'Kabeza', 'Kimisange', 'Masaka', 'Nyarurama'],
       Niboye: ['Kibenga', 'Muyange', 'Niboye', 'Nyanza', 'Rebero'],
-      Nyarugunga: ['Kabeza', 'Kagarama', 'Murama', 'Nyarugunga', 'Rurembo'],
-      Gatenga: ['Gatenga', 'Karama', 'Kibaza', 'Nyanza', 'Rebero']
+      Nyarugunga: ['Kabeza', 'Kagarama', 'Murama', 'Nyarugunga', 'Rurembo']
     }
   },
   Nyarugenge: {

@@ -1,20 +1,14 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
-  title: "TuraNeza - Find Your Perfect Home in Kigali",
-  description: "Discover affordable rentals in Kigali, Rwanda. Browse apartments, houses, and rooms with TuraNeza.",
+  title: {
+    default: "TuraNeza | Homes for Rent in Kigali",
+    template: "%s | TuraNeza",
+  },
+  description: "Find verified apartments, houses, studios and rooms in Kigali, directly from property owners.",
+  applicationName: "TuraNeza",
+  keywords: ["Kigali rentals", "Rwanda property", "apartments in Kigali", "houses for rent"],
 };
 
 export default function RootLayout({
@@ -24,11 +18,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

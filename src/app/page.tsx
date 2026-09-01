@@ -1,6 +1,6 @@
 'use client'
 
-import { Search, MapPin, Filter, Heart, Star, Bed, Bath, Square, Phone, User, Menu, X, Shield, Copy, ChevronDown } from 'lucide-react'
+import { Search, MapPin, Heart, Star, Phone, User, Menu, X, Shield, Copy, ChevronDown, Home, BadgeCheck } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -212,8 +212,8 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation */}
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto pl-0 pr-4 sm:pr-6 lg:pr-8">
+      <nav className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
               <Image
@@ -246,7 +246,7 @@ export default function HomePage() {
               <div className="hidden md:block">
                 <AuthButton />
               </div>
-              <button className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+              <button className="md:hidden rounded-lg p-2 hover:bg-gray-100" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Toggle navigation" aria-expanded={isMenuOpen}>
                 {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </button>
             </div>
@@ -272,23 +272,27 @@ export default function HomePage() {
       </nav>
 
       
-      <div className="relative py-16 min-h-[500px]" style={{ backgroundImage: 'url(https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&w=1920)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
+      <section className="relative flex min-h-[560px] items-center py-16" style={{ backgroundImage: 'url(/images/kigali-hd.jpg)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
         {/* Overlay for better text readability */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-black/70"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/35"></div>
         
-        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl text-left">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-medium text-white backdrop-blur">
+            <BadgeCheck className="h-4 w-4" /> Verified homes. Direct owners. No brokerage.
+          </div>
           {/* Hero Text */}
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
-            Discover Your New Home
+            Find a home in Kigali.<br className="hidden sm:block" /> Live with ease.
           </h1>
           <p className="text-lg md:text-xl text-white/90 mb-8">
-            Directly connect with home owners in Kigali.
+            Browse trusted rental listings and connect directly with property owners across Kigali.
           </p>
           
           {/* Search Form */}
-          <form onSubmit={handleSearch} className="max-w-2xl mx-auto">
+          <form onSubmit={handleSearch} className="max-w-3xl" role="search">
             {/* Main Search Box */}
-            <div className="bg-white rounded-full shadow-lg p-2 flex items-center gap-2">
+            <div className="bg-white rounded-2xl sm:rounded-full shadow-2xl p-2 flex items-center gap-2">
               <div className="flex-1 relative">
                 <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <input
@@ -296,12 +300,14 @@ export default function HomePage() {
                   value={filters.location}
                   onChange={(e) => setFilters(prev => ({ ...prev, location: e.target.value }))}
                   placeholder="Location, School, or Point of Interest"
+                  aria-label="Search by location or point of interest"
                   className="w-full pl-12 pr-4 py-3 rounded-full focus:outline-none text-base"
                 />
               </div>
               <button 
                 type="submit" 
                 className="bg-red-600 text-white rounded-full p-3 hover:bg-red-700 transition-colors flex-shrink-0"
+                aria-label="Search properties"
               >
                 <Search className="h-5 w-5" />
               </button>
@@ -451,8 +457,13 @@ export default function HomePage() {
               </div>
             )}
           </form>
+          <div className="mt-6 flex flex-wrap gap-3 text-sm font-medium">
+            <Link href="/properties" className="rounded-full bg-white px-5 py-2.5 text-gray-900 transition hover:bg-gray-100">Browse all homes</Link>
+            <Link href="/properties/new" className="rounded-full border border-white/40 bg-white/10 px-5 py-2.5 text-white backdrop-blur transition hover:bg-white/20">List your property</Link>
+          </div>
+          </div>
         </div>
-      </div>
+      </section>
 
       {/* More Filters Modal */}
       {showFiltersModal && (
@@ -735,7 +746,7 @@ export default function HomePage() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
+            <div className="rounded-2xl border border-gray-100 bg-gray-50 p-8 text-center">
               <div className="bg-red-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Shield className="h-8 w-8 text-red-600" />
               </div>
@@ -743,15 +754,15 @@ export default function HomePage() {
               <p className="text-gray-600">All properties and owners are verified for your safety</p>
             </div>
             
-            <div className="text-center">
+            <div className="rounded-2xl border border-gray-100 bg-gray-50 p-8 text-center">
               <div className="bg-green-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Shield className="h-8 w-8 text-green-600" />
+                <Home className="h-8 w-8 text-green-600" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">No Brokerage</h3>
               <p className="text-gray-600">Direct contact with property owners, no hidden fees</p>
             </div>
             
-            <div className="text-center">
+            <div className="rounded-2xl border border-gray-100 bg-gray-50 p-8 text-center">
               <div className="bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Phone className="h-8 w-8 text-blue-600" />
               </div>
