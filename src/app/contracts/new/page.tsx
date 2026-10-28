@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Suspense, useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
-import { FileText, Download, Printer, Mail, CheckCircle, Calendar, Home, User, DollarSign, FileSignature, MessageCircle, X } from 'lucide-react'
+import { FileText, DownloadSimple, Printer, Envelope, CheckCircle, Calendar, House, User, Money, Signature, ChatCircle, X } from '@phosphor-icons/react'
 
 function NewContractContent() {
   const params = useSearchParams()
@@ -202,15 +202,15 @@ function NewContractContent() {
                 <option value="kinyarwanda">Kinyarwanda</option>
               </select>
               <button onClick={() => setStep('form')} className="text-sm text-gray-600 hover:text-gray-900">
-                ← Edit Details
+                ← Edit details
               </button>
               {step === 'preview' && (
                 <button 
                   onClick={() => setStep('sign')} 
                   className="flex items-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800"
                 >
-                  <FileSignature className="h-4 w-4" />
-                  Sign Agreement
+                  <Signature className="h-4 w-4" />
+                  Sign agreement
                 </button>
               )}
               {step === 'sign' && (
@@ -220,7 +220,7 @@ function NewContractContent() {
                     Print
                   </button>
                   <button onClick={handleDownload} className="tk-button flex items-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800">
-                    <Download className="h-4 w-4" />
+                    <DownloadSimple className="h-4 w-4" />
                     Download PDF
                   </button>
                 </>
@@ -313,7 +313,7 @@ function NewContractContent() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="border border-gray-300 rounded-lg p-4">
                   <h3 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                    <Home className="h-5 w-5 text-emerald-600" />
+                    <House className="h-5 w-5 text-emerald-600" />
                     {language === 'english' ? 'LANDLORD (Lessor)' : 'NYIR\'INZU (Uwukodesha)'}
                   </h3>
                   <div className="space-y-2 text-sm">
@@ -326,7 +326,7 @@ function NewContractContent() {
 
                 <div className="border border-gray-300 rounded-lg p-4">
                   <h3 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                    <User className="h-5 w-5 text-teal-600" />
+                    <User className="h-5 w-5 text-emerald-600" />
                     {language === 'english' ? 'TENANT (Lessee)' : 'UKODESHA (Uwukodeshwa)'}
                   </h3>
                   <div className="space-y-2 text-sm">
@@ -578,7 +578,7 @@ function NewContractContent() {
                 ) : signatures.landlordSigned ? (
                   <div>
                     <div className="border-b-2 border-gray-600 mb-2 h-16 flex items-end pb-2">
-                      <span className="text-2xl font-signature italic text-gray-700">{signatures.landlord}</span>
+                      <span className="text-2xl font-signature text-gray-700">{signatures.landlord}</span>
                     </div>
                     <div className="flex items-center gap-2 text-gray-600 text-sm mb-2">
                       <CheckCircle className="h-4 w-4" />
@@ -633,7 +633,7 @@ function NewContractContent() {
                 ) : signatures.tenantSigned ? (
                   <div>
                     <div className="border-b-2 border-gray-600 mb-2 h-16 flex items-end pb-2">
-                      <span className="text-2xl font-signature italic text-gray-700">{signatures.tenant}</span>
+                      <span className="text-2xl font-signature text-gray-700">{signatures.tenant}</span>
                     </div>
                     <div className="flex items-center gap-2 text-gray-600 text-sm mb-2">
                       <CheckCircle className="h-4 w-4" />
@@ -698,8 +698,8 @@ function NewContractContent() {
                   {language === 'english' ? 'Edit Agreement' : 'Hindura Amasezerano'}
                 </button>
                 <button onClick={() => setStep('sign')} className="px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 flex items-center gap-2">
-                  <FileSignature className="h-5 w-5" />
-                  {language === 'english' ? 'Sign Agreement' : 'Shyira Umukono'}
+                  <Signature className="h-5 w-5" />
+                  {language === 'english' ? 'Sign agreement' : 'Shyira Umukono'}
                 </button>
               </>
             ) : (
@@ -714,7 +714,7 @@ function NewContractContent() {
                     onClick={handleShareWithTenant}
                     className="tk-button px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 flex items-center gap-2"
                   >
-                    <Mail className="h-5 w-5" />
+                    <Envelope className="h-5 w-5" />
                     {language === 'english' ? 'Share with Tenant' : 'Ohereza Ukodesha'}
                   </button>
                 )}
@@ -727,7 +727,7 @@ function NewContractContent() {
                       {language === 'english' ? 'Print Agreement' : 'Icapira Amasezerano'}
                     </button>
                     <button onClick={handleDownload} className="tk-button px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 flex items-center gap-2">
-                      <Download className="h-5 w-5" />
+                      <DownloadSimple className="h-5 w-5" />
                       {language === 'english' ? 'Download PDF' : 'Pakurura PDF'}
                     </button>
                   </>
@@ -767,14 +767,14 @@ function NewContractContent() {
                 onClick={handleShareByEmail}
                 className="tk-button w-full flex items-center justify-center gap-3 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
               >
-                <Mail className="h-5 w-5" />
+                <Envelope className="h-5 w-5" />
                 <span>{language === 'english' ? 'Share via Email' : 'Sangiza kuri Email'}</span>
               </button>
               <button
                 onClick={handleShareByWhatsApp}
                 className="tk-button w-full flex items-center justify-center gap-3 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
               >
-                <MessageCircle className="h-5 w-5" />
+                <ChatCircle className="h-5 w-5" />
                 <span>{language === 'english' ? 'Share via WhatsApp' : 'Sangiza kuri WhatsApp'}</span>
               </button>
             </div>
@@ -785,7 +785,7 @@ function NewContractContent() {
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="mb-8">
-          <h1 className="tk-title text-3xl font-bold text-gray-900 mb-2">Generate Lease Agreement</h1>
+          <h1 className="tk-title text-3xl font-bold text-gray-900 mb-2">Generate a lease agreement</h1>
           <p className="text-gray-600">Fill in the details below to create a customized lease agreement</p>
           {property && (
             <div className="mt-4 bg-gray-50 border border-gray-200 rounded-lg p-4">
@@ -800,8 +800,8 @@ function NewContractContent() {
           {/* Landlord Information */}
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-4">
-              <Home className="h-6 w-6 text-emerald-600" />
-              <h2 className="tk-section-title text-xl font-bold text-gray-900">Landlord Information</h2>
+              <House className="h-6 w-6 text-emerald-600" />
+              <h2 className="tk-section-title text-xl font-bold text-gray-900">Landlord information</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -868,8 +868,8 @@ function NewContractContent() {
           {/* Tenant Information */}
           <div className="mb-8 pt-8 border-t">
             <div className="flex items-center gap-2 mb-4">
-              <User className="h-6 w-6 text-teal-600" />
-              <h2 className="tk-section-title text-xl font-bold text-gray-900">Tenant Information</h2>
+              <User className="h-6 w-6 text-emerald-600" />
+              <h2 className="tk-section-title text-xl font-bold text-gray-900">Tenant information</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -947,8 +947,8 @@ function NewContractContent() {
           {/* Lease Terms */}
           <div className="mb-8 pt-8 border-t">
             <div className="flex items-center gap-2 mb-4">
-              <Calendar className="h-6 w-6 text-teal-600" />
-              <h2 className="tk-section-title text-xl font-bold text-gray-900">Lease Terms</h2>
+              <Calendar className="h-6 w-6 text-emerald-600" />
+              <h2 className="tk-section-title text-xl font-bold text-gray-900">Lease terms</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -1014,8 +1014,8 @@ function NewContractContent() {
           {/* Additional Terms */}
           <div className="mb-8 pt-8 border-t">
             <div className="flex items-center gap-2 mb-4">
-              <FileSignature className="h-6 w-6 text-amber-600" />
-              <h2 className="tk-section-title text-xl font-bold text-gray-900">Additional Terms</h2>
+              <Signature className="h-6 w-6 text-amber-600" />
+              <h2 className="tk-section-title text-xl font-bold text-gray-900">Additional terms</h2>
             </div>
             
             <div className="space-y-4">

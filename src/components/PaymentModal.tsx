@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, CreditCard, Loader2, CheckCircle, XCircle } from 'lucide-react'
+import { X, CreditCard, CircleNotch, CheckCircle, XCircle } from '@phosphor-icons/react'
 import { PaymentPurpose, PaymentProvider, PRICING } from '@/lib/payments'
 
 interface PaymentModalProps {
@@ -186,7 +186,7 @@ export default function PaymentModal({ isOpen, onClose, purpose, propertyId, onS
       verified_listing: 'Verified Property Listing',
       premium_verified_listing: 'Premium Verified Listing',
       listing_refresh: 'Refresh Property Listing',
-      listing_extension: 'Extend Listing Validity',
+      listing_extension: 'Extend listing Validity',
       unlimited_contact_access: 'Unlimited Contact Access',
       contact_unlock: 'Unlock Property Contact'
     }
@@ -213,7 +213,7 @@ export default function PaymentModal({ isOpen, onClose, purpose, propertyId, onS
         <div className="p-6">
           {/* Header */}
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-2xl font-bold text-gray-900">Complete Payment</h3>
+            <h3 className="text-2xl font-bold text-gray-900">Complete payment</h3>
             <button
               onClick={onClose}
               className="p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -224,8 +224,8 @@ export default function PaymentModal({ isOpen, onClose, purpose, propertyId, onS
           </div>
 
           {/* Payment Details */}
-          <div className="mb-6 p-5 bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 rounded-xl">
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Payment For</p>
+          <div className="mb-6 p-6 bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 rounded-xl">
+            <p className="text-xs font-medium text-gray-500  tracking-wide mb-1">Payment For</p>
             <p className="font-bold text-gray-900 text-lg mb-1">{getPurposeTitle()}</p>
             <p className="text-sm text-gray-600 mb-4">{getPurposeDescription()}</p>
             <p className="text-3xl font-bold text-gray-900">
@@ -286,7 +286,7 @@ export default function PaymentModal({ isOpen, onClose, purpose, propertyId, onS
                       className="w-5 h-5 text-amber-500 focus:ring-amber-500"
                     />
                     <div className="ml-4 flex items-center flex-1">
-                      <div className="flex items-center justify-center bg-[#FFCB05] rounded-lg p-2.5 min-w-[80px]">
+                      <div className="flex items-center justify-center bg-[#FFCB05] rounded-lg p-3 min-w-[80px]">
                         <svg viewBox="0 0 120 50" className="h-10 w-auto">
                           {/* MTN Mobile Money logo */}
                           <image 
@@ -316,7 +316,7 @@ export default function PaymentModal({ isOpen, onClose, purpose, propertyId, onS
                   required
                 />
                 <p className="text-xs text-gray-500 mt-2 flex items-center">
-                  <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3.5 h-3.5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   Enter the phone number registered with {provider === 'momo' ? 'MTN MoMo' : 'Airtel Money'}
@@ -329,22 +329,22 @@ export default function PaymentModal({ isOpen, onClose, purpose, propertyId, onS
                   type="button"
                   onClick={onClose}
                   disabled={loading}
-                  className="tk-button px-6 py-3.5 bg-white border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="tk-button px-6 py-4 bg-white border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading || !phoneNumber}
-                  className="tk-button px-6 py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl hover:from-amber-600 hover:to-amber-700 font-semibold transition-all disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center shadow-lg shadow-amber-500/30"
+                  className="tk-button px-6 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl hover:from-amber-600 hover:to-amber-700 font-semibold transition-all disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center shadow-lg shadow-amber-500/30"
                 >
                   {loading ? (
                     <>
-                      <Loader2 className="animate-spin h-5 w-5 mr-2" />
+                      <CircleNotch className="animate-spin h-5 w-5 mr-2" />
                       Processing...
                     </>
                   ) : (
-                    'Pay Now'
+                    'Pay with mobile money'
                   )}
                 </button>
               </div>
@@ -356,7 +356,7 @@ export default function PaymentModal({ isOpen, onClose, purpose, propertyId, onS
             <div className="text-center py-8">
               <div className="relative inline-flex">
                 <div className="absolute inset-0 bg-amber-400 rounded-full blur-xl opacity-30 animate-pulse"></div>
-                <Loader2 className="relative animate-spin h-16 w-16 text-amber-500 mx-auto mb-4" />
+                <CircleNotch className="relative animate-spin h-16 w-16 text-amber-500 mx-auto mb-4" />
               </div>
               <p className="text-lg font-bold text-gray-900 mb-2">Processing Payment</p>
               <p className="text-sm text-gray-600 max-w-xs mx-auto">{message}</p>

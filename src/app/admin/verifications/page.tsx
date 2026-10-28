@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
-import { ShieldCheck, Clock, CheckCircle, XCircle, Loader2, Eye, Image as ImageIcon } from 'lucide-react'
+import { SealCheck, Clock, CheckCircle, XCircle, CircleNotch, Eye, Image as ImageIcon } from '@phosphor-icons/react'
+import { ListSkeleton } from '@/components/Skeletons'
 
 interface Verification {
   id: string
@@ -34,6 +35,7 @@ export default function AdminVerificationsPage() {
   const [verifications, setVerifications] = useState<Verification[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [notice, setNotice] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null)
   const [statusFilter, setStatusFilter] = useState<'pending' | 'approved' | 'rejected'>('pending')
   const [selectedVerification, setSelectedVerification] = useState<Verification | null>(null)
   const [reviewNotes, setReviewNotes] = useState('')
@@ -157,15 +159,15 @@ export default function AdminVerificationsPage() {
 
       const json = await response.json()
       if (json.success) {
-        alert(`Verification ${action}d successfully!`)
+        setNotice({ kind: 'ok', text: `Verification ${action === 'approve' ? 'approved' : 'rejected'}. The owner can see the new status on their listing.` })
         setSelectedVerification(null)
         setReviewNotes('')
         fetchVerifications()
       } else {
-        alert(`Failed to ${action} verification: ${json.error}`)
+        setNotice({ kind: 'error', text: `Could not ${action} this verification. ${json.error || 'Try again in a moment.'}` })
       }
     } catch (err: any) {
-      alert(`Error: ${err.message}`)
+      setNotice({ kind: 'error', text: `Could not reach the server. ${err.message}` })
     } finally {
       setReviewLoading(false)
     }
@@ -186,26 +188,30 @@ export default function AdminVerificationsPage() {
 
   if (loading) {
     return (
-      <div className="tk-page min-h-[60vh] bg-gray-50 flex items-center justify-center">
-        <Loader2 className="animate-spin h-8 w-8 text-emerald-600" />
-      </div>
+      <ListSkeleton />
     )
   }
 
   return (
     <div className="tk-page min-h-[60vh] bg-gray-50">
+      {notice && (
+        <div role="status" className={`mx-auto mt-4 flex max-w-7xl items-start justify-between gap-4 rounded-xl px-4 py-3 text-sm ${notice.kind === 'ok' ? 'bg-emerald-50 text-emerald-800' : 'bg-rose-50 text-rose-700'}`}>
+          <span>{notice.text}</span>
+          <button type="button" onClick={() => setNotice(null)} className="font-semibold underline underline-offset-4">Dismiss</button>
+        </div>
+      )}
       <div className="tk-subbar">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center">
-              <ShieldCheck className="h-6 w-6 text-emerald-600 mr-2" />
-              <h1 className="tk-title text-xl font-bold text-gray-900">Admin - Property Verifications</h1>
+              <SealCheck className="h-6 w-6 text-emerald-600 mr-2" />
+              <h1 className="tk-title text-xl font-bold text-gray-900">Property verifications</h1>
             </div>
             <Link
               href="/properties"
               className="text-gray-600 hover:text-gray-900"
             >
-              Back to Properties
+              Back to homes
             </Link>
           </div>
         </div>
@@ -291,8 +297,8 @@ export default function AdminVerificationsPage() {
                       </div>
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                         verification.verification_type === 'premium_verified'
-                          ? 'bg-teal-100 text-teal-700'
-                          : 'bg-teal-100 text-teal-700'
+                          ? 'bg-emerald-100 text-emerald-700'
+                          : 'bg-emerald-100 text-emerald-700'
                       }`}>
                         {verification.verification_type === 'premium_verified' ? 'Premium Verified' : 'Verified'}
                       </span>
@@ -420,7 +426,7 @@ export default function AdminVerificationsPage() {
                 className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center justify-center"
               >
                 {reviewLoading ? (
-                  <Loader2 className="animate-spin h-5 w-5" />
+                  <CircleNotch className="animate-spin h-5 w-5" />
                 ) : (
                   <>
                     <CheckCircle className="h-4 w-4 mr-2" />

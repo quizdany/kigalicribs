@@ -4,7 +4,8 @@ import React, { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
-import { Camera, Loader2, ArrowLeft, X, ShieldCheck } from 'lucide-react'
+import { Camera, CircleNotch, ArrowLeft, X, SealCheck } from '@phosphor-icons/react'
+import { FormSkeleton } from '@/components/Skeletons'
 import ListingUpgradeModal from '@/components/PremiumModal'
 
 // Kigali administrative divisions data
@@ -289,9 +290,7 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
 
   if (loading) {
     return (
-      <div className="tk-page min-h-[60vh] bg-gray-50 flex items-center justify-center">
-        <Loader2 className="animate-spin h-8 w-8 text-emerald-600" />
-      </div>
+      <FormSkeleton />
     )
   }
 
@@ -301,7 +300,7 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
         <div className="text-center">
           <p className="text-rose-600 mb-4">{error}</p>
           <Link href="/properties" className="text-emerald-600 hover:text-emerald-700">
-            Back to properties
+            Back to homes
           </Link>
         </div>
       </div>
@@ -322,14 +321,14 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
       </div>
 
       <div className="max-w-3xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <h1 className="tk-title text-3xl font-bold text-gray-900 mb-5">Edit Property</h1>
+        <h1 className="tk-title text-3xl font-bold text-gray-900 mb-6">Edit property</h1>
         
         {/* Upgrade Banner for Basic Listings */}
         {property?.listing_type === 'basic' && property?.verification_status !== 'pending' && (
-          <div className="mb-6 bg-gradient-to-r from-teal-50 to-teal-50 border border-teal-200 rounded-lg p-6">
+          <div className="mb-6 bg-gradient-to-r from-emerald-50 to-emerald-50 border border-emerald-200 rounded-lg p-6">
             <div className="flex items-start">
               <div className="flex-shrink-0">
-                <ShieldCheck className="h-8 w-8 text-teal-600" />
+                <SealCheck className="h-8 w-8 text-emerald-600" />
               </div>
               <div className="ml-4 flex-1">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -340,9 +339,9 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
                 </p>
                 <button
                   onClick={() => setShowUpgradeModal(true)}
-                  className="px-4 py-2 bg-gradient-to-r from-teal-600 to-teal-600 text-white rounded-lg hover:from-teal-700 hover:to-teal-700 font-medium transition-all shadow-sm text-sm"
+                  className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-emerald-600 text-white rounded-lg hover:from-emerald-700 hover:to-emerald-700 font-medium transition-all shadow-sm text-sm"
                 >
-                  Upgrade Now - From 30,000 RWF
+                  Upgrade listing - From 30,000 RWF
                 </button>
               </div>
             </div>
@@ -357,7 +356,7 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd"/>
               </svg>
               <div className="ml-3">
-                <h3 className="text-sm font-medium text-amber-800">Verification Pending</h3>
+                <h3 className="text-sm font-medium text-amber-800">Verification pending</h3>
                 <p className="text-xs text-amber-700 mt-1">
                   Your verification request is under review. You'll be notified once it's approved.
                 </p>
@@ -375,7 +374,7 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
         <form onSubmit={handleSubmit} className="tk-surface space-y-6 bg-white shadow-sm rounded-lg p-6">
           {/* Basic Information */}
           <div className="space-y-4">
-            <h2 className="tk-section-title text-xl font-semibold text-gray-900">Basic Information</h2>
+            <h2 className="tk-section-title text-xl font-semibold text-gray-900">Basic information</h2>
             
             <div>
               <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
@@ -451,7 +450,7 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
 
           {/* Property Details */}
           <div className="space-y-4">
-            <h2 className="tk-section-title text-xl font-semibold text-gray-900">Property Details</h2>
+            <h2 className="tk-section-title text-xl font-semibold text-gray-900">Property details</h2>
             
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
@@ -581,7 +580,7 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
 
           {/* Contact Information */}
           <div className="space-y-4">
-            <h2 className="tk-section-title text-xl font-semibold text-gray-900">Contact Information</h2>
+            <h2 className="tk-section-title text-xl font-semibold text-gray-900">Contact information</h2>
             
             <div>
               <label htmlFor="ownerPhone" className="block text-sm font-medium text-gray-700 mb-1">
@@ -636,7 +635,7 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
 
           {/* Images */}
           <div className="space-y-4">
-            <h2 className="tk-section-title text-xl font-semibold text-gray-900">Property Images</h2>
+            <h2 className="tk-section-title text-xl font-semibold text-gray-900">Property photos</h2>
             <p className="text-sm text-gray-600">Upload up to 10 images. First image will be the main display.</p>
             
             {/* Existing Images */}
@@ -654,13 +653,13 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
                       <button
                         type="button"
                         onClick={() => removeExistingImage(idx)}
-                        className="absolute top-1 right-1 p-1.5 bg-emerald-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                        className="absolute top-1 right-1 p-2 bg-emerald-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
                         title="Remove image"
                       >
                         <X className="h-3 w-3" />
                       </button>
                       {idx === 0 && (
-                        <div className="absolute bottom-1 left-1 px-2 py-0.5 bg-teal-600 text-white text-xs rounded">
+                        <div className="absolute bottom-1 left-1 px-2 py-0.5 bg-emerald-600 text-white text-xs rounded">
                           Main
                         </div>
                       )}
@@ -685,7 +684,7 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
                       <button
                         type="button"
                         onClick={() => removeNewImage(idx)}
-                        className="absolute top-1 right-1 p-1.5 bg-emerald-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                        className="absolute top-1 right-1 p-2 bg-emerald-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
                         title="Remove image"
                       >
                         <X className="h-3 w-3" />
@@ -737,11 +736,11 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
             >
               {saving ? (
                 <>
-                  <Loader2 className="animate-spin h-5 w-5 mr-2" />
+                  <CircleNotch className="animate-spin h-5 w-5 mr-2" />
                   Saving...
                 </>
               ) : (
-                'Save Changes'
+                'Save changes'
               )}
             </button>
           </div>

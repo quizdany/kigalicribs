@@ -11,6 +11,7 @@ export default function AuthPage() {
   const [next, setNext] = useState('/');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -61,7 +62,7 @@ export default function AuthPage() {
         });
 
         if (signUpError) throw new Error(signUpError.message);
-        alert('Please check your email to confirm your account');
+        setNotice(`Account created. We sent a confirmation link to ${formData.email}. Open it to finish signing up.`);
         setIsLogin(true);
       }
     } catch (err) {
@@ -83,9 +84,14 @@ export default function AuthPage() {
     <div className="tk-page min-h-[60vh] flex items-center justify-center bg-gray-50">
       <div className="tk-surface w-full max-w-md p-8 bg-white rounded-lg shadow-md">
         <h2 className="tk-section-title text-2xl font-bold mb-6 text-center">
-          {isLogin ? 'Login to TuraKGL' : 'Sign Up for TuraKGL'}
+          {isLogin ? 'Sign in to TuraKGL' : 'Create your TuraKGL account'}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {notice && (
+            <div role="status" className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800">
+              {notice}
+            </div>
+          )}
           {error && (
             <div className="p-3 text-sm text-rose-600 bg-rose-50 rounded-lg border border-rose-200">
               {error}
@@ -94,7 +100,7 @@ export default function AuthPage() {
           
           {!isLogin && (
             <div className="space-y-1">
-              <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">Full Name</label>
+              <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">Full name</label>
               <input
                 id="fullName"
                 type="text"
@@ -108,7 +114,7 @@ export default function AuthPage() {
             </div>
           )}
           <div className="space-y-1">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email Address</label>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email address</label>
             <input
               id="email"
               type="email"
@@ -143,7 +149,7 @@ export default function AuthPage() {
               isLoading ? 'opacity-50 cursor-not-allowed' : ''
             }`}
           >
-            {isLoading ? 'Loading...' : isLogin ? 'Login' : 'Sign Up'}
+            {isLoading ? (isLogin ? 'Signing in' : 'Creating account') : isLogin ? 'Sign in' : 'Create account'}
           </button>
 
           <div className="relative my-6">
@@ -186,7 +192,7 @@ export default function AuthPage() {
             className="text-emerald-600 hover:underline"
             onClick={() => setIsLogin(!isLogin)}
           >
-            {isLogin ? "Don't have an account? Sign Up" : 'Already have an account? Login'}
+            {isLogin ? "New to TuraKGL? Create an account" : 'Already have an account? Sign in'}
           </button>
         </div>
       </div>

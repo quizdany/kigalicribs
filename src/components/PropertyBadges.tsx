@@ -1,6 +1,6 @@
 'use client'
 
-import { Shield, ShieldCheck, Star, Clock, AlertCircle } from 'lucide-react'
+import { Seal, SealCheck, Star, Clock, WarningCircle } from '@phosphor-icons/react'
 
 interface PropertyBadgesProps {
   listing_type?: 'basic' | 'verified' | 'premium_verified'
@@ -30,66 +30,66 @@ export default function PropertyBadges({
     <div className="flex flex-wrap gap-2">
       {/* Listing Type Badge */}
       {listing_type === 'verified' && verification_status === 'verified' && (
-        <span className="inline-flex items-center gap-1 px-3 py-1 bg-teal-100 text-teal-700 rounded-full text-sm font-medium">
-          <ShieldCheck className="h-4 w-4" />
+        <span className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-100 text-emerald-700 rounded-md text-sm font-medium">
+          <SealCheck className="h-4 w-4" />
           Verified
         </span>
       )}
       
       {listing_type === 'premium_verified' && verification_status === 'verified' && (
-        <span className="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-teal-100 to-amber-100 text-teal-700 rounded-full text-sm font-medium">
+        <span className="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-emerald-100 to-amber-100 text-emerald-700 rounded-md text-sm font-medium">
           <Star className="h-4 w-4" />
           Premium Verified
         </span>
       )}
       
       {listing_type === 'basic' && verification_status !== 'pending' && (
-        <span className="inline-flex items-center gap-1 px-3 py-1 bg-gray-50 text-gray-300 rounded-full text-sm font-medium">
+        <span className="inline-flex items-center gap-1 px-3 py-1 bg-gray-50 text-gray-300 rounded-md text-sm font-medium">
           Basic Listing
         </span>
       )}
 
       {/* Verification Status - Only show to property owner */}
       {isOwner && verification_status === 'pending' && (
-        <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium">
+        <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-100 text-amber-700 rounded-md text-sm font-medium">
           <Clock className="h-4 w-4" />
           Pending Verification
         </span>
       )}
       
       {isOwner && verification_status === 'rejected' && (
-        <span className="inline-flex items-center gap-1 px-3 py-1 bg-rose-100 text-rose-700 rounded-full text-sm font-medium">
-          <AlertCircle className="h-4 w-4" />
+        <span className="inline-flex items-center gap-1 px-3 py-1 bg-rose-100 text-rose-700 rounded-md text-sm font-medium">
+          <WarningCircle className="h-4 w-4" />
           Verification Rejected
         </span>
       )}
 
       {/* Featured Badge */}
       {isFeatured && (
-        <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium">
-          <Star className="h-4 w-4 fill-amber-500" />
+        <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-100 text-amber-700 rounded-md text-sm font-medium">
+          <Star weight="fill" className="h-4 w-4 text-amber-500" />
           Featured
         </span>
       )}
 
       {/* Priority Badge */}
       {isPriority && !isFeatured && (
-        <span className="inline-flex items-center gap-1 px-3 py-1 bg-teal-100 text-teal-700 rounded-full text-sm font-medium">
+        <span className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-100 text-emerald-700 rounded-md text-sm font-medium">
           ⬆️ Priority
         </span>
       )}
 
       {/* Expiry Warning */}
       {daysUntilExpiry !== null && daysUntilExpiry > 0 && daysUntilExpiry <= 30 && (
-        <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium">
+        <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-100 text-amber-700 rounded-md text-sm font-medium">
           <Clock className="h-4 w-4" />
           Expires in {daysUntilExpiry} days
         </span>
       )}
       
       {daysUntilExpiry !== null && daysUntilExpiry <= 0 && (
-        <span className="inline-flex items-center gap-1 px-3 py-1 bg-rose-100 text-rose-700 rounded-full text-sm font-medium">
-          <AlertCircle className="h-4 w-4" />
+        <span className="inline-flex items-center gap-1 px-3 py-1 bg-rose-100 text-rose-700 rounded-md text-sm font-medium">
+          <WarningCircle className="h-4 w-4" />
           Expired
         </span>
       )}

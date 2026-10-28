@@ -42,7 +42,7 @@ export default function PropertyLeadActions({ propertyId, available = true }: { 
     } finally { setBusy(false); }
   }
 
-  return <section className="mt-5 border-t pt-5" aria-label="Contact the owner or report the listing">
+  return <section className="mt-6 border-t pt-6" aria-label="Contact the owner or report the listing">
     <h4 className="font-semibold text-gray-900">Arrange a viewing directly</h4>
     <p className="mt-1 text-sm text-gray-600">Send your preferred time to the owner. It is a request until the owner confirms it.</p>
     {available ? <button type="button" onClick={() => { setViewingOpen(!viewingOpen); setNotice(''); }} className="mt-3 w-full rounded-lg border border-emerald-800 px-4 py-3 font-medium text-emerald-900 hover:bg-emerald-50">{viewingOpen ? 'Close viewing request' : 'Request a viewing'}</button> : <p className="mt-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-900">Viewing requests are closed because this home is no longer available.</p>}
@@ -53,12 +53,12 @@ export default function PropertyLeadActions({ propertyId, available = true }: { 
       <p className="text-xs text-gray-500">Check the owner’s response in <Link href="/requests" className="underline">My requests</Link>. TuraKGL does not confirm appointments automatically.</p>
     </form>}
 
-    <div className="mt-5 border-t pt-4">
+    <div className="mt-6 border-t pt-4">
       <button type="button" onClick={() => { setReportOpen(!reportOpen); setNotice(''); }} className="text-sm text-gray-600 underline">Report broker, unavailable home or incorrect information</button>
       {reportOpen && <form className="mt-3 space-y-3" onSubmit={e => { e.preventDefault(); void submit({ kind: 'listing_report', propertyId, reason, details }); }}>
         <label className="block text-sm font-medium">What should we review?<select value={reason} onChange={e => setReason(e.target.value as typeof reason)} className="mt-1 w-full rounded-lg border bg-white p-3">{reportReasons.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
         <label className="block text-sm font-medium">Details (optional)<textarea maxLength={1200} rows={3} value={details} onChange={e => setDetails(e.target.value)} className="mt-1 w-full rounded-lg border p-3" placeholder="Tell us what you observed." /></label>
-        <button disabled={busy} className="tk-button rounded-lg border border-slate-400 px-4 py-3 font-medium disabled:opacity-50">{busy ? 'Sending…' : 'Send report'}</button>
+        <button disabled={busy} className="tk-button rounded-lg border border-gray-400 px-4 py-3 font-medium disabled:opacity-50">{busy ? 'Sending…' : 'Send report'}</button>
         <p className="text-xs text-gray-500">Reports go to the TuraKGL review queue. A report does not automatically remove a listing or prove wrongdoing.</p>
       </form>}
     </div>

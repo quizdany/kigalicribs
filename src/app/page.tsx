@@ -1,9 +1,11 @@
 'use client'
 
-import { Search, MapPin, Heart, Star, X, Copy, ChevronDown, BadgeCheck } from 'lucide-react'
+import { MagnifyingGlass, MapPin, Heart, Star, X, Copy, CaretDown, SealCheck } from '@phosphor-icons/react'
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import KigaliSlideshow from '@/components/KigaliSlideshow'
+import Reveal from '@/components/Reveal'
+import TaglineReveal from '@/components/TaglineReveal'
 import PaymentModal from '@/components/PaymentModal'
 import PropertyBadges from '@/components/PropertyBadges'
 import { supabase } from '@/lib/supabase'
@@ -204,15 +206,15 @@ export default function HomePage() {
       <KigaliSlideshow>
         <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl text-left">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-medium text-white backdrop-blur">
-            <BadgeCheck className="h-4 w-4" /> KIGALI, RWANDA · DIRECT FROM OWNERS
+          <div className="mb-6 inline-flex items-center gap-2 rounded-lg border border-white/25 bg-white/10 px-3 py-1 text-sm font-medium tracking-wide text-white backdrop-blur">
+            <SealCheck weight="fill" className="h-4 w-4" /> Kigali, Rwanda · Direct from owners
           </div>
           {/* Hero Text */}
-          <h1 className="hero-title font-bold text-white mb-5">
+          <h1 className="hero-title font-bold mb-6">
             Find your place<br /> in Kigali.
           </h1>
-          <p className="text-lg md:text-xl text-white/90 mb-8">
-            Browse trusted rental listings and connect directly with property owners across Kigali.
+          <p className="text-lg text-white/90 mb-8">
+            Search apartments, houses and rooms by neighbourhood, then talk to the owner directly. No broker in the middle.
           </p>
           
           {/* Search Form */}
@@ -235,7 +237,7 @@ export default function HomePage() {
                 className="bg-emerald-600 text-white rounded-full p-3 hover:bg-emerald-700 transition-colors flex-shrink-0"
                 aria-label="Search properties"
               >
-                <Search className="h-5 w-5" />
+                <MagnifyingGlass className="h-5 w-5" />
               </button>
             </div>
 
@@ -332,7 +334,7 @@ export default function HomePage() {
                           {filters.amenities.length}
                         </span>
                       )}
-                      <ChevronDown className={`absolute right-4 h-4 w-4 transition-transform ${showAmenitiesDropdown ? 'rotate-180' : ''}`} />
+                      <CaretDown className={`absolute right-4 h-4 w-4 transition-transform ${showAmenitiesDropdown ? 'rotate-180' : ''}`} />
                     </button>
 
                     {showAmenitiesDropdown && (
@@ -364,14 +366,14 @@ export default function HomePage() {
                           <button
                             type="button"
                             onClick={() => setFilters(prev => ({ ...prev, amenities: [] }))}
-                            className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
+                            className="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
                           >
                             Clear
                           </button>
                           <button
                             type="button"
                             onClick={() => { setShowAmenitiesDropdown(false); handleSearch(); }}
-                            className="px-3 py-1.5 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
+                            className="px-3 py-2 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
                           >
                             Apply
                           </button>
@@ -383,10 +385,10 @@ export default function HomePage() {
               </div>
             )}
           </form>
-          <div className="mt-6 flex flex-wrap gap-3 text-sm font-medium">
-            <Link href="/properties" className="rounded-full bg-white px-5 py-2.5 text-gray-900 transition hover:bg-gray-100">Browse all homes</Link>
-            <Link href="/properties/new" className="rounded-full border border-white/40 bg-white/10 px-5 py-2.5 text-white backdrop-blur transition hover:bg-white/20">List your property</Link>
-          </div>
+          <p className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm font-semibold text-white/90">
+            <Link href="/properties" className="underline decoration-white/40 underline-offset-4 transition-colors duration-300 hover:text-white hover:decoration-white">Browse every listing</Link>
+            <Link href="/owners/start" className="underline decoration-white/40 underline-offset-4 transition-colors duration-300 hover:text-white hover:decoration-white">Own a home? List it here</Link>
+          </p>
           </div>
         </div>
       </KigaliSlideshow>
@@ -397,7 +399,7 @@ export default function HomePage() {
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold text-gray-900">More Filters</h3>
+                <h3 className="text-xl font-bold text-gray-900">More filters</h3>
                 <button 
                   onClick={() => setShowFiltersModal(false)}
                   className="p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -451,7 +453,7 @@ export default function HomePage() {
                   }}
                   className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium transition-colors"
                 >
-                  Apply Filters
+                  Apply filters
                 </button>
               </div>
             </div>
@@ -460,34 +462,41 @@ export default function HomePage() {
       )}
 
       {/* Featured Properties */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="flex justify-between items-center mb-8">
+      <Reveal as="section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="flex justify-between items-end mb-8">
           <div>
             <h2 className="text-2xl font-bold text-gray-900">
               {filters.location || filters.propertyType !== 'all' || filters.budget !== 'any' || filters.amenities.length > 0
-                ? 'Search Results'
-                : 'Featured Properties in Kigali'}
+                ? 'Search results'
+                : 'Homes available now in Kigali'}
             </h2>
             {(filters.location || filters.propertyType !== 'all' || filters.budget !== 'any' || filters.amenities.length > 0) && (
-              <p className="text-sm text-gray-600 mt-1">{properties.length} properties found</p>
+              <p className="text-sm text-gray-600 mt-1">{properties.length} {properties.length === 1 ? 'home' : 'homes'} found</p>
             )}
           </div>
         </div>
         
         {loading ? (
-          <div className="text-center py-12">
-            <p className="text-gray-600">Loading properties...</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" aria-busy="true" aria-label="Loading homes">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="rounded-3xl bg-white p-3 pb-6">
+                <div className="tk-skeleton aspect-[4/3] w-full rounded-2xl" />
+                <div className="tk-skeleton mx-2 mt-4 h-5 w-3/4" />
+                <div className="tk-skeleton mx-2 mt-2 h-4 w-1/2" />
+              </div>
+            ))}
           </div>
         ) : listingError ? (
-          <div className="rounded-2xl border border-gray-200 bg-white p-10 text-center" role="alert"><p>{listingError}</p><button type="button" className="mt-4 rounded-lg bg-emerald-600 px-5 py-3 text-white" onClick={() => handleSearch()}>Try again</button></div>
+          <div className="rounded-2xl bg-white p-10 text-center" role="alert"><p className="mx-auto max-w-md text-gray-700">{listingError}</p><button type="button" className="tk-button mt-4 bg-emerald-800 text-white hover:bg-emerald-900" onClick={() => handleSearch()}>Try again</button></div>
         ) : properties.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-600 mb-4">No properties available yet.</p>
-            <Link 
-              href="/properties/new" 
-              className="inline-block px-6 py-3 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 transition-colors"
+          <div className="rounded-2xl bg-white px-6 py-12 text-center">
+            <h3 className="tk-section-title text-gray-900">No homes listed yet</h3>
+            <p className="mx-auto mt-2 max-w-md text-gray-600">If you own a place in Kigali, yours can be the first one renters see.</p>
+            <Link
+              href="/owners/start"
+              className="tk-button mt-6 inline-block bg-emerald-800 text-white hover:bg-emerald-900"
             >
-              List the First Property
+              List the first property
             </Link>
           </div>
         ) : (
@@ -522,7 +531,7 @@ export default function HomePage() {
                     }}
                     className="absolute top-3 right-3 p-2 hover:scale-110 transition-transform"
                   >
-                    <Heart className="h-5 w-5 text-white stroke-white stroke-2 fill-transparent hover:fill-emerald-500 transition-colors" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))' }} />
+                    <Heart weight="bold" className="h-5 w-5 text-white transition-colors duration-300 hover:text-emerald-200" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))' }} />
                   </button>
                 </div>
 
@@ -541,7 +550,7 @@ export default function HomePage() {
                       {property.title}
                     </h3>
                     <div className="flex items-center gap-1 flex-shrink-0">
-                      <Star className="h-3.5 w-3.5 text-gray-900 fill-current" />
+                      <Star weight="fill" className="h-3.5 w-3.5 text-gray-900" />
                       <span className="text-sm text-gray-900 font-medium">
                         {property.rating || '5.0'}
                       </span>
@@ -565,7 +574,7 @@ export default function HomePage() {
             ))}
           </div>
         )}
-      </div>
+      </Reveal>
 
       {/* Contact Modal */}
       {showContactModal && (
@@ -665,16 +674,30 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Direct-rental value proposition */}
-      <section aria-label="Why rent through TuraKGL" className="bg-white py-8">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-4xl rounded-xl border border-emerald-100 bg-emerald-50/70 px-6 py-7 text-center shadow-sm sm:px-10">
-            <p className="text-lg italic leading-relaxed text-gray-700 sm:text-xl">
-              Your rent should go toward your home—not a broker’s commission. Explore Kigali rentals and connect directly with property owners to make finding your next place simpler and more affordable.
-            </p>
-          </div>
+      <TaglineReveal lines={['Rent should pay for your home,', 'not for a broker’s commission.']} />
+
+      {/* How it works */}
+      <Reveal as="section" className="mx-auto grid max-w-7xl gap-12 px-4 py-24 sm:px-6 lg:grid-cols-[2fr_3fr] lg:px-8">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900">How renting through TuraKGL works</h2>
+          <p className="mt-4 text-gray-600">Three steps from search to viewing. Contact limits and payments are explained on the <Link href="/help" className="font-semibold text-emerald-800 underline underline-offset-4">help page</Link>.</p>
         </div>
-      </section>
+        <ol className="grid gap-8">
+          {[
+            ['Search by neighbourhood', 'Filter Kigali listings by area, monthly rent in RWF, bedrooms and property type. Save up to 20 homes to a shortlist on your device.'],
+            ['Contact the owner directly', 'Your first three owner contacts are free. After that, one payment of 10,000 RWF unlocks every listing.'],
+            ['Agree a viewing time', 'Send a viewing request from the listing. It becomes a confirmed appointment once the owner replies with a date and time.'],
+          ].map(([title, body], i) => (
+            <li key={title} className="grid grid-cols-[auto_1fr] gap-4">
+              <span className="grid h-10 w-10 place-items-center rounded-xl bg-emerald-800 text-sm font-semibold text-white tabular-nums">{i + 1}</span>
+              <div>
+                <h3 className="tk-section-title text-gray-900">{title}</h3>
+                <p className="mt-1 text-gray-600">{body}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </Reveal>
 
 
 

@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Camera, Loader2 } from 'lucide-react'
+import { Camera, CircleNotch } from '@phosphor-icons/react'
+import { FormSkeleton } from '@/components/Skeletons'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 
@@ -257,23 +258,21 @@ export default function NewProperty() {
 
       <div className="max-w-3xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {isCheckingAuth ? (
-          <div className="flex justify-center items-center py-12">
-            <Loader2 className="animate-spin h-8 w-8 text-emerald-600" />
-          </div>
+          <FormSkeleton />
         ) : !isAuthenticated ? (
           <div className="tk-surface bg-white shadow-sm rounded-lg p-8 text-center">
-            <h2 className="tk-section-title text-2xl font-bold text-gray-900 mb-4">Authentication Required</h2>
+            <h2 className="tk-section-title text-2xl font-bold text-gray-900 mb-4">Sign in to continue</h2>
             <p className="text-gray-600 mb-6">You need to be logged in to list a property.</p>
             <Link 
               href="/auth?next=%2Fproperties%2Fnew" 
               className="tk-button inline-block px-6 py-3 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 transition-colors"
             >
-              Login to Continue
+              Sign in to continue
             </Link>
           </div>
         ) : (
           <>
-            <h1 className="tk-title text-3xl font-bold text-gray-900 mb-5">List Your Property</h1>
+            <h1 className="tk-title text-3xl font-bold text-gray-900 mb-6">List your property</h1>
         
         {error && (
           <div className="mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-600 rounded-lg">
@@ -284,7 +283,7 @@ export default function NewProperty() {
         <form onSubmit={handleSubmit} className="tk-surface bg-white shadow-sm rounded-lg p-6 space-y-6">
           {/* Basic Information */}
           <div className="space-y-4">
-            <h2 className="tk-section-title text-xl font-semibold text-gray-900">Basic Information</h2>
+            <h2 className="tk-section-title text-xl font-semibold text-gray-900">Basic information</h2>
             
             <div>
               <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
@@ -360,7 +359,7 @@ export default function NewProperty() {
 
           {/* Property Details */}
           <div className="space-y-4">
-            <h2 className="tk-section-title text-xl font-semibold text-gray-900">Property Details</h2>
+            <h2 className="tk-section-title text-xl font-semibold text-gray-900">Property details</h2>
             
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
@@ -490,7 +489,7 @@ export default function NewProperty() {
 
           {/* Contact Information */}
           <div className="space-y-4">
-            <h2 className="tk-section-title text-xl font-semibold text-gray-900">Contact Information</h2>
+            <h2 className="tk-section-title text-xl font-semibold text-gray-900">Contact information</h2>
             <p className="text-sm text-gray-600">Provide your contact details so interested renters can reach you.</p>
             
             <div>
@@ -548,14 +547,14 @@ export default function NewProperty() {
 
           {/* Images */}
           <div className="space-y-4">
-            <h2 className="tk-section-title text-xl font-semibold text-gray-900">Property Images</h2>
+            <h2 className="tk-section-title text-xl font-semibold text-gray-900">Property photos</h2>
             
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">
-                Upload Images (Max 10)
+                Upload photos (Max 10)
               </label>
               
-              <div className="flex items-center justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
+              <div className="flex items-center justify-center px-6 pt-6 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
                 <div className="space-y-1 text-center">
                   <Camera className="mx-auto h-12 w-12 text-gray-400" />
                   <div className="flex text-sm text-gray-600">
@@ -604,10 +603,10 @@ export default function NewProperty() {
           </div>
 
           {/* Verification Suggestion Card */}
-          <div className="bg-gradient-to-br from-teal-50 to-teal-50 border-2 border-teal-200 rounded-lg p-6">
+          <div className="bg-gradient-to-br from-emerald-50 to-emerald-50 border-2 border-emerald-200 rounded-lg p-6">
             <div className="flex items-start space-x-4">
               <div className="flex-shrink-0">
-                <svg className="h-10 w-10 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="h-10 w-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </div>
@@ -626,9 +625,9 @@ export default function NewProperty() {
                       <li>✓ Basic visibility</li>
                     </ul>
                   </div>
-                  <div className="bg-teal-100 rounded-lg p-3 border-2 border-teal-400">
-                    <p className="text-xs font-semibold text-teal-900 mb-1">Verified (30,000 RWF)</p>
-                    <ul className="text-xs text-teal-900 space-y-1">
+                  <div className="bg-emerald-100 rounded-lg p-3 border-2 border-emerald-400">
+                    <p className="text-xs font-semibold text-emerald-900 mb-1">Verified (30,000 RWF)</p>
+                    <ul className="text-xs text-emerald-900 space-y-1">
                       <li>✓ Verified badge</li>
                       <li>✓ 3x more visibility</li>
                       <li>✓ Priority display</li>
@@ -649,7 +648,7 @@ export default function NewProperty() {
             >
               {loading ? (
                 <>
-                  <Loader2 className="animate-spin h-5 w-5" />
+                  <CircleNotch className="animate-spin h-5 w-5" />
                   <span>Creating...</span>
                 </>
               ) : (
