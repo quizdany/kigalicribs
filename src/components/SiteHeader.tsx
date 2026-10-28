@@ -3,22 +3,21 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu, X } from 'lucide-react'
 import AuthButton from '@/components/AuthButton'
 import { supabase } from '@/lib/supabase'
 
 const links = [
-  { href: '/properties', label: 'Find a Property' },
-  { href: '/properties/new', label: 'List a Property' },
+  { href: '/properties', label: 'Find a home' },
+  { href: '/properties/new', label: 'List a property' },
   { href: '/assistant', label: 'Assistant' },
   { href: '/help', label: 'Help' },
 ]
 const memberLinks = [
-  { href: '/requests', label: 'My Requests' },
-  { href: '/owners/properties', label: 'My Properties' },
+  { href: '/requests', label: 'My requests' },
+  { href: '/owners/properties', label: 'My properties' },
 ]
 const adminLinks = [
-  { href: '/admin/verifications', label: 'Verify Properties' },
+  { href: '/admin/verifications', label: 'Verify properties' },
   { href: '/admin/agents', label: 'Operations' },
 ]
 
@@ -28,6 +27,17 @@ export function Wordmark({ className = '' }: { className?: string }) {
       <span className="font-bold">T</span>
       <span className="opacity-70">ura</span>
       <span className="font-bold">KGL</span>
+    </span>
+  )
+}
+
+// Two lines that rotate into an X, so the toggle animates instead of swapping icons.
+function MenuGlyph({ open }: { open: boolean }) {
+  const line = 'absolute left-0 h-0.5 w-5 rounded-full bg-current transition-transform duration-500'
+  return (
+    <span className="relative block h-4 w-5" aria-hidden="true">
+      <span className={`${line} top-1 ${open ? 'translate-y-1 rotate-45' : ''}`} />
+      <span className={`${line} top-3 ${open ? '-translate-y-1 -rotate-45' : ''}`} />
     </span>
   )
 }
@@ -55,57 +65,76 @@ export default function SiteHeader() {
   }, [])
 
   useEffect(() => setOpen(false), [pathname])
+  useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [open])
 
   const visible = [...links, ...(signedIn ? memberLinks : []), ...(isAdmin ? adminLinks : [])]
-  const isActive = (href: string) => pathname === href || (href !== '/properties' && pathname?.startsWith(href + '/'))
+  const isActive = (href: string) => pathname === href || (href !== '/properties' && !!pathname?.startsWith(href + '/'))
   const linkClass = (href: string) =>
-    `rounded-lg px-3 py-2 text-sm font-medium transition-colors ${isActive(href) ? 'bg-emerald-50 text-emerald-800' : 'text-gray-700 hover:bg-emerald-50 hover:text-emerald-800'}`
+    `rounded-full px-3 py-2 text-sm font-semibold transition-colors duration-300 ${isActive(href) ? 'bg-emerald-800 text-white' : 'text-gray-700 hover:bg-emerald-50 hover:text-emerald-800'}`
+  // Cap the whole entrance sequence at 400ms however long the menu gets.
+  const step = Math.min(60, 400 / Math.max(visible.length, 1))
 
   return (
-    <header className="site-header sticky top-0 z-40 border-b border-gray-200 bg-white/95 backdrop-blur print:hidden">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex shrink-0 items-center text-gray-900" aria-label="TuraKGL home">
-          <img src="/images/turakgl-home-finder.svg" alt="" className="h-10 w-10" />
-          <Wordmark className="ml-2 text-2xl" />
-        </Link>
+    <>
+      <header className="sticky top-0 z-40 px-4 pt-3 print:hidden">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 rounded-2xl border border-white/60 bg-white/80 py-2 pl-4 pr-2 shadow-[0_8px_24px_rgb(18_46_40/8%)] backdrop-blur-xl">
+          <Link href="/" className="flex shrink-0 items-center text-gray-900" aria-label="TuraKGL home">
+            <img src="/images/turakgl-home-finder.svg" alt="" className="h-8 w-8" />
+            <Wordmark className="ml-2 text-xl" />
+          </Link>
 
-        <nav aria-label="Main" className="hidden items-center gap-1 lg:flex">
-          {visible.map((l) => (
-            <Link key={l.href} href={l.href} className={linkClass(l.href)} aria-current={isActive(l.href) ? 'page' : undefined}>
-              {l.label}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="flex items-center gap-2">
-          <div className="hidden sm:block">
-            <AuthButton />
-          </div>
-          <button
-            className="rounded-lg p-2 text-gray-700 hover:bg-gray-100 lg:hidden"
-            onClick={() => setOpen(!open)}
-            aria-label="Toggle navigation"
-            aria-expanded={open}
-          >
-            {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
-        </div>
-      </div>
-
-      {open && (
-        <nav aria-label="Main" className="border-t bg-white lg:hidden">
-          <div className="mx-auto grid max-w-7xl gap-1 p-3">
+          <nav aria-label="Main" className="hidden items-center gap-1 lg:flex">
             {visible.map((l) => (
-              <Link key={l.href} href={l.href} className={linkClass(l.href)}>
+              <Link key={l.href} href={l.href} className={linkClass(l.href)} aria-current={isActive(l.href) ? 'page' : undefined}>
                 {l.label}
               </Link>
             ))}
-            <div className="px-3 pt-2 sm:hidden">
+          </nav>
+
+          <div className="flex items-center gap-2">
+            <div className="hidden sm:block">
               <AuthButton />
             </div>
+            <button
+              className="grid h-11 w-11 place-items-center rounded-xl text-gray-900 transition-colors duration-300 hover:bg-gray-100 lg:hidden"
+              onClick={() => setOpen(!open)}
+              aria-label={open ? 'Close menu' : 'Open menu'}
+              aria-expanded={open}
+              aria-controls="mobile-menu"
+            >
+              <MenuGlyph open={open} />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {open && (
+        <nav
+          id="mobile-menu"
+          aria-label="Main"
+          className="fixed inset-0 z-30 flex flex-col bg-gray-50/95 px-6 pb-8 pt-24 backdrop-blur-2xl lg:hidden"
+        >
+          <div className="grid gap-2">
+            {visible.map((l, i) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                style={{ animationDelay: `${i * step}ms` }}
+                aria-current={isActive(l.href) ? 'page' : undefined}
+                className={`tk-menu-link rounded-xl px-4 py-3 text-2xl font-semibold tracking-tight ${isActive(l.href) ? 'bg-emerald-800 text-white' : 'text-gray-900 hover:bg-white'}`}
+              >
+                {l.label}
+              </Link>
+            ))}
+          </div>
+          <div className="tk-menu-link mt-auto" style={{ animationDelay: `${visible.length * step}ms` }}>
+            <AuthButton />
           </div>
         </nav>
       )}
-    </header>
+    </>
   )
 }

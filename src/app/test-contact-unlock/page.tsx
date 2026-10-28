@@ -65,7 +65,7 @@ export default function TestContactUnlockPage() {
           <p className="text-rose-600 mb-4">You need to be logged in to test this feature.</p>
           <a 
             href="/auth" 
-            className="tk-button block w-full bg-teal-600 text-white text-center py-2 px-4 rounded hover:bg-teal-700"
+            className="tk-button block w-full bg-emerald-600 text-white text-center py-2 px-4 rounded hover:bg-emerald-700"
           >
             Go to Login
           </a>
@@ -77,7 +77,7 @@ export default function TestContactUnlockPage() {
   return (
     <div className="tk-page min-h-[60vh] bg-gray-50 p-8">
       <div className="max-w-2xl mx-auto">
-        <h1 className="tk-title text-3xl font-bold mb-5">Contact Unlock Status Test</h1>
+        <h1 className="tk-title text-3xl font-bold mb-6">Contact Unlock Status Test</h1>
 
         {/* User Info */}
         <div className="tk-surface bg-white rounded-lg shadow p-6 mb-6">
@@ -101,9 +101,9 @@ export default function TestContactUnlockPage() {
             <h2 className="tk-section-title text-xl font-semibold mb-4">Your Contact Unlock Status</h2>
             
             <div className="grid grid-cols-2 gap-4 mb-4">
-              <div className="bg-teal-50 p-4 rounded-lg">
+              <div className="bg-emerald-50 p-4 rounded-lg">
                 <p className="text-sm text-gray-600">Used Free Unlocks</p>
-                <p className="text-3xl font-bold text-teal-600">
+                <p className="text-3xl font-bold text-emerald-600">
                   {unlockStatus.usedFreeUnlocks}
                 </p>
               </div>
@@ -159,7 +159,7 @@ export default function TestContactUnlockPage() {
         <div className="flex gap-4">
           <button
             onClick={fetchUnlockStatus}
-            className="tk-button bg-teal-600 text-white px-6 py-2 rounded hover:bg-teal-700"
+            className="tk-button bg-emerald-600 text-white px-6 py-2 rounded hover:bg-emerald-700"
           >
             Refresh Status
           </button>

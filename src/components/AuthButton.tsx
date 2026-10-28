@@ -39,15 +39,15 @@ export default function AuthButton() {
 
   if (user) {
     return (
-      <button onClick={handleLogout} className="tk-button px-4 py-2 bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100 border border-emerald-200 transition-colors">
-        Logout
+      <button onClick={handleLogout} className="rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 transition-colors duration-300 hover:bg-gray-100">
+        Sign out
       </button>
     )
   }
 
   return (
-    <Link href={pathname && pathname !== '/' && !pathname.startsWith('/auth') ? `/auth?next=${encodeURIComponent(pathname)}` : '/auth'} className="tk-button px-4 py-2 text-emerald-700 font-medium rounded-lg border border-emerald-200 hover:bg-emerald-50 transition-colors duration-200">
-      Login / Sign Up
+    <Link href={pathname && pathname !== '/' && !pathname.startsWith('/auth') ? `/auth?next=${encodeURIComponent(pathname)}` : '/auth'} className="inline-block rounded-xl bg-emerald-800 px-3 py-2 text-sm font-semibold text-white transition-colors duration-300 hover:bg-emerald-900">
+      Sign in
     </Link>
   )
 }

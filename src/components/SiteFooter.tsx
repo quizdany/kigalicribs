@@ -35,13 +35,13 @@ const columns = [
 
 export default function SiteFooter() {
   return (
-    <footer className="site-footer bg-gray-900 py-10 text-white print:hidden">
+    <footer className="bg-ink-dark py-16 text-white print:hidden">
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-8 text-center sm:grid-cols-3">
           {columns.map((c) => (
             <div key={c.title}>
-              <h4 className="mb-3 font-semibold">{c.title}</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
+              <h2 className="mb-4 text-sm font-semibold text-white">{c.title}</h2>
+              <ul className="space-y-3 text-sm text-white/60">
                 {c.links.map((l) => (
                   <li key={l.label}>
                     {!l.href ? (
@@ -57,8 +57,12 @@ export default function SiteFooter() {
             </div>
           ))}
         </div>
-        <div className="mt-8 border-t border-gray-800 pt-5 text-center text-sm text-gray-400">
+        <div className="mt-12 flex flex-col items-center gap-3 border-t border-white/10 pt-6 text-sm text-white/60 sm:flex-row sm:justify-between">
           <p>&copy; {new Date().getFullYear()} TuraKGL. All rights reserved.</p>
+          <p className="flex gap-6">
+            <Link href="/privacy" className="transition-colors hover:text-white">Privacy policy</Link>
+            <Link href="/terms" className="transition-colors hover:text-white">Terms of use</Link>
+          </p>
         </div>
       </div>
     </footer>

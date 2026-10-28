@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { RefreshCw, Clock, AlertCircle, Loader2 } from 'lucide-react'
+import { ArrowsClockwise, Clock, WarningCircle, CircleNotch } from '@phosphor-icons/react'
 import PaymentModal from './PaymentModal'
 import { PaymentPurpose } from '@/lib/payments'
 import { supabase } from '@/lib/supabase'
@@ -103,9 +103,9 @@ export default function OwnerActions({
 
   if (listing_type === 'basic') {
     return (
-      <div className="bg-teal-50 border border-teal-200 rounded-lg p-4">
-        <p className="text-sm text-teal-700">
-          💡 Upgrade to a <strong>Verified Listing</strong> to access refresh and extend features
+      <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+        <p className="text-sm text-emerald-700">
+          💡 Upgrade to a <strong>Verified listing</strong> to access refresh and extend features
         </p>
       </div>
     )
@@ -114,14 +114,14 @@ export default function OwnerActions({
   return (
     <>
       <div className="tk-surface bg-white rounded-lg shadow-sm p-6 space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900">Listing Management</h3>
+        <h3 className="text-lg font-semibold text-gray-900">Listing management</h3>
 
         {/* Message */}
         {message && (
           <div className={`p-3 rounded-lg flex items-center gap-2 ${
             message.type === 'error' ? 'bg-rose-50 text-rose-700' : 'bg-rose-50 text-rose-700'
           }`}>
-            <AlertCircle className="h-4 w-4" />
+            <WarningCircle className="h-4 w-4" />
             <span className="text-sm">{message.text}</span>
           </div>
         )}
@@ -131,17 +131,17 @@ export default function OwnerActions({
           <button
             onClick={handleRefresh}
             disabled={!canRefresh || loading}
-            className="tk-button w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+            className="tk-button w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
             {loading ? (
               <>
-                <Loader2 className="h-5 w-5 animate-spin" />
+                <CircleNotch className="h-5 w-5 animate-spin" />
                 Processing...
               </>
             ) : (
               <>
-                <RefreshCw className="h-5 w-5" />
-                Refresh Listing (10,000 RWF)
+                <ArrowsClockwise className="h-5 w-5" />
+                Refresh listing (10,000 RWF)
               </>
             )}
           </button>
@@ -164,7 +164,7 @@ export default function OwnerActions({
           >
             {loading ? (
               <>
-                <Loader2 className="h-5 w-5 animate-spin" />
+                <CircleNotch className="h-5 w-5 animate-spin" />
                 Processing...
               </>
             ) : (

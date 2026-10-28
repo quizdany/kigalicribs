@@ -2,11 +2,12 @@
 
 import { useState } from 'react'
 import PaymentModal from '@/components/PaymentModal'
-import { Shield, ShieldCheck, Star, RefreshCw, Clock } from 'lucide-react'
+import { Seal, SealCheck, Star, ArrowsClockwise, Clock } from '@phosphor-icons/react'
 import { PaymentPurpose } from '@/lib/payments'
 
 export default function PaymentDemoPage() {
   const [showPayment, setShowPayment] = useState(false)
+  const [notice, setNotice] = useState('')
   const [selectedPurpose, setSelectedPurpose] = useState<PaymentPurpose>('verified_listing')
 
   const openPayment = (purpose: PaymentPurpose) => {
@@ -19,7 +20,7 @@ export default function PaymentDemoPage() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="tk-title text-4xl font-bold text-gray-900 mb-4">Payment System Demo</h1>
+          <h1 className="tk-title text-4xl font-bold text-gray-900 mb-4">Payment system demo</h1>
           <p className="text-lg text-gray-600">
             Test all payment purposes in the new revenue model
           </p>
@@ -35,11 +36,11 @@ export default function PaymentDemoPage() {
           {/* Verified Listing */}
           <div className="tk-surface bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
             <div className="flex items-center mb-4">
-              <div className="p-3 bg-teal-100 rounded-lg">
-                <Shield className="h-6 w-6 text-teal-600" />
+              <div className="p-3 bg-emerald-100 rounded-lg">
+                <Seal className="h-6 w-6 text-emerald-600" />
               </div>
               <div className="ml-4">
-                <h3 className="text-lg font-bold text-gray-900">Verified Listing</h3>
+                <h3 className="text-lg font-bold text-gray-900">Verified listing</h3>
                 <p className="text-sm text-gray-500">Landlord Package</p>
               </div>
             </div>
@@ -63,9 +64,9 @@ export default function PaymentDemoPage() {
             </ul>
             <button
               onClick={() => openPayment('verified_listing')}
-              className="w-full px-4 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-medium transition-colors"
+              className="w-full px-4 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium transition-colors"
             >
-              Try Verified Payment
+              Pay for verified listing
             </button>
           </div>
 
@@ -76,10 +77,10 @@ export default function PaymentDemoPage() {
             </div>
             <div className="flex items-center mb-4">
               <div className="p-3 bg-emerald-100 rounded-lg">
-                <ShieldCheck className="h-6 w-6 text-emerald-600" />
+                <SealCheck className="h-6 w-6 text-emerald-600" />
               </div>
               <div className="ml-4">
-                <h3 className="text-lg font-bold text-gray-900">Premium Verified</h3>
+                <h3 className="text-lg font-bold text-gray-900">Premium verified</h3>
                 <p className="text-sm text-gray-500">Top Tier</p>
               </div>
             </div>
@@ -105,7 +106,7 @@ export default function PaymentDemoPage() {
               onClick={() => openPayment('premium_verified_listing')}
               className="w-full px-4 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium transition-colors"
             >
-              Try Premium Payment
+              Pay for premium verified
             </button>
           </div>
 
@@ -113,10 +114,10 @@ export default function PaymentDemoPage() {
           <div className="tk-surface bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
             <div className="flex items-center mb-4">
               <div className="p-3 bg-emerald-100 rounded-lg">
-                <RefreshCw className="h-6 w-6 text-emerald-600" />
+                <ArrowsClockwise className="h-6 w-6 text-emerald-600" />
               </div>
               <div className="ml-4">
-                <h3 className="text-lg font-bold text-gray-900">Listing Refresh</h3>
+                <h3 className="text-lg font-bold text-gray-900">Listing refresh</h3>
                 <p className="text-sm text-gray-500">Boost visibility</p>
               </div>
             </div>
@@ -142,18 +143,18 @@ export default function PaymentDemoPage() {
               onClick={() => openPayment('listing_refresh')}
               className="w-full px-4 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium transition-colors"
             >
-              Try Refresh Payment
+              Pay for a refresh
             </button>
           </div>
 
           {/* Listing Extension */}
           <div className="tk-surface bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
             <div className="flex items-center mb-4">
-              <div className="p-3 bg-teal-100 rounded-lg">
-                <Clock className="h-6 w-6 text-teal-600" />
+              <div className="p-3 bg-emerald-100 rounded-lg">
+                <Clock className="h-6 w-6 text-emerald-600" />
               </div>
               <div className="ml-4">
-                <h3 className="text-lg font-bold text-gray-900">Listing Extension</h3>
+                <h3 className="text-lg font-bold text-gray-900">Listing extension</h3>
                 <p className="text-sm text-gray-500">Extend validity</p>
               </div>
             </div>
@@ -177,9 +178,9 @@ export default function PaymentDemoPage() {
             </ul>
             <button
               onClick={() => openPayment('listing_extension')}
-              className="w-full px-4 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-medium transition-colors"
+              className="w-full px-4 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium transition-colors"
             >
-              Try Extension Payment
+              Pay for an extension
             </button>
           </div>
 
@@ -187,10 +188,10 @@ export default function PaymentDemoPage() {
           <div className="tk-surface bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow md:col-span-2 lg:col-span-1">
             <div className="flex items-center mb-4">
               <div className="p-3 bg-amber-100 rounded-lg">
-                <ShieldCheck className="h-6 w-6 text-amber-600" />
+                <SealCheck className="h-6 w-6 text-amber-600" />
               </div>
               <div className="ml-4">
-                <h3 className="text-lg font-bold text-gray-900">Unlimited Contacts</h3>
+                <h3 className="text-lg font-bold text-gray-900">Unlimited contacts</h3>
                 <p className="text-sm text-gray-500">For tenants</p>
               </div>
             </div>
@@ -216,14 +217,14 @@ export default function PaymentDemoPage() {
               onClick={() => openPayment('unlimited_contact_access')}
               className="w-full px-4 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 font-medium transition-colors"
             >
-              Try Contact Payment
+              Pay for unlimited contacts
             </button>
           </div>
         </div>
 
         {/* Usage Instructions */}
         <div className="tk-surface bg-white rounded-lg shadow-md p-6">
-          <h2 className="tk-section-title text-xl font-bold text-gray-900 mb-4">How to Use This Demo</h2>
+          <h2 className="tk-section-title text-xl font-bold text-gray-900 mb-4">How to use this demo</h2>
           <ol className="space-y-3 text-gray-600">
             <li className="flex">
               <span className="font-bold text-emerald-600 mr-3">1.</span>
@@ -246,9 +247,9 @@ export default function PaymentDemoPage() {
             </li>
           </ol>
 
-          <div className="mt-6 p-4 bg-teal-50 border border-teal-200 rounded-lg">
-            <h3 className="font-semibold text-teal-900 mb-2">Payment Purposes:</h3>
-            <ul className="space-y-2 text-sm text-teal-800">
+          <div className="mt-6 p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
+            <h3 className="font-semibold text-emerald-900 mb-2">Payment purposes</h3>
+            <ul className="space-y-2 text-sm text-emerald-800">
               <li><strong>Verified/Premium Verified:</strong> Landlord packages for listing upgrades</li>
               <li><strong>Listing Refresh:</strong> Bump property to top for 7 days</li>
               <li><strong>Listing Extension:</strong> Add 3 months to validity period</li>
@@ -260,7 +261,7 @@ export default function PaymentDemoPage() {
         {/* Payment Providers Info */}
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-6">
-            <h3 className="font-bold text-gray-900 mb-3">📱 MTN Mobile Money</h3>
+            <h3 className="font-bold text-gray-900 mb-3">MTN Mobile Money</h3>
             <ul className="space-y-2 text-sm text-gray-600">
               <li>• Most popular in Rwanda</li>
               <li>• Instant payment processing</li>
@@ -270,7 +271,7 @@ export default function PaymentDemoPage() {
           </div>
 
           <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-6">
-            <h3 className="font-bold text-gray-900 mb-3">📱 Airtel Money</h3>
+            <h3 className="font-bold text-gray-900 mb-3">Airtel Money</h3>
             <ul className="space-y-2 text-sm text-gray-600">
               <li>• Wide coverage across Africa</li>
               <li>• Fast transaction processing</li>
@@ -281,13 +282,19 @@ export default function PaymentDemoPage() {
         </div>
       </div>
 
+      {notice && (
+        <div role="status" className="fixed inset-x-4 bottom-4 z-50 mx-auto max-w-md rounded-xl bg-ink-dark px-4 py-3 text-sm text-white">
+          {notice} <button type="button" onClick={() => setNotice('')} className="ml-2 font-semibold underline underline-offset-4">Dismiss</button>
+        </div>
+      )}
+
       {/* Payment Modal */}
       <PaymentModal
         isOpen={showPayment}
         onClose={() => setShowPayment(false)}
         purpose={selectedPurpose}
         onSuccess={() => {
-          alert('Payment successful! (Demo)')
+          setNotice('Demo payment completed. No money was charged.')
           setShowPayment(false)
         }}
       />

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react'
+import { CaretLeft, CaretRight, Pause, Play } from '@phosphor-icons/react'
 
 const slides = [
   { src: '/images/kigali-centre.jpg', label: 'Kigali Convention Centre', alt: 'An aerial view of Kigali Convention Centre and its surroundings' },
@@ -43,9 +43,9 @@ export default function KigaliSlideshow({ children }: { children: React.ReactNod
     <div className="kigali-content">{children}</div>
     <div className="kigali-controls">
       <div className="kigali-buttons">
-        <button type="button" onClick={() => go(-1)} aria-label="Previous Kigali photo"><ChevronLeft size={20} /></button>
+        <button type="button" onClick={() => go(-1)} aria-label="Previous Kigali photo"><CaretLeft size={20} /></button>
         {slides.map((slide, index) => <button type="button" key={slide.src} aria-label={`Show ${slide.label}`} aria-pressed={active === index} className="slide-selector" onClick={() => { setActive(index); setPaused(true) }}><span /></button>)}
-        <button type="button" onClick={() => go(1)} aria-label="Next Kigali photo"><ChevronRight size={20} /></button>
+        <button type="button" onClick={() => go(1)} aria-label="Next Kigali photo"><CaretRight size={20} /></button>
         {!reduced && <button type="button" onClick={() => setPaused(value => !value)} aria-label={paused ? 'Play slideshow' : 'Pause slideshow'}>{paused ? <Play size={16} /> : <Pause size={16} />}</button>}
       </div>
     </div>

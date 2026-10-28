@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Phone, Mail, Lock, Unlock, AlertCircle, Loader2, MessageCircle } from 'lucide-react'
+import { Phone, Envelope, Lock, LockOpen, WarningCircle, CircleNotch, ChatCircle } from '@phosphor-icons/react'
 import PaymentModal from './PaymentModal'
 import { supabase } from '@/lib/supabase'
 
@@ -152,7 +152,7 @@ export default function ContactUnlockButton({ propertyId, propertyTitle, propert
     return (
       <a
         href="/auth"
-        className="tk-button w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
+        className="tk-button w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
       >
         <Lock className="h-5 w-5" />
         Login to View Contact
@@ -163,7 +163,7 @@ export default function ContactUnlockButton({ propertyId, propertyTitle, propert
   if (loading) {
     return (
       <div className="w-full px-6 py-3 bg-gray-100 text-gray-600 rounded-lg flex items-center justify-center gap-2">
-        <Loader2 className="h-5 w-5 animate-spin" />
+        <CircleNotch className="h-5 w-5 animate-spin" />
         Loading...
       </div>
     )
@@ -174,12 +174,12 @@ export default function ContactUnlockButton({ propertyId, propertyTitle, propert
       <div className="space-y-3">
         <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
           <div className="flex items-center gap-2 text-emerald-700 font-semibold mb-3">
-            <Unlock className="h-5 w-5" />
+            <LockOpen className="h-5 w-5" />
             Contact Information
           </div>
           {contactInfo.owner_email && (
             <div className="flex items-center gap-2 text-gray-700 mb-2">
-              <Mail className="h-4 w-4" />
+              <Envelope className="h-4 w-4" />
               <a href={`mailto:${contactInfo.owner_email}`} className="hover:underline">
                 {contactInfo.owner_email}
               </a>
@@ -208,7 +208,7 @@ export default function ContactUnlockButton({ propertyId, propertyTitle, propert
             target="_blank"
             className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
           >
-            <MessageCircle className="h-5 w-5" />
+            <ChatCircle className="h-5 w-5" />
             Chat on WhatsApp
           </a>
         )}
@@ -221,10 +221,10 @@ export default function ContactUnlockButton({ propertyId, propertyTitle, propert
       <div className="space-y-3">
         {/* Unlock Status */}
         {unlockStatus && !unlockStatus.hasUnlimitedAccess && (
-          <div className="text-sm text-gray-600 bg-teal-50 border border-teal-200 rounded-lg p-3">
+          <div className="text-sm text-gray-600 bg-emerald-50 border border-emerald-200 rounded-lg p-3">
             <div className="flex items-center justify-between">
               <span>Free unlocks remaining:</span>
-              <span className="font-bold text-teal-600">
+              <span className="font-bold text-emerald-600">
                 {unlockStatus.remainingFreeUnlocks} of {unlockStatus.freeUnlocksLimit}
               </span>
             </div>
@@ -233,7 +233,7 @@ export default function ContactUnlockButton({ propertyId, propertyTitle, propert
 
         {unlockStatus?.hasUnlimitedAccess && (
           <div className="text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded-lg p-3 flex items-center gap-2">
-            <Unlock className="h-4 w-4" />
+            <LockOpen className="h-4 w-4" />
             <span className="font-semibold">You have unlimited access</span>
           </div>
         )}
@@ -241,7 +241,7 @@ export default function ContactUnlockButton({ propertyId, propertyTitle, propert
         {/* Error Message */}
         {error && (
           <div className="text-sm text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-lg p-3 flex items-center gap-2">
-            <AlertCircle className="h-4 w-4" />
+            <WarningCircle className="h-4 w-4" />
             {error}
           </div>
         )}
@@ -255,13 +255,13 @@ export default function ContactUnlockButton({ propertyId, propertyTitle, propert
           >
             {unlocking ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <CircleNotch className="h-4 w-4 animate-spin" />
                 <span className="hidden sm:inline">Unlocking...</span>
               </>
             ) : (
               <>
                 <Phone className="h-4 w-4" />
-                <span className="hidden sm:inline">Contact Owner</span>
+                <span className="hidden sm:inline">Contact owner</span>
                 <span className="sm:hidden">Contact</span>
               </>
             )}
@@ -274,12 +274,12 @@ export default function ContactUnlockButton({ propertyId, propertyTitle, propert
           >
             {whatsappUnlocking ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <CircleNotch className="h-4 w-4 animate-spin" />
                 <span className="hidden sm:inline">Opening...</span>
               </>
             ) : (
               <>
-                <MessageCircle className="h-4 w-4" />
+                <ChatCircle className="h-4 w-4" />
                 <span className="hidden sm:inline">WhatsApp Owner</span>
                 <span className="sm:hidden">WhatsApp</span>
               </>

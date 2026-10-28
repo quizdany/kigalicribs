@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { X, Shield, ShieldCheck, Star, Check } from 'lucide-react'
+import { X, Seal, SealCheck, Star, Check } from '@phosphor-icons/react'
 import PaymentModal from './PaymentModal'
 import { PaymentPurpose } from '@/lib/payments'
 
@@ -55,7 +55,7 @@ export default function ListingUpgradeModal({
           {/* Header */}
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h2 className="tk-section-title text-2xl font-bold text-gray-900">Upgrade Your Listing</h2>
+              <h2 className="tk-section-title text-2xl font-bold text-gray-900">Upgrade your listing</h2>
               <p className="text-gray-600 mt-1">Choose the best plan for your property</p>
             </div>
             <button
@@ -68,8 +68,8 @@ export default function ListingUpgradeModal({
 
           {/* Current Status */}
           {currentListingType !== 'basic' && (
-            <div className="mb-6 p-4 bg-teal-50 border border-teal-200 rounded-lg">
-              <p className="text-sm text-teal-700">
+            <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
+              <p className="text-sm text-emerald-700">
                 Current listing type: <strong className="capitalize">{currentListingType.replace('_', ' ')}</strong>
               </p>
             </div>
@@ -78,10 +78,10 @@ export default function ListingUpgradeModal({
           {/* Pricing Plans */}
           <div className="grid md:grid-cols-2 gap-6 mb-6">
             {/* Verified Listing */}
-            <div className="border-2 border-teal-500 rounded-lg p-6 relative">
+            <div className="border-2 border-emerald-500 rounded-lg p-6 relative">
               <div className="flex items-center gap-2 mb-4">
-                <ShieldCheck className="h-6 w-6 text-teal-600" />
-                <h3 className="text-xl font-bold text-gray-900">Verified Listing</h3>
+                <SealCheck className="h-6 w-6 text-emerald-600" />
+                <h3 className="text-xl font-bold text-gray-900">Verified listing</h3>
               </div>
               
               <div className="mb-4">
@@ -115,22 +115,22 @@ export default function ListingUpgradeModal({
 
               <button
                 onClick={() => handleUpgrade('verified_listing')}
-                className="w-full py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-medium transition-colors"
+                className="w-full py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium transition-colors"
                 disabled={currentListingType === 'verified' || currentListingType === 'premium_verified'}
               >
-                {currentListingType === 'basic' ? 'Upgrade Now' : 'Current Plan'}
+                {currentListingType === 'basic' ? 'Upgrade listing' : 'Current Plan'}
               </button>
             </div>
 
             {/* Premium Verified Listing */}
-            <div className="border-2 border-teal-500 rounded-lg p-6 relative bg-gradient-to-br from-teal-50 to-amber-50">
-              <div className="absolute -top-3 right-4 px-3 py-1 bg-gradient-to-r from-teal-600 to-amber-600 text-white text-sm font-bold rounded-full">
+            <div className="border-2 border-emerald-500 rounded-lg p-6 relative bg-gradient-to-br from-emerald-50 to-amber-50">
+              <div className="absolute -top-3 right-4 px-3 py-1 bg-gradient-to-r from-emerald-600 to-amber-600 text-white text-sm font-bold rounded-full">
                 BEST VALUE
               </div>
               
               <div className="flex items-center gap-2 mb-4">
-                <Star className="h-6 w-6 text-teal-600" />
-                <h3 className="text-xl font-bold text-gray-900">Premium Verified</h3>
+                <Star className="h-6 w-6 text-emerald-600" />
+                <h3 className="text-xl font-bold text-gray-900">Premium verified</h3>
               </div>
               
               <div className="mb-4">
@@ -168,7 +168,7 @@ export default function ListingUpgradeModal({
 
               <button
                 onClick={() => handleUpgrade('premium_verified_listing')}
-                className="w-full py-3 bg-gradient-to-r from-teal-600 to-amber-600 text-white rounded-lg hover:from-teal-700 hover:to-amber-700 font-medium transition-colors"
+                className="w-full py-3 bg-gradient-to-r from-emerald-600 to-amber-600 text-white rounded-lg hover:from-emerald-700 hover:to-amber-700 font-medium transition-colors"
                 disabled={currentListingType === 'premium_verified'}
               >
                 {currentListingType === 'premium_verified' ? 'Current Plan' : 'Get Premium'}
