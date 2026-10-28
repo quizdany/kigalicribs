@@ -1,0 +1,137 @@
+import { propertyEditSchema,redactProperty } from '@/lib/property-policy'
+import { requestUser,sameOrigin } from '@/lib/agent-tools'
+import { NextResponse } from 'next/server'
+import { supabase as supabaseClient } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase: any = supabaseClient
+
+export async function GET(
+  request: any,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params
+    
+    // Force fresh query - no caching
+    const { data, error } = await supabase
+      .from('properties')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle()
+    
+    if (error) {
+      console.error('Property fetch error:', error)
+      return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    }
+    
+    if (!data) {
+      return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 })
+    }
+    
+    console.log('Property API returning:', {
+      id: data.id,
+      listing_type: data.listing_type,
+      verification_status: data.verification_status,
+      verified_at: data.verified_at
+    })
+    
+    const viewer=await requestUser(request);
+    const visible=viewer?.id===data.owner_id?data:redactProperty(data);
+    return NextResponse.json({ success: true, data:visible }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+        'Pragma': 'no-cache'
+      }
+    })
+  } catch (err) {
+    console.error('Property API error:', err)
+    return NextResponse.json({ success: false, error: err instanceof Error ? err.message : 'Unknown error' }, { status: 500 })
+  }
+}
+
+export async function PATCH(
+  request: any,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader?.startsWith('Bearer ')) return NextResponse.json({ success: false, error: 'Missing token' }, { status: 401 })
+    const token = authHeader.split(' ')[1]
+
+    // Create a per-request authed client so DB calls run with the user's JWT (required for RLS policies)
+    const supabaseAuthed = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        global: {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      }
+    ) as typeof supabaseClient
+
+    const { data: userData } = await (supabaseAuthed as any).auth.getUser()
+    if (!userData?.user) return NextResponse.json({ success: false, error: 'Invalid token' }, { status: 401 })
+
+    if(!sameOrigin(request))return NextResponse.json({success:false,error:'Forbidden'},{status:403});
+    const raw=await request.text();
+    if(raw.length>100000)return NextResponse.json({success:false,error:'Listing too large'},{status:413});
+    const parsed=propertyEditSchema.safeParse(JSON.parse(raw));
+    if(!parsed.success||!Object.keys(parsed.data).length)return NextResponse.json({success:false,error:parsed.success?'No changes supplied':parsed.error.issues[0]?.message},{status:400});
+    const body=parsed.data;
+
+    // verify owner
+    const existingRes: any = await (supabaseAuthed as any).from('properties').select('owner_id').eq('id', id).maybeSingle()
+    const existing = existingRes.data
+    if (!existing) return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 })
+    if (existing.owner_id !== userData.user.id) return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 })
+
+    const { data, error } = await (supabaseAuthed as any).from('properties').update(body).eq('id', id).select().maybeSingle()
+    if (error) return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    return NextResponse.json({ success: true, data })
+  } catch (err) {
+    return NextResponse.json({ success: false, error: err instanceof Error ? err.message : 'Unknown error' }, { status: 500 })
+  }
+}
+
+export async function DELETE(
+  request: any,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader?.startsWith('Bearer ')) return NextResponse.json({ success: false, error: 'Missing token' }, { status: 401 })
+    const token = authHeader.split(' ')[1]
+
+    // Create a per-request authed client
+    const supabaseAuthed = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        global: {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      }
+    ) as typeof supabaseClient
+
+    const { data: userData } = await (supabaseAuthed as any).auth.getUser()
+    if (!userData?.user) return NextResponse.json({ success: false, error: 'Invalid token' }, { status: 401 })
+
+    const existingRes: any = await (supabaseAuthed as any).from('properties').select('owner_id').eq('id', id).maybeSingle()
+    const existing = existingRes.data
+    if (!existing) return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 })
+    if (existing.owner_id !== userData.user.id) return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 })
+
+    const { error } = await (supabaseAuthed as any).from('properties').delete().eq('id', id)
+    if (error) return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    return NextResponse.json({ success: true })
+  } catch (err) {
+    return NextResponse.json({ success: false, error: err instanceof Error ? err.message : 'Unknown error' }, { status: 500 })
+  }
+}

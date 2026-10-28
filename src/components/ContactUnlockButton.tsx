@@ -1,0 +1,310 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { Phone, Mail, Lock, Unlock, AlertCircle, Loader2, MessageCircle } from 'lucide-react'
+import PaymentModal from './PaymentModal'
+import { supabase } from '@/lib/supabase'
+
+interface ContactUnlockButtonProps {
+  propertyId: string
+  propertyTitle: string
+  propertyPrice: number
+  propertyDistrict: string
+  onSuccess?: (contactInfo: any) => void
+}
+
+export default function ContactUnlockButton({ propertyId, propertyTitle, propertyPrice, propertyDistrict, onSuccess }: ContactUnlockButtonProps) {
+  const [unlockStatus, setUnlockStatus] = useState<any>(null)
+  const [loading, setLoading] = useState(false)
+  const [unlocking, setUnlocking] = useState(false)
+  const [whatsappUnlocking, setWhatsappUnlocking] = useState(false)
+  const [error, setError] = useState('')
+  const [contactInfo, setContactInfo] = useState<any>(null)
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+
+  useEffect(() => {
+    checkAuth()
+  }, [])
+
+  const checkAuth = async () => {
+    const { data: { session } } = await supabase.auth.getSession()
+    setIsAuthenticated(!!session)
+    
+    if (session) {
+      fetchUnlockStatus()
+    }
+  }
+
+  const fetchUnlockStatus = async () => {
+    try {
+      setLoading(true)
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+
+      const response = await fetch('/api/users/contact-unlock-status', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      })
+
+      const data = await response.json()
+      if (data.success) {
+        setUnlockStatus(data.data)
+      }
+    } catch (err) {
+      console.error('Failed to fetch unlock status:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleUnlock = async () => {
+    try {
+      setUnlocking(true)
+      setError('')
+      
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        setError('Please login to continue')
+        return
+      }
+
+      const response = await fetch(`/api/properties/${propertyId}/contact`, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        setContactInfo(data.data)
+        if (onSuccess) {
+          onSuccess(data.data)
+        }
+        // Refresh unlock status
+        fetchUnlockStatus()
+      } else if (data.requiresPayment) {
+        // Show payment modal for unlimited access
+        setShowPaymentModal(true)
+      } else {
+        setError(data.error || 'Failed to unlock contact')
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to unlock contact')
+    } finally {
+      setUnlocking(false)
+    }
+  }
+
+  const handleWhatsAppUnlock = async () => {
+    try {
+      setWhatsappUnlocking(true)
+      setError('')
+      
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        setError('Please login to continue')
+        return
+      }
+
+      const response = await fetch(`/api/properties/${propertyId}/contact`, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        // Open WhatsApp with pre-filled message
+        const phone = data.data.owner_phone.replace(/\D/g, '') // Remove non-digits
+        const message = encodeURIComponent(
+          `Hi, I'm interested in your property:\n\n` +
+          `${propertyTitle}\n` +
+          `Location: ${propertyDistrict}\n` +
+          `Price: ${propertyPrice.toLocaleString()} RWF/month\n\n` +
+          `Link: ${window.location.href}`
+        )
+        window.open(`https://wa.me/${phone}?text=${message}`, '_blank')
+        
+        setContactInfo(data.data)
+        if (onSuccess) {
+          onSuccess(data.data)
+        }
+        // Refresh unlock status
+        fetchUnlockStatus()
+      } else if (data.requiresPayment) {
+        // Show payment modal for unlimited access
+        setShowPaymentModal(true)
+      } else {
+        setError(data.error || 'Failed to unlock contact')
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to unlock contact')
+    } finally {
+      setWhatsappUnlocking(false)
+    }
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <a
+        href="/auth"
+        className="tk-button w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
+      >
+        <Lock className="h-5 w-5" />
+        Login to View Contact
+      </a>
+    )
+  }
+
+  if (loading) {
+    return (
+      <div className="w-full px-6 py-3 bg-gray-100 text-gray-600 rounded-lg flex items-center justify-center gap-2">
+        <Loader2 className="h-5 w-5 animate-spin" />
+        Loading...
+      </div>
+    )
+  }
+
+  if (contactInfo) {
+    return (
+      <div className="space-y-3">
+        <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+          <div className="flex items-center gap-2 text-emerald-700 font-semibold mb-3">
+            <Unlock className="h-5 w-5" />
+            Contact Information
+          </div>
+          {contactInfo.owner_email && (
+            <div className="flex items-center gap-2 text-gray-700 mb-2">
+              <Mail className="h-4 w-4" />
+              <a href={`mailto:${contactInfo.owner_email}`} className="hover:underline">
+                {contactInfo.owner_email}
+              </a>
+            </div>
+          )}
+          {contactInfo.owner_phone && (
+            <div className="flex items-center gap-2 text-gray-700">
+              <Phone className="h-4 w-4" />
+              <a href={`tel:${contactInfo.owner_phone}`} className="hover:underline">
+                {contactInfo.owner_phone}
+              </a>
+            </div>
+          )}
+        </div>
+        
+        {/* WhatsApp Quick Action */}
+        {contactInfo.owner_phone && (
+          <a
+            href={`https://wa.me/${contactInfo.owner_phone.replace(/\D/g, '')}?text=${encodeURIComponent(
+              `Hi, I'm interested in your property:\n\n` +
+              `${propertyTitle}\n` +
+              `Location: ${propertyDistrict}\n` +
+              `Price: ${propertyPrice.toLocaleString()} RWF/month\n\n` +
+              `Link: ${window.location.href}`
+            )}`}
+            target="_blank"
+            className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+          >
+            <MessageCircle className="h-5 w-5" />
+            Chat on WhatsApp
+          </a>
+        )}
+      </div>
+    )
+  }
+
+  return (
+    <>
+      <div className="space-y-3">
+        {/* Unlock Status */}
+        {unlockStatus && !unlockStatus.hasUnlimitedAccess && (
+          <div className="text-sm text-gray-600 bg-teal-50 border border-teal-200 rounded-lg p-3">
+            <div className="flex items-center justify-between">
+              <span>Free unlocks remaining:</span>
+              <span className="font-bold text-teal-600">
+                {unlockStatus.remainingFreeUnlocks} of {unlockStatus.freeUnlocksLimit}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {unlockStatus?.hasUnlimitedAccess && (
+          <div className="text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded-lg p-3 flex items-center gap-2">
+            <Unlock className="h-4 w-4" />
+            <span className="font-semibold">You have unlimited access</span>
+          </div>
+        )}
+
+        {/* Error Message */}
+        {error && (
+          <div className="text-sm text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-lg p-3 flex items-center gap-2">
+            <AlertCircle className="h-4 w-4" />
+            {error}
+          </div>
+        )}
+
+        {/* Unlock Buttons */}
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            onClick={handleUnlock}
+            disabled={unlocking || whatsappUnlocking}
+            className="tk-button inline-flex items-center justify-center gap-2 px-4 py-3 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed text-sm font-medium"
+          >
+            {unlocking ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="hidden sm:inline">Unlocking...</span>
+              </>
+            ) : (
+              <>
+                <Phone className="h-4 w-4" />
+                <span className="hidden sm:inline">Contact Owner</span>
+                <span className="sm:hidden">Contact</span>
+              </>
+            )}
+          </button>
+
+          <button
+            onClick={handleWhatsAppUnlock}
+            disabled={unlocking || whatsappUnlocking}
+            className="tk-button inline-flex items-center justify-center gap-2 px-4 py-3 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed text-sm font-medium"
+          >
+            {whatsappUnlocking ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="hidden sm:inline">Opening...</span>
+              </>
+            ) : (
+              <>
+                <MessageCircle className="h-4 w-4" />
+                <span className="hidden sm:inline">WhatsApp Owner</span>
+                <span className="sm:hidden">WhatsApp</span>
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Pricing Info */}
+        {unlockStatus && !unlockStatus.hasUnlimitedAccess && unlockStatus.remainingFreeUnlocks === 0 && (
+          <p className="text-xs text-gray-500 text-center">
+            Get unlimited access for {unlockStatus.unlimitedAccessPrice?.toLocaleString()} RWF
+          </p>
+        )}
+      </div>
+
+      {/* Payment Modal for Unlimited Access */}
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        purpose="unlimited_contact_access"
+        onSuccess={() => {
+          setShowPaymentModal(false)
+          fetchUnlockStatus()
+        }}
+      />
+    </>
+  )
+}
