@@ -3,11 +3,12 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { signIn, signUp, signInWithGoogle } from '@/lib/auth';
+import { signIn, signUp, signInWithGoogle, safeNext } from '@/lib/auth';
 
 export default function AuthPage() {
   const router = useRouter();
   const [isLogin, setIsLogin] = useState(true);
+  const [next, setNext] = useState('/');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
@@ -30,6 +31,13 @@ export default function AuthPage() {
     setError('');
   }, [isLogin]);
 
+  // Runs after the reset above so a callback error stays visible.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setNext(safeNext(params.get('next')));
+    if (params.get('error')) setError(params.get('error')!);
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -43,12 +51,13 @@ export default function AuthPage() {
         });
 
         if (signInError) throw new Error(signInError.message);
-        router.push('/'); // Redirect to homepage after login
+        router.push(next); // Return to the page that asked for sign-in
       } else {
         const { data, error: signUpError } = await signUp({
           email: formData.email,
           password: formData.password,
           fullName: formData.fullName,
+          next,
         });
 
         if (signUpError) throw new Error(signUpError.message);
@@ -148,7 +157,7 @@ export default function AuthPage() {
 
           <button
             type="button"
-            onClick={() => signInWithGoogle()}
+            onClick={() => signInWithGoogle(next)}
             className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors font-medium"
           >
             <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24">

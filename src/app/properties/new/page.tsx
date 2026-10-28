@@ -265,7 +265,7 @@ export default function NewProperty() {
             <h2 className="tk-section-title text-2xl font-bold text-gray-900 mb-4">Authentication Required</h2>
             <p className="text-gray-600 mb-6">You need to be logged in to list a property.</p>
             <Link 
-              href="/auth" 
+              href="/auth?next=%2Fproperties%2Fnew" 
               className="tk-button inline-block px-6 py-3 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 transition-colors"
             >
               Login to Continue

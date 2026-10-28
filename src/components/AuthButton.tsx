@@ -1,12 +1,13 @@
 "use client"
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 
 export default function AuthButton() {
   const router = useRouter()
+  const pathname = usePathname()
   const [user, setUser] = useState<any>(null)
 
   useEffect(() => {
@@ -45,7 +46,7 @@ export default function AuthButton() {
   }
 
   return (
-    <Link href="/auth" className="tk-button px-4 py-2 text-emerald-700 font-medium rounded-lg border border-emerald-200 hover:bg-emerald-50 transition-colors duration-200">
+    <Link href={pathname && pathname !== '/' && !pathname.startsWith('/auth') ? `/auth?next=${encodeURIComponent(pathname)}` : '/auth'} className="tk-button px-4 py-2 text-emerald-700 font-medium rounded-lg border border-emerald-200 hover:bg-emerald-50 transition-colors duration-200">
       Login / Sign Up
     </Link>
   )

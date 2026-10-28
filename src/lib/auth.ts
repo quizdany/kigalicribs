@@ -1,10 +1,24 @@
 import { supabase } from './supabase'
 
-export async function signUp({ email, password, fullName }: { email: string; password: string; fullName: string }) {
+// Only same-site paths, so a crafted ?next= cannot send users elsewhere.
+export function safeNext(next: string | null | undefined) {
+  return next && next.startsWith('/') && !next.startsWith('//') ? next : '/'
+}
+
+// Supabase falls back to its dashboard "Site URL" unless an explicit redirect is
+// given, which sent preview/local sign-ins to the production site.
+function callbackUrl(next?: string) {
+  const url = new URL('/auth/callback', window.location.origin)
+  if (next && next !== '/') url.searchParams.set('next', next)
+  return url.href
+}
+
+export async function signUp({ email, password, fullName, next }: { email: string; password: string; fullName: string; next?: string }) {
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
+      emailRedirectTo: callbackUrl(next),
       data: {
         full_name: fullName,
       },
@@ -21,7 +35,7 @@ export async function signIn({ email, password }: { email: string; password: str
   return { data, error }
 }
 
-export async function signInWithGoogle() {
+export async function signInWithGoogle(next?: string) {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
@@ -29,7 +43,7 @@ export async function signInWithGoogle() {
         access_type: 'offline',
         prompt: 'consent',
       },
-      redirectTo: `${window.location.origin}/auth/callback`
+      redirectTo: callbackUrl(next)
     }
   })
   return { data, error }

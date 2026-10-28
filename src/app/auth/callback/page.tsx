@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { safeNext } from '@/lib/auth'
 
 export default function AuthCallback() {
   const router = useRouter()
@@ -13,8 +14,8 @@ export default function AuthCallback() {
         const { error } = await supabase.auth.getSession()
         if (error) throw error
         
-        // Successful authentication, redirect to home page
-        router.push('/')
+        // Successful authentication, return to where sign-in started
+        router.replace(safeNext(new URLSearchParams(window.location.search).get('next')))
       } catch (error) {
         console.error('Error during auth callback:', error)
         router.push('/auth?error=Authentication%20failed')
