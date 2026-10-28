@@ -9,6 +9,8 @@ import PropertyBadges from '@/components/PropertyBadges'
 import ContactUnlockButton from '@/components/ContactUnlockButton'
 import OwnerActions from '@/components/OwnerActions'
 import ListingUpgradeModal from '@/components/PremiumModal'
+import PropertyLeadActions from '@/components/PropertyLeadActions'
+import { isListingAvailable } from '@/lib/marketplace-policy'
 import { useSearchParams } from 'next/navigation'
 
 export default function PropertyDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -127,18 +129,18 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Loader2 className="animate-spin h-8 w-8 text-red-600" />
+      <div className="tk-page min-h-[60vh] bg-gray-50 flex items-center justify-center">
+        <Loader2 className="animate-spin h-8 w-8 text-emerald-600" />
       </div>
     )
   }
 
   if (error || !property) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="tk-page min-h-[60vh] bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-600 mb-4">{error || 'Property not found'}</p>
-          <Link href="/properties" className="text-red-600 hover:text-red-700">
+          <p className="text-rose-600 mb-4">{error || 'Property not found'}</p>
+          <Link href="/properties" className="text-emerald-600 hover:text-emerald-700">
             Back to properties
           </Link>
         </div>
@@ -146,10 +148,11 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
     )
   }
 
+  const listingAvailable = isListingAvailable({ status: property.status, expiresAt: property.listing_expires_at })
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      <nav className="bg-white shadow-sm border-b">
+    <div className="tk-page min-h-[60vh] bg-gray-50">
+      <div className="tk-subbar">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center gap-3">
@@ -165,7 +168,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
             {isOwner && (
               <Link
                 href={`/properties/${id}/edit`}
-                className="flex items-center px-6 py-2 bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition-colors font-medium"
+                className="tk-button flex items-center px-6 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-colors font-medium"
               >
                 <Edit className="h-4 w-4 mr-2" />
                 Edit Property
@@ -173,7 +176,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
             )}
           </div>
         </div>
-      </nav>
+      </div>
 
       {/* Property Details */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -266,10 +269,10 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-4">
             {/* Title and Price */}
-            <div className="bg-white rounded-lg shadow-sm p-5">
+            <div className="tk-surface bg-white rounded-lg shadow-sm p-5">
               <div className="flex justify-between items-start mb-3">
                 <div className="flex-1">
-                  <h1 className="text-2xl font-bold text-gray-900 mb-1">{property.title}</h1>
+                  <h1 className="tk-title text-2xl font-bold text-gray-900 mb-1">{property.title}</h1>
                   <div className="flex items-center text-gray-600 mb-2 text-sm">
                     <MapPin className="h-4 w-4 mr-1" />
                     <span>{property.address || property.location}, {property.district}</span>
@@ -296,9 +299,9 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
 
             {/* Features */}
             {(property.bedrooms || property.bathrooms || property.size) && (
-              <div className="bg-white rounded-lg shadow-sm p-5">
-                <h2 className="text-lg font-semibold text-gray-900 mb-3">Property Features</h2>
-                <div className="grid grid-cols-3 gap-4">
+              <div className="tk-surface bg-white rounded-lg shadow-sm p-5">
+                <h2 className="tk-section-title text-lg font-semibold text-gray-900 mb-3">Property Features</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {property.bedrooms && (
                     <div className="flex items-center">
                       <Bed className="h-5 w-5 mr-2 text-gray-600" />
@@ -331,19 +334,19 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
             )}
 
             {/* Description */}
-            <div className="bg-white rounded-lg shadow-sm p-5">
-              <h2 className="text-lg font-semibold text-gray-900 mb-3">Description</h2>
+            <div className="tk-surface bg-white rounded-lg shadow-sm p-5">
+              <h2 className="tk-section-title text-lg font-semibold text-gray-900 mb-3">Description</h2>
               <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">{property.description}</p>
             </div>
 
             {/* Amenities */}
             {property.amenities && property.amenities.length > 0 && (
-              <div className="bg-white rounded-lg shadow-sm p-5">
-                <h2 className="text-lg font-semibold text-gray-900 mb-3">Amenities</h2>
+              <div className="tk-surface bg-white rounded-lg shadow-sm p-5">
+                <h2 className="tk-section-title text-lg font-semibold text-gray-900 mb-3">Amenities</h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {property.amenities.map((amenity: string, idx: number) => (
                     <div key={idx} className="flex items-center text-gray-700 text-sm">
-                      <div className="w-1.5 h-1.5 bg-red-600 rounded-full mr-2"></div>
+                      <div className="w-1.5 h-1.5 bg-emerald-600 rounded-full mr-2"></div>
                       <span className="capitalize">{amenity}</span>
                     </div>
                   ))}
@@ -356,21 +359,23 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
           <div className="lg:col-span-1 space-y-6">
             {/* Contact Section for Non-Owners */}
             {!isOwner && (
-              <div className="bg-white rounded-lg shadow-sm p-6 sticky top-4">
+              <div className="tk-surface bg-white rounded-lg shadow-sm p-6 sticky top-4">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Interested in this property?</h3>
-                
-                <ContactUnlockButton
+                {!listingAvailable && <p className="mb-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-900">This listing is no longer available. Contact details and new viewing requests are closed.</p>}
+                {listingAvailable && <ContactUnlockButton
                   propertyId={id}
                   propertyTitle={property.title}
                   propertyPrice={property.price}
                   propertyDistrict={property.district}
                   onSuccess={(contactInfo) => setContactInfo(contactInfo)}
-                />
+                />}
+
+                <PropertyLeadActions propertyId={id} available={listingAvailable} />
                 
                 {currentUser && (
                   <Link
                     href={`/contracts/new?propertyId=${id}`}
-                    className="mt-3 w-full flex items-center justify-center px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
+                    className="tk-button mt-3 w-full flex items-center justify-center px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
                   >
                     Start Lease Agreement
                   </Link>
@@ -381,16 +386,16 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
             {/* Owner Actions */}
             {isOwner && (
               <>
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <p className="text-sm text-green-800 font-medium">You own this property</p>
-                  <p className="text-xs text-green-600 mt-1">Manage your listing below</p>
+                <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+                  <p className="text-sm text-emerald-800 font-medium">You own this property</p>
+                  <p className="text-xs text-emerald-600 mt-1">Manage your listing below</p>
                 </div>
                 
                 {/* Upgrade to Verified/Premium */}
                 {property.listing_type === 'basic' && property.verification_status !== 'pending' && (
-                  <div className="bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-6">
+                  <div className="bg-gradient-to-br from-teal-50 to-teal-50 border border-teal-200 rounded-lg p-6">
                     <div className="flex items-start mb-3">
-                      <div className="flex-shrink-0 w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                      <div className="flex-shrink-0 w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center">
                         <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                         </svg>
@@ -407,26 +412,26 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                     
                     <button
                       onClick={() => setShowUpgradeModal(true)}
-                      className="w-full px-4 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium transition-all shadow-sm"
+                      className="w-full px-4 py-2.5 bg-gradient-to-r from-teal-600 to-teal-600 text-white rounded-lg hover:from-teal-700 hover:to-teal-700 font-medium transition-all shadow-sm"
                     >
                       Upgrade Listing
                     </button>
                     
                     <div className="mt-3 text-xs text-gray-500 space-y-1">
                       <div className="flex items-center">
-                        <svg className="w-3 h-3 text-green-600 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className="w-3 h-3 text-emerald-600 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
                         </svg>
                         Verified badge & trust
                       </div>
                       <div className="flex items-center">
-                        <svg className="w-3 h-3 text-green-600 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className="w-3 h-3 text-emerald-600 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
                         </svg>
                         6 months validity
                       </div>
                       <div className="flex items-center">
-                        <svg className="w-3 h-3 text-green-600 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className="w-3 h-3 text-emerald-600 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
                         </svg>
                         From 30,000 RWF
@@ -437,9 +442,9 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                 
                 {/* Awaiting Verification Notice - Replaces upgrade card after payment */}
                 {property.verification_status === 'pending' && (
-                  <div className="bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-300 rounded-lg p-6 shadow-sm">
+                  <div className="bg-gradient-to-br from-amber-50 to-amber-50 border-2 border-amber-300 rounded-lg p-6 shadow-sm">
                     <div className="flex items-start mb-4">
-                      <div className="flex-shrink-0 w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center">
+                      <div className="flex-shrink-0 w-12 h-12 bg-amber-500 rounded-full flex items-center justify-center">
                         <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
@@ -451,9 +456,9 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                         <p className="text-sm text-gray-700 mb-3">
                           Your payment has been received! Our admin team is reviewing your property for verification.
                         </p>
-                        <div className="bg-white bg-opacity-60 rounded-lg p-3 space-y-2">
+                        <div className="tk-surface bg-white bg-opacity-60 rounded-lg p-3 space-y-2">
                           <div className="flex items-start">
-                            <svg className="w-4 h-4 text-blue-600 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <svg className="w-4 h-4 text-teal-600 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
                             </svg>
                             <p className="text-xs text-gray-700">
@@ -461,7 +466,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                             </p>
                           </div>
                           <div className="flex items-start">
-                            <svg className="w-4 h-4 text-yellow-600 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <svg className="w-4 h-4 text-amber-600 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd"/>
                             </svg>
                             <p className="text-xs text-gray-700">
@@ -480,8 +485,8 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                       </div>
                     </div>
                     
-                    <div className="bg-blue-100 border border-blue-200 rounded-lg p-3 mt-4">
-                      <p className="text-xs text-blue-900 flex items-start">
+                    <div className="bg-teal-100 border border-teal-200 rounded-lg p-3 mt-4">
+                      <p className="text-xs text-teal-900 flex items-start">
                         <svg className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"/>
                         </svg>
@@ -504,7 +509,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
             )}
 
             {/* Property Details Section */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="tk-surface bg-white rounded-lg shadow-sm p-6">
               <div className="pt-2">
                 <h4 className="text-sm font-semibold text-gray-900 mb-3">Property Details</h4>
                 <div className="space-y-2 text-sm">
@@ -573,7 +578,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
       {/* Contact Modal */}
       {showContactModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+          <div className="tk-surface bg-white rounded-lg shadow-xl w-full max-w-md">
             <div className="flex items-center justify-between p-4 border-b">
               <h3 className="text-lg font-semibold">Owner Contact</h3>
               <button
@@ -592,7 +597,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                 <p className="text-gray-600">Loading contact…</p>
               )}
               {contactError && (
-                <p className="text-red-600 text-sm">{contactError}</p>
+                <p className="text-rose-600 text-sm">{contactError}</p>
               )}
               {!contactLoading && !contactError && contactInfo && (
                 <div className="space-y-4">
@@ -611,7 +616,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                       <div className="flex items-center gap-2">
                         <a
                           href={`mailto:${contactInfo.owner_email}`}
-                          className="px-3 py-1 text-sm rounded bg-red-600 text-white hover:bg-red-700 flex items-center"
+                          className="tk-button px-3 py-1 text-sm rounded bg-emerald-600 text-white hover:bg-emerald-700 flex items-center"
                         >
                           Email
                         </a>
@@ -634,7 +639,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                       <div className="flex items-center gap-2">
                         <a
                           href={`tel:${contactInfo.owner_phone}`}
-                          className="px-3 py-1 text-sm rounded bg-green-600 text-white hover:bg-green-700 flex items-center"
+                          className="tk-button px-3 py-1 text-sm rounded bg-emerald-600 text-white hover:bg-emerald-700 flex items-center"
                         >
                           Call
                         </a>
@@ -655,14 +660,14 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
               {currentUser && (
                 <Link
                   href={`/contracts/new?propertyId=${id}`}
-                  className="px-4 py-2 rounded bg-gray-100 text-gray-800 hover:bg-gray-200"
+                  className="tk-button px-4 py-2 rounded bg-gray-100 text-gray-800 hover:bg-gray-200"
                 >
                   Start lease agreement
                 </Link>
               )}
               <button
                 onClick={() => setShowContactModal(false)}
-                className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+                className="px-4 py-2 rounded bg-emerald-600 text-white hover:bg-emerald-700"
               >
                 Close
               </button>

@@ -152,46 +152,55 @@ export interface Database {
         Row: User
         Insert: Omit<User, 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Omit<User, 'id'>>
+        Relationships: []
       }
       properties: {
         Row: Property
         Insert: Omit<Property, 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Omit<Property, 'id'>>
+        Relationships: []
       }
       leases: {
         Row: Lease
         Insert: Omit<Lease, 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Omit<Lease, 'id'>>
+        Relationships: []
       }
       lease_payments: {
         Row: Payment
         Insert: Omit<Payment, 'id' | 'created_at'>
         Update: Partial<Omit<Payment, 'id'>>
+        Relationships: []
       }
       payments: {
         Row: PremiumPayment
         Insert: Omit<PremiumPayment, 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Omit<PremiumPayment, 'id'>>
+        Relationships: []
       }
       premium_users: {
         Row: PremiumUser
         Insert: Omit<PremiumUser, 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Omit<PremiumUser, 'id'>>
+        Relationships: []
       }
       contact_unlocks: {
         Row: ContactUnlock
         Insert: Omit<ContactUnlock, 'id' | 'unlocked_at'>
         Update: Partial<Omit<ContactUnlock, 'id'>>
+        Relationships: []
       }
       property_verifications: {
         Row: PropertyVerification
         Insert: Omit<PropertyVerification, 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Omit<PropertyVerification, 'id'>>
+        Relationships: []
       }
       reviews: {
         Row: Review
         Insert: Omit<Review, 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Omit<Review, 'id'>>
+        Relationships: []
       }
     }
     Views: {

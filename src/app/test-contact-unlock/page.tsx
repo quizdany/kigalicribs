@@ -51,7 +51,7 @@ export default function TestContactUnlockPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="tk-page min-h-[60vh] flex items-center justify-center">
         <div className="text-xl">Loading...</div>
       </div>
     )
@@ -59,13 +59,13 @@ export default function TestContactUnlockPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="max-w-md w-full p-6 bg-white rounded-lg shadow-lg">
-          <h1 className="text-2xl font-bold mb-4">Test Contact Unlock API</h1>
-          <p className="text-red-600 mb-4">You need to be logged in to test this feature.</p>
+      <div className="tk-page min-h-[60vh] flex items-center justify-center">
+        <div className="tk-surface max-w-md w-full p-6 bg-white rounded-lg shadow-lg">
+          <h1 className="tk-title text-2xl font-bold mb-4">Test Contact Unlock API</h1>
+          <p className="text-rose-600 mb-4">You need to be logged in to test this feature.</p>
           <a 
             href="/auth" 
-            className="block w-full bg-blue-600 text-white text-center py-2 px-4 rounded hover:bg-blue-700"
+            className="tk-button block w-full bg-teal-600 text-white text-center py-2 px-4 rounded hover:bg-teal-700"
           >
             Go to Login
           </a>
@@ -75,13 +75,13 @@ export default function TestContactUnlockPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="tk-page min-h-[60vh] bg-gray-50 p-8">
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Contact Unlock Status Test</h1>
+        <h1 className="tk-title text-3xl font-bold mb-5">Contact Unlock Status Test</h1>
 
         {/* User Info */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-3">Current User</h2>
+        <div className="tk-surface bg-white rounded-lg shadow p-6 mb-6">
+          <h2 className="tk-section-title text-xl font-semibold mb-3">Current User</h2>
           <div className="space-y-2 text-sm">
             <p><strong>Email:</strong> {user.email}</p>
             <p><strong>User ID:</strong> {user.id}</p>
@@ -90,27 +90,27 @@ export default function TestContactUnlockPage() {
 
         {/* Error Display */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-            <p className="text-red-600">Error: {error}</p>
+          <div className="bg-rose-50 border border-rose-200 rounded-lg p-4 mb-6">
+            <p className="text-rose-600">Error: {error}</p>
           </div>
         )}
 
         {/* Unlock Status */}
         {unlockStatus && (
-          <div className="bg-white rounded-lg shadow p-6 mb-6">
-            <h2 className="text-xl font-semibold mb-4">Your Contact Unlock Status</h2>
+          <div className="tk-surface bg-white rounded-lg shadow p-6 mb-6">
+            <h2 className="tk-section-title text-xl font-semibold mb-4">Your Contact Unlock Status</h2>
             
             <div className="grid grid-cols-2 gap-4 mb-4">
-              <div className="bg-blue-50 p-4 rounded-lg">
+              <div className="bg-teal-50 p-4 rounded-lg">
                 <p className="text-sm text-gray-600">Used Free Unlocks</p>
-                <p className="text-3xl font-bold text-blue-600">
+                <p className="text-3xl font-bold text-teal-600">
                   {unlockStatus.usedFreeUnlocks}
                 </p>
               </div>
               
-              <div className="bg-green-50 p-4 rounded-lg">
+              <div className="bg-emerald-50 p-4 rounded-lg">
                 <p className="text-sm text-gray-600">Remaining Free</p>
-                <p className="text-3xl font-bold text-green-600">
+                <p className="text-3xl font-bold text-emerald-600">
                   {unlockStatus.remainingFreeUnlocks}
                 </p>
               </div>
@@ -124,14 +124,14 @@ export default function TestContactUnlockPage() {
               
               <div className="flex items-center justify-between mb-2">
                 <span className="text-gray-700">Has Unlimited Access:</span>
-                <span className={`font-semibold ${unlockStatus.hasUnlimitedAccess ? 'text-green-600' : 'text-gray-400'}`}>
+                <span className={`font-semibold ${unlockStatus.hasUnlimitedAccess ? 'text-emerald-600' : 'text-gray-400'}`}>
                   {unlockStatus.hasUnlimitedAccess ? '✓ Yes' : '✗ No'}
                 </span>
               </div>
               
               <div className="flex items-center justify-between mb-2">
                 <span className="text-gray-700">Can Unlock Properties:</span>
-                <span className={`font-semibold ${unlockStatus.canUnlock ? 'text-green-600' : 'text-red-600'}`}>
+                <span className={`font-semibold ${unlockStatus.canUnlock ? 'text-emerald-600' : 'text-rose-600'}`}>
                   {unlockStatus.canUnlock ? '✓ Yes' : '✗ No (Payment Required)'}
                 </span>
               </div>
@@ -145,8 +145,8 @@ export default function TestContactUnlockPage() {
             </div>
 
             {!unlockStatus.canUnlock && (
-              <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded">
-                <p className="text-sm text-yellow-800">
+              <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded">
+                <p className="text-sm text-amber-800">
                   ⚠️ You've used all {unlockStatus.freeUnlocksLimit} free unlocks. 
                   Purchase unlimited access for {unlockStatus.unlimitedAccessPrice.toLocaleString()} RWF to continue.
                 </p>
@@ -159,14 +159,14 @@ export default function TestContactUnlockPage() {
         <div className="flex gap-4">
           <button
             onClick={fetchUnlockStatus}
-            className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+            className="tk-button bg-teal-600 text-white px-6 py-2 rounded hover:bg-teal-700"
           >
             Refresh Status
           </button>
           
           <a
             href="/properties"
-            className="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700"
+            className="tk-button bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700"
           >
             View Properties
           </a>

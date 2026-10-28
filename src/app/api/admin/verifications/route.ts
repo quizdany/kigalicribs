@@ -44,7 +44,9 @@ export async function GET(req: Request) {
 
     // Get URL params for filtering
     const { searchParams } = new URL(req.url)
-    const status = searchParams.get('status') || 'pending'
+    const rawStatus = searchParams.get('status') || 'pending'
+    if(!['pending','approved','rejected'].includes(rawStatus))return NextResponse.json({success:false,error:'Invalid verification status'},{status:400})
+    const status=rawStatus as 'pending'|'approved'|'rejected'
 
     // Fetch verification requests with property details
     const { data: verifications, error } = await supabase

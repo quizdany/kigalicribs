@@ -16,6 +16,7 @@ export interface Database {
         }
         Insert: Omit<Database['public']['Tables']['users']['Row'], 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Database['public']['Tables']['users']['Row']>
+        Relationships: []
       }
       properties: {
         Row: {
@@ -39,10 +40,10 @@ export interface Database {
           featured: boolean
           listing_type: 'basic' | 'verified' | 'premium_verified'
           verification_status: 'none' | 'pending' | 'verified' | 'rejected'
-          verified_at?: string
+          verified_at?: string | null
           listing_expires_at?: string
-          featured_until?: string
-          priority_until?: string
+          featured_until?: string | null
+          priority_until?: string | null
           refresh_count: number
           photo_count: number
           created_at: string
@@ -50,6 +51,7 @@ export interface Database {
         }
         Insert: Omit<Database['public']['Tables']['properties']['Row'], 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Database['public']['Tables']['properties']['Row']>
+        Relationships: []
       }
       payments: {
         Row: {
@@ -71,6 +73,7 @@ export interface Database {
         }
         Insert: Omit<Database['public']['Tables']['payments']['Row'], 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Database['public']['Tables']['payments']['Row']>
+        Relationships: []
       }
       premium_users: {
         Row: {
@@ -86,6 +89,7 @@ export interface Database {
         }
         Insert: Omit<Database['public']['Tables']['premium_users']['Row'], 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Database['public']['Tables']['premium_users']['Row']>
+        Relationships: []
       }
       contact_unlocks: {
         Row: {
@@ -97,6 +101,7 @@ export interface Database {
         }
         Insert: Omit<Database['public']['Tables']['contact_unlocks']['Row'], 'id' | 'unlocked_at'>
         Update: Partial<Database['public']['Tables']['contact_unlocks']['Row']>
+        Relationships: []
       }
       property_verifications: {
         Row: {
@@ -115,6 +120,7 @@ export interface Database {
         }
         Insert: Omit<Database['public']['Tables']['property_verifications']['Row'], 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Database['public']['Tables']['property_verifications']['Row']>
+        Relationships: []
       }
       leases: {
         Row: {
@@ -133,6 +139,7 @@ export interface Database {
         }
         Insert: Omit<Database['public']['Tables']['leases']['Row'], 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Database['public']['Tables']['leases']['Row']>
+        Relationships: []
       }
       lease_payments: {
         Row: {
@@ -150,6 +157,7 @@ export interface Database {
         }
         Insert: Omit<Database['public']['Tables']['lease_payments']['Row'], 'id' | 'created_at'>
         Update: Partial<Database['public']['Tables']['lease_payments']['Row']>
+        Relationships: []
       }
       reviews: {
         Row: {
@@ -163,6 +171,7 @@ export interface Database {
         }
         Insert: Omit<Database['public']['Tables']['reviews']['Row'], 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Database['public']['Tables']['reviews']['Row']>
+        Relationships: []
       }
     }
     Views: {

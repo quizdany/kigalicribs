@@ -114,7 +114,7 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
         return
       }
 
-      const res = await fetch(`/api/properties/${id}`)
+      const res = await fetch(`/api/properties/${id}`, {headers:{Authorization:`Bearer ${session.access_token}`}})
       const json = await res.json()
       
       if (!json?.success) {
@@ -289,18 +289,18 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Loader2 className="animate-spin h-8 w-8 text-red-600" />
+      <div className="tk-page min-h-[60vh] bg-gray-50 flex items-center justify-center">
+        <Loader2 className="animate-spin h-8 w-8 text-emerald-600" />
       </div>
     )
   }
 
   if (error && !isOwner) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="tk-page min-h-[60vh] bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-600 mb-4">{error}</p>
-          <Link href="/properties" className="text-red-600 hover:text-red-700">
+          <p className="text-rose-600 mb-4">{error}</p>
+          <Link href="/properties" className="text-emerald-600 hover:text-emerald-700">
             Back to properties
           </Link>
         </div>
@@ -309,8 +309,8 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm border-b">
+    <div className="tk-page min-h-[60vh] bg-gray-50">
+      <div className="tk-subbar">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <Link href={`/properties/${id}`} className="flex items-center text-gray-700 hover:text-gray-900">
@@ -319,17 +319,17 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
             </Link>
           </div>
         </div>
-      </nav>
+      </div>
 
       <div className="max-w-3xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Edit Property</h1>
+        <h1 className="tk-title text-3xl font-bold text-gray-900 mb-5">Edit Property</h1>
         
         {/* Upgrade Banner for Basic Listings */}
         {property?.listing_type === 'basic' && property?.verification_status !== 'pending' && (
-          <div className="mb-6 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-6">
+          <div className="mb-6 bg-gradient-to-r from-teal-50 to-teal-50 border border-teal-200 rounded-lg p-6">
             <div className="flex items-start">
               <div className="flex-shrink-0">
-                <ShieldCheck className="h-8 w-8 text-blue-600" />
+                <ShieldCheck className="h-8 w-8 text-teal-600" />
               </div>
               <div className="ml-4 flex-1">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -340,7 +340,7 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
                 </p>
                 <button
                   onClick={() => setShowUpgradeModal(true)}
-                  className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium transition-all shadow-sm text-sm"
+                  className="px-4 py-2 bg-gradient-to-r from-teal-600 to-teal-600 text-white rounded-lg hover:from-teal-700 hover:to-teal-700 font-medium transition-all shadow-sm text-sm"
                 >
                   Upgrade Now - From 30,000 RWF
                 </button>
@@ -351,14 +351,14 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
         
         {/* Pending Verification Notice */}
         {property?.verification_status === 'pending' && (
-          <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <div className="mb-6 bg-amber-50 border border-amber-200 rounded-lg p-4">
             <div className="flex items-start">
-              <svg className="h-5 w-5 text-yellow-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="h-5 w-5 text-amber-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd"/>
               </svg>
               <div className="ml-3">
-                <h3 className="text-sm font-medium text-yellow-800">Verification Pending</h3>
-                <p className="text-xs text-yellow-700 mt-1">
+                <h3 className="text-sm font-medium text-amber-800">Verification Pending</h3>
+                <p className="text-xs text-amber-700 mt-1">
                   Your verification request is under review. You'll be notified once it's approved.
                 </p>
               </div>
@@ -367,15 +367,15 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
         )}
         
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg">
+          <div className="mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-600 rounded-lg">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-8 bg-white shadow-sm rounded-lg p-6">
+        <form onSubmit={handleSubmit} className="tk-surface space-y-6 bg-white shadow-sm rounded-lg p-6">
           {/* Basic Information */}
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">Basic Information</h2>
+            <h2 className="tk-section-title text-xl font-semibold text-gray-900">Basic Information</h2>
             
             <div>
               <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
@@ -388,7 +388,7 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
                 value={form.title}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                className="tk-field w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 placeholder="e.g., Modern 2BR Apartment in Kimihurura"
               />
             </div>
@@ -404,7 +404,7 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
                 onChange={handleChange}
                 required
                 rows={6}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                className="tk-field w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 placeholder="Describe your property in detail..."
               />
             </div>
@@ -420,7 +420,7 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
                   value={form.type}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  className="tk-field w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 >
                   <option value="">Select type</option>
                   <option value="apartment">Apartment</option>
@@ -442,7 +442,7 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
                   onChange={handleChange}
                   required
                   min="0"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  className="tk-field w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                   placeholder="e.g., 75000"
                 />
               </div>
@@ -451,9 +451,9 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
 
           {/* Property Details */}
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">Property Details</h2>
+            <h2 className="tk-section-title text-xl font-semibold text-gray-900">Property Details</h2>
             
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label htmlFor="bedrooms" className="block text-sm font-medium text-gray-700 mb-1">
                   Bedrooms
@@ -465,7 +465,7 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
                   value={form.bedrooms}
                   onChange={handleChange}
                   min="0"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  className="tk-field w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 />
               </div>
 
@@ -480,7 +480,7 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
                   value={form.bathrooms}
                   onChange={handleChange}
                   min="0"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  className="tk-field w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 />
               </div>
 
@@ -495,7 +495,7 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
                   value={form.size}
                   onChange={handleChange}
                   min="0"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  className="tk-field w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 />
               </div>
             </div>
@@ -503,7 +503,7 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
 
           {/* Location */}
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">Location</h2>
+            <h2 className="tk-section-title text-xl font-semibold text-gray-900">Location</h2>
             
             <div>
               <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
@@ -516,7 +516,7 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
                 value={form.address}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                className="tk-field w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 placeholder="Street address"
               />
             </div>
@@ -531,7 +531,7 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
                 value={form.district}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                className="tk-field w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
               >
                 <option value="">Select district</option>
                 <option value="Gasabo">Gasabo</option>
@@ -550,7 +550,7 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
                 value={form.sector}
                 onChange={handleChange}
                 disabled={!form.district}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                className="tk-field w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
               >
                 <option value="">{form.district ? 'Select sector' : 'Select district first'}</option>
                 {getAvailableSectors().map(sector => (
@@ -569,7 +569,7 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
                 value={form.cell}
                 onChange={handleChange}
                 disabled={!form.sector}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                className="tk-field w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
               >
                 <option value="">{form.sector ? 'Select cell' : 'Select sector first'}</option>
                 {getAvailableCells().map(cell => (
@@ -581,7 +581,7 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
 
           {/* Contact Information */}
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">Contact Information</h2>
+            <h2 className="tk-section-title text-xl font-semibold text-gray-900">Contact Information</h2>
             
             <div>
               <label htmlFor="ownerPhone" className="block text-sm font-medium text-gray-700 mb-1">
@@ -594,7 +594,7 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
                 value={form.ownerPhone}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                className="tk-field w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 placeholder="+250 788 123 456"
               />
             </div>
@@ -602,7 +602,7 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
 
           {/* Amenities */}
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">Amenities</h2>
+            <h2 className="tk-section-title text-xl font-semibold text-gray-900">Amenities</h2>
             
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               {[
@@ -624,7 +624,7 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
                     value={amenity.toLowerCase()}
                     checked={amenities.includes(amenity.toLowerCase())}
                     onChange={handleAmenityChange}
-                    className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
                   />
                   <label htmlFor={amenity.toLowerCase()} className="ml-2 text-sm text-gray-700">
                     {amenity}
@@ -636,7 +636,7 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
 
           {/* Images */}
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">Property Images</h2>
+            <h2 className="tk-section-title text-xl font-semibold text-gray-900">Property Images</h2>
             <p className="text-sm text-gray-600">Upload up to 10 images. First image will be the main display.</p>
             
             {/* Existing Images */}
@@ -654,13 +654,13 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
                       <button
                         type="button"
                         onClick={() => removeExistingImage(idx)}
-                        className="absolute top-1 right-1 p-1.5 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                        className="absolute top-1 right-1 p-1.5 bg-emerald-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
                         title="Remove image"
                       >
                         <X className="h-3 w-3" />
                       </button>
                       {idx === 0 && (
-                        <div className="absolute bottom-1 left-1 px-2 py-0.5 bg-blue-600 text-white text-xs rounded">
+                        <div className="absolute bottom-1 left-1 px-2 py-0.5 bg-teal-600 text-white text-xs rounded">
                           Main
                         </div>
                       )}
@@ -680,17 +680,17 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
                       <img
                         src={preview}
                         alt={`New ${idx + 1}`}
-                        className="w-full h-full object-cover rounded-lg border border-green-300"
+                        className="w-full h-full object-cover rounded-lg border border-emerald-300"
                       />
                       <button
                         type="button"
                         onClick={() => removeNewImage(idx)}
-                        className="absolute top-1 right-1 p-1.5 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                        className="absolute top-1 right-1 p-1.5 bg-emerald-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
                         title="Remove image"
                       >
                         <X className="h-3 w-3" />
                       </button>
-                      <div className="absolute bottom-1 left-1 px-2 py-0.5 bg-green-600 text-white text-xs rounded">
+                      <div className="absolute bottom-1 left-1 px-2 py-0.5 bg-emerald-600 text-white text-xs rounded">
                         New
                       </div>
                     </div>
@@ -726,14 +726,14 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
           <div className="flex gap-4">
             <Link
               href={`/properties/${id}`}
-              className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors text-center"
+              className="tk-button flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors text-center"
             >
               Cancel
             </Link>
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
+              className="tk-button flex-1 px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
             >
               {saving ? (
                 <>

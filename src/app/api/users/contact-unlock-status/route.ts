@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/database.types'
+import { isEntitlementActive } from '@/lib/marketplace-policy'
 
 /**
  * Get user's contact unlock status
@@ -32,25 +33,29 @@ export async function GET(req: Request) {
     }
 
     // Count how many properties user has unlocked
-    const { count: unlockCount } = await supabase
+    const { count: unlockCount, error: unlockError } = await supabase
       .from('contact_unlocks')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', user.id)
+
+    if (unlockError) return NextResponse.json({ success: false, error: 'Unable to check contact access.' }, { status: 503 })
 
     const usedFreeUnlocks = unlockCount || 0
     const freeUnlocksLimit = 3
     const remainingFreeUnlocks = Math.max(0, freeUnlocksLimit - usedFreeUnlocks)
 
     // Check if user has unlimited access
-    const { data: premiumUser } = await supabase
+    const { data: premiumUser, error: premiumError } = await supabase
       .from('premium_users')
-      .select('*')
+      .select('is_active, expires_at')
       .eq('user_id', user.id)
       .eq('subscription_type', 'unlimited_contact_access')
       .eq('is_active', true)
-      .single()
+      .maybeSingle()
 
-    const hasUnlimitedAccess = premiumUser !== null
+    if (premiumError) return NextResponse.json({ success: false, error: 'Unable to check contact plan.' }, { status: 503 })
+
+    const hasUnlimitedAccess = !!premiumUser && isEntitlementActive({ isActive: premiumUser.is_active, expiresAt: premiumUser.expires_at })
 
     return NextResponse.json({
       success: true,
@@ -59,7 +64,7 @@ export async function GET(req: Request) {
         freeUnlocksLimit,
         remainingFreeUnlocks,
         hasUnlimitedAccess,
-        unlimitedAccessPrice: 10000, // RWF
+        unlimitedAccessPrice: 10000, // Current configured plan price in RWF.
         canUnlock: hasUnlimitedAccess || remainingFreeUnlocks > 0
       }
     })

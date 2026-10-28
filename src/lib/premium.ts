@@ -45,9 +45,9 @@ export async function getPremiumDetails(userId: string) {
       startsAt: data.starts_at,
       expiresAt: data.expires_at,
       isActive: data.is_active,
-      daysRemaining: Math.ceil(
+      daysRemaining: data.expires_at ? Math.ceil(
         (new Date(data.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-      )
+      ) : null
     }
   } catch (error) {
     console.error('Premium details fetch error:', error)

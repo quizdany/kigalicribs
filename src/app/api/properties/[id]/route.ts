@@ -1,3 +1,5 @@
+import { propertyEditSchema,redactProperty } from '@/lib/property-policy'
+import { requestUser,sameOrigin } from '@/lib/agent-tools'
 import { NextResponse } from 'next/server'
 import { supabase as supabaseClient } from '@/lib/supabase'
 import { createClient } from '@supabase/supabase-js'
@@ -34,7 +36,9 @@ export async function GET(
       verified_at: data.verified_at
     })
     
-    return NextResponse.json({ success: true, data }, {
+    const viewer=await requestUser(request);
+    const visible=viewer?.id===data.owner_id?data:redactProperty(data);
+    return NextResponse.json({ success: true, data:visible }, {
       headers: {
         'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
         'Pragma': 'no-cache'
@@ -72,7 +76,12 @@ export async function PATCH(
     const { data: userData } = await (supabaseAuthed as any).auth.getUser()
     if (!userData?.user) return NextResponse.json({ success: false, error: 'Invalid token' }, { status: 401 })
 
-    const body = await request.json()
+    if(!sameOrigin(request))return NextResponse.json({success:false,error:'Forbidden'},{status:403});
+    const raw=await request.text();
+    if(raw.length>100000)return NextResponse.json({success:false,error:'Listing too large'},{status:413});
+    const parsed=propertyEditSchema.safeParse(JSON.parse(raw));
+    if(!parsed.success||!Object.keys(parsed.data).length)return NextResponse.json({success:false,error:parsed.success?'No changes supplied':parsed.error.issues[0]?.message},{status:400});
+    const body=parsed.data;
 
     // verify owner
     const existingRes: any = await (supabaseAuthed as any).from('properties').select('owner_id').eq('id', id).maybeSingle()

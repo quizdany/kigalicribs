@@ -209,7 +209,7 @@ export default function PaymentModal({ isOpen, onClose, purpose, propertyId, onS
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+      <div className="tk-surface bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl">
         <div className="p-6">
           {/* Header */}
           <div className="flex justify-between items-center mb-6">
@@ -245,7 +245,7 @@ export default function PaymentModal({ isOpen, onClose, purpose, propertyId, onS
                   <label
                     className={`flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all ${
                       provider === 'airtel'
-                        ? 'border-red-500 bg-red-50 shadow-sm'
+                        ? 'border-emerald-500 bg-emerald-50 shadow-sm'
                         : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'
                     }`}
                   >
@@ -255,10 +255,10 @@ export default function PaymentModal({ isOpen, onClose, purpose, propertyId, onS
                       value="airtel"
                       checked={provider === 'airtel'}
                       onChange={(e) => setProvider(e.target.value as PaymentProvider)}
-                      className="w-5 h-5 text-red-600 focus:ring-red-500"
+                      className="w-5 h-5 text-emerald-600 focus:ring-emerald-500"
                     />
                     <div className="ml-4 flex items-center flex-1">
-                      <div className="flex items-center justify-center bg-white rounded-lg p-2 min-w-[80px]">
+                      <div className="tk-surface flex items-center justify-center bg-white rounded-lg p-2 min-w-[80px]">
                         <svg viewBox="0 0 120 50" className="h-10 w-auto">
                           {/* Airtel logo */}
                           <text x="10" y="28" fill="#ED1C24" fontFamily="Arial, sans-serif" fontSize="24" fontWeight="bold">airtel</text>
@@ -273,7 +273,7 @@ export default function PaymentModal({ isOpen, onClose, purpose, propertyId, onS
                   <label
                     className={`flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all ${
                       provider === 'momo'
-                        ? 'border-yellow-500 bg-yellow-50 shadow-sm'
+                        ? 'border-amber-500 bg-amber-50 shadow-sm'
                         : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'
                     }`}
                   >
@@ -283,7 +283,7 @@ export default function PaymentModal({ isOpen, onClose, purpose, propertyId, onS
                       value="momo"
                       checked={provider === 'momo'}
                       onChange={(e) => setProvider(e.target.value as PaymentProvider)}
-                      className="w-5 h-5 text-yellow-500 focus:ring-yellow-500"
+                      className="w-5 h-5 text-amber-500 focus:ring-amber-500"
                     />
                     <div className="ml-4 flex items-center flex-1">
                       <div className="flex items-center justify-center bg-[#FFCB05] rounded-lg p-2.5 min-w-[80px]">
@@ -312,7 +312,7 @@ export default function PaymentModal({ isOpen, onClose, purpose, propertyId, onS
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
                   placeholder="078XXXXXXX or 250XXXXXXXXX"
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all"
                   required
                 />
                 <p className="text-xs text-gray-500 mt-2 flex items-center">
@@ -329,14 +329,14 @@ export default function PaymentModal({ isOpen, onClose, purpose, propertyId, onS
                   type="button"
                   onClick={onClose}
                   disabled={loading}
-                  className="px-6 py-3.5 bg-white border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="tk-button px-6 py-3.5 bg-white border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading || !phoneNumber}
-                  className="px-6 py-3.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl hover:from-orange-600 hover:to-orange-700 font-semibold transition-all disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center shadow-lg shadow-orange-500/30"
+                  className="tk-button px-6 py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl hover:from-amber-600 hover:to-amber-700 font-semibold transition-all disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center shadow-lg shadow-amber-500/30"
                 >
                   {loading ? (
                     <>
@@ -355,8 +355,8 @@ export default function PaymentModal({ isOpen, onClose, purpose, propertyId, onS
           {status === 'processing' && (
             <div className="text-center py-8">
               <div className="relative inline-flex">
-                <div className="absolute inset-0 bg-orange-400 rounded-full blur-xl opacity-30 animate-pulse"></div>
-                <Loader2 className="relative animate-spin h-16 w-16 text-orange-500 mx-auto mb-4" />
+                <div className="absolute inset-0 bg-amber-400 rounded-full blur-xl opacity-30 animate-pulse"></div>
+                <Loader2 className="relative animate-spin h-16 w-16 text-amber-500 mx-auto mb-4" />
               </div>
               <p className="text-lg font-bold text-gray-900 mb-2">Processing Payment</p>
               <p className="text-sm text-gray-600 max-w-xs mx-auto">{message}</p>
@@ -367,9 +367,9 @@ export default function PaymentModal({ isOpen, onClose, purpose, propertyId, onS
           {status === 'completed' && (
             <div className="text-center py-8">
               <div className="relative inline-flex mb-4">
-                <div className="absolute inset-0 bg-green-400 rounded-full blur-xl opacity-30"></div>
-                <div className="relative bg-green-100 rounded-full p-3">
-                  <CheckCircle className="h-16 w-16 text-green-600" />
+                <div className="absolute inset-0 bg-emerald-400 rounded-full blur-xl opacity-30"></div>
+                <div className="relative bg-emerald-100 rounded-full p-3">
+                  <CheckCircle className="h-16 w-16 text-emerald-600" />
                 </div>
               </div>
               <p className="text-lg font-bold text-gray-900 mb-2">Payment Successful!</p>
@@ -381,16 +381,16 @@ export default function PaymentModal({ isOpen, onClose, purpose, propertyId, onS
           {status === 'failed' && (
             <div className="text-center py-8">
               <div className="relative inline-flex mb-4">
-                <div className="absolute inset-0 bg-red-400 rounded-full blur-xl opacity-30"></div>
-                <div className="relative bg-red-100 rounded-full p-3">
-                  <XCircle className="h-16 w-16 text-red-600" />
+                <div className="absolute inset-0 bg-emerald-400 rounded-full blur-xl opacity-30"></div>
+                <div className="relative bg-emerald-100 rounded-full p-3">
+                  <XCircle className="h-16 w-16 text-rose-600" />
                 </div>
               </div>
               <p className="text-lg font-bold text-gray-900 mb-2">Payment Failed</p>
               <p className="text-sm text-gray-600 mb-6 max-w-xs mx-auto">{message}</p>
               <button
                 onClick={() => setStatus('idle')}
-                className="px-8 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl hover:from-orange-600 hover:to-orange-700 font-semibold transition-all shadow-lg shadow-orange-500/30"
+                className="px-8 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl hover:from-amber-600 hover:to-amber-700 font-semibold transition-all shadow-lg shadow-amber-500/30"
               >
                 Try Again
               </button>

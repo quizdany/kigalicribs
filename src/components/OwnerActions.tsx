@@ -103,8 +103,8 @@ export default function OwnerActions({
 
   if (listing_type === 'basic') {
     return (
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <p className="text-sm text-blue-700">
+      <div className="bg-teal-50 border border-teal-200 rounded-lg p-4">
+        <p className="text-sm text-teal-700">
           💡 Upgrade to a <strong>Verified Listing</strong> to access refresh and extend features
         </p>
       </div>
@@ -113,13 +113,13 @@ export default function OwnerActions({
 
   return (
     <>
-      <div className="bg-white rounded-lg shadow-sm p-6 space-y-4">
+      <div className="tk-surface bg-white rounded-lg shadow-sm p-6 space-y-4">
         <h3 className="text-lg font-semibold text-gray-900">Listing Management</h3>
 
         {/* Message */}
         {message && (
           <div className={`p-3 rounded-lg flex items-center gap-2 ${
-            message.type === 'error' ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'
+            message.type === 'error' ? 'bg-rose-50 text-rose-700' : 'bg-rose-50 text-rose-700'
           }`}>
             <AlertCircle className="h-4 w-4" />
             <span className="text-sm">{message.text}</span>
@@ -131,7 +131,7 @@ export default function OwnerActions({
           <button
             onClick={handleRefresh}
             disabled={!canRefresh || loading}
-            className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+            className="tk-button w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
             {loading ? (
               <>
@@ -160,7 +160,7 @@ export default function OwnerActions({
           <button
             onClick={handleExtend}
             disabled={!canExtend || loading}
-            className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+            className="tk-button w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
             {loading ? (
               <>
@@ -192,8 +192,8 @@ export default function OwnerActions({
             <div className="flex items-center justify-between text-sm">
               <span className="text-gray-600">Listing expires:</span>
               <span className={`font-semibold ${
-                daysUntilExpiry && daysUntilExpiry <= 7 ? 'text-red-600' :
-                daysUntilExpiry && daysUntilExpiry <= 30 ? 'text-orange-600' :
+                daysUntilExpiry && daysUntilExpiry <= 7 ? 'text-rose-600' :
+                daysUntilExpiry && daysUntilExpiry <= 30 ? 'text-amber-600' :
                 'text-gray-900'
               }`}>
                 {expiryDate.toLocaleDateString()}

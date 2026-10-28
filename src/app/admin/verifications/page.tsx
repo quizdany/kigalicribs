@@ -173,10 +173,10 @@ export default function AdminVerificationsPage() {
 
   if (!isAdmin && error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="tk-page min-h-[60vh] bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-600 mb-4">{error}</p>
-          <Link href="/" className="text-red-600 hover:text-red-700">
+          <p className="text-rose-600 mb-4">{error}</p>
+          <Link href="/" className="text-emerald-600 hover:text-emerald-700">
             Go to homepage
           </Link>
         </div>
@@ -186,21 +186,20 @@ export default function AdminVerificationsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Loader2 className="animate-spin h-8 w-8 text-red-600" />
+      <div className="tk-page min-h-[60vh] bg-gray-50 flex items-center justify-center">
+        <Loader2 className="animate-spin h-8 w-8 text-emerald-600" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      <nav className="bg-white shadow-sm border-b">
+    <div className="tk-page min-h-[60vh] bg-gray-50">
+      <div className="tk-subbar">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center">
-              <ShieldCheck className="h-6 w-6 text-red-600 mr-2" />
-              <h1 className="text-xl font-bold text-gray-900">Admin - Property Verifications</h1>
+              <ShieldCheck className="h-6 w-6 text-emerald-600 mr-2" />
+              <h1 className="tk-title text-xl font-bold text-gray-900">Admin - Property Verifications</h1>
             </div>
             <Link
               href="/properties"
@@ -210,7 +209,7 @@ export default function AdminVerificationsPage() {
             </Link>
           </div>
         </div>
-      </nav>
+      </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Filter Tabs */}
@@ -219,7 +218,7 @@ export default function AdminVerificationsPage() {
             onClick={() => setStatusFilter('pending')}
             className={`px-4 py-2 font-medium border-b-2 transition-colors ${
               statusFilter === 'pending'
-                ? 'border-red-600 text-red-600'
+                ? 'border-emerald-600 text-emerald-600'
                 : 'border-transparent text-gray-600 hover:text-gray-900'
             }`}
           >
@@ -230,7 +229,7 @@ export default function AdminVerificationsPage() {
             onClick={() => setStatusFilter('approved')}
             className={`px-4 py-2 font-medium border-b-2 transition-colors ${
               statusFilter === 'approved'
-                ? 'border-green-600 text-green-600'
+                ? 'border-emerald-600 text-emerald-600'
                 : 'border-transparent text-gray-600 hover:text-gray-900'
             }`}
           >
@@ -241,7 +240,7 @@ export default function AdminVerificationsPage() {
             onClick={() => setStatusFilter('rejected')}
             className={`px-4 py-2 font-medium border-b-2 transition-colors ${
               statusFilter === 'rejected'
-                ? 'border-red-600 text-red-600'
+                ? 'border-emerald-600 text-emerald-600'
                 : 'border-transparent text-gray-600 hover:text-gray-900'
             }`}
           >
@@ -252,14 +251,14 @@ export default function AdminVerificationsPage() {
 
         {/* Verifications List */}
         {verifications.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-sm p-12 text-center">
+          <div className="tk-surface bg-white rounded-lg shadow-sm p-12 text-center">
             <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-600">No {statusFilter} verifications found</p>
           </div>
         ) : (
           <div className="space-y-4">
             {verifications.map((verification) => (
-              <div key={verification.id} className="bg-white rounded-lg shadow-sm p-6">
+              <div key={verification.id} className="tk-surface bg-white rounded-lg shadow-sm p-6">
                 <div className="grid md:grid-cols-3 gap-6">
                   {/* Property Image */}
                   <div>
@@ -292,8 +291,8 @@ export default function AdminVerificationsPage() {
                       </div>
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                         verification.verification_type === 'premium_verified'
-                          ? 'bg-purple-100 text-purple-700'
-                          : 'bg-blue-100 text-blue-700'
+                          ? 'bg-teal-100 text-teal-700'
+                          : 'bg-teal-100 text-teal-700'
                       }`}>
                         {verification.verification_type === 'premium_verified' ? 'Premium Verified' : 'Verified'}
                       </span>
@@ -342,7 +341,7 @@ export default function AdminVerificationsPage() {
                     <div className="flex gap-3">
                       <Link
                         href={`/properties/${verification.property_id}`}
-                        className="flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                        className="tk-button flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                       >
                         <Eye className="h-4 w-4 mr-2" />
                         View Property
@@ -352,7 +351,7 @@ export default function AdminVerificationsPage() {
                         <>
                           <button
                             onClick={() => setSelectedVerification(verification)}
-                            className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                            className="flex items-center px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
                           >
                             <CheckCircle className="h-4 w-4 mr-2" />
                             Approve
@@ -362,7 +361,7 @@ export default function AdminVerificationsPage() {
                               setSelectedVerification(verification)
                               setTimeout(() => handleReview(verification.id, 'reject'), 100)
                             }}
-                            className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                            className="flex items-center px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
                           >
                             <XCircle className="h-4 w-4 mr-2" />
                             Reject
@@ -381,7 +380,7 @@ export default function AdminVerificationsPage() {
       {/* Review Modal */}
       {selectedVerification && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
+          <div className="tk-surface bg-white rounded-lg max-w-md w-full p-6">
             <h3 className="text-xl font-bold text-gray-900 mb-4">
               Approve Verification
             </h3>
@@ -398,7 +397,7 @@ export default function AdminVerificationsPage() {
               <textarea
                 value={reviewNotes}
                 onChange={(e) => setReviewNotes(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 rows={3}
                 placeholder="Add any notes about this verification..."
               />
@@ -418,7 +417,7 @@ export default function AdminVerificationsPage() {
               <button
                 onClick={() => handleReview(selectedVerification.id, 'approve')}
                 disabled={reviewLoading}
-                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center justify-center"
+                className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center justify-center"
               >
                 {reviewLoading ? (
                   <Loader2 className="animate-spin h-5 w-5" />

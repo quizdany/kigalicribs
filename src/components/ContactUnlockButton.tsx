@@ -152,7 +152,7 @@ export default function ContactUnlockButton({ propertyId, propertyTitle, propert
     return (
       <a
         href="/auth"
-        className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        className="tk-button w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
       >
         <Lock className="h-5 w-5" />
         Login to View Contact
@@ -172,8 +172,8 @@ export default function ContactUnlockButton({ propertyId, propertyTitle, propert
   if (contactInfo) {
     return (
       <div className="space-y-3">
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <div className="flex items-center gap-2 text-green-700 font-semibold mb-3">
+        <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+          <div className="flex items-center gap-2 text-emerald-700 font-semibold mb-3">
             <Unlock className="h-5 w-5" />
             Contact Information
           </div>
@@ -206,7 +206,7 @@ export default function ContactUnlockButton({ propertyId, propertyTitle, propert
               `Link: ${window.location.href}`
             )}`}
             target="_blank"
-            className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
           >
             <MessageCircle className="h-5 w-5" />
             Chat on WhatsApp
@@ -221,10 +221,10 @@ export default function ContactUnlockButton({ propertyId, propertyTitle, propert
       <div className="space-y-3">
         {/* Unlock Status */}
         {unlockStatus && !unlockStatus.hasUnlimitedAccess && (
-          <div className="text-sm text-gray-600 bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <div className="text-sm text-gray-600 bg-teal-50 border border-teal-200 rounded-lg p-3">
             <div className="flex items-center justify-between">
               <span>Free unlocks remaining:</span>
-              <span className="font-bold text-blue-600">
+              <span className="font-bold text-teal-600">
                 {unlockStatus.remainingFreeUnlocks} of {unlockStatus.freeUnlocksLimit}
               </span>
             </div>
@@ -232,7 +232,7 @@ export default function ContactUnlockButton({ propertyId, propertyTitle, propert
         )}
 
         {unlockStatus?.hasUnlimitedAccess && (
-          <div className="text-sm text-green-600 bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-2">
+          <div className="text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded-lg p-3 flex items-center gap-2">
             <Unlock className="h-4 w-4" />
             <span className="font-semibold">You have unlimited access</span>
           </div>
@@ -240,7 +240,7 @@ export default function ContactUnlockButton({ propertyId, propertyTitle, propert
 
         {/* Error Message */}
         {error && (
-          <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2">
+          <div className="text-sm text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-lg p-3 flex items-center gap-2">
             <AlertCircle className="h-4 w-4" />
             {error}
           </div>
@@ -251,7 +251,7 @@ export default function ContactUnlockButton({ propertyId, propertyTitle, propert
           <button
             onClick={handleUnlock}
             disabled={unlocking || whatsappUnlocking}
-            className="inline-flex items-center justify-center gap-2 px-4 py-3 bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed text-sm font-medium"
+            className="tk-button inline-flex items-center justify-center gap-2 px-4 py-3 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed text-sm font-medium"
           >
             {unlocking ? (
               <>
@@ -270,7 +270,7 @@ export default function ContactUnlockButton({ propertyId, propertyTitle, propert
           <button
             onClick={handleWhatsAppUnlock}
             disabled={unlocking || whatsappUnlocking}
-            className="inline-flex items-center justify-center gap-2 px-4 py-3 bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed text-sm font-medium"
+            className="tk-button inline-flex items-center justify-center gap-2 px-4 py-3 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed text-sm font-medium"
           >
             {whatsappUnlocking ? (
               <>

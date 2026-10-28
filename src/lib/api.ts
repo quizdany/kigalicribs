@@ -31,7 +31,7 @@ export const signOut = async () => {
 // Property helpers
 export const getProperties = async (filters?: {
   location?: string
-  type?: string
+  type?: 'apartment' | 'house' | 'studio' | 'room'
   minPrice?: number
   maxPrice?: number
 }) => {

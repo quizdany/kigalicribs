@@ -30,14 +30,14 @@ export default function PropertyBadges({
     <div className="flex flex-wrap gap-2">
       {/* Listing Type Badge */}
       {listing_type === 'verified' && verification_status === 'verified' && (
-        <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
+        <span className="inline-flex items-center gap-1 px-3 py-1 bg-teal-100 text-teal-700 rounded-full text-sm font-medium">
           <ShieldCheck className="h-4 w-4" />
           Verified
         </span>
       )}
       
       {listing_type === 'premium_verified' && verification_status === 'verified' && (
-        <span className="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 rounded-full text-sm font-medium">
+        <span className="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-teal-100 to-amber-100 text-teal-700 rounded-full text-sm font-medium">
           <Star className="h-4 w-4" />
           Premium Verified
         </span>
@@ -51,14 +51,14 @@ export default function PropertyBadges({
 
       {/* Verification Status - Only show to property owner */}
       {isOwner && verification_status === 'pending' && (
-        <span className="inline-flex items-center gap-1 px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-medium">
+        <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium">
           <Clock className="h-4 w-4" />
           Pending Verification
         </span>
       )}
       
       {isOwner && verification_status === 'rejected' && (
-        <span className="inline-flex items-center gap-1 px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">
+        <span className="inline-flex items-center gap-1 px-3 py-1 bg-rose-100 text-rose-700 rounded-full text-sm font-medium">
           <AlertCircle className="h-4 w-4" />
           Verification Rejected
         </span>
@@ -66,29 +66,29 @@ export default function PropertyBadges({
 
       {/* Featured Badge */}
       {isFeatured && (
-        <span className="inline-flex items-center gap-1 px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-medium">
-          <Star className="h-4 w-4 fill-yellow-500" />
+        <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium">
+          <Star className="h-4 w-4 fill-amber-500" />
           Featured
         </span>
       )}
 
       {/* Priority Badge */}
       {isPriority && !isFeatured && (
-        <span className="inline-flex items-center gap-1 px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium">
+        <span className="inline-flex items-center gap-1 px-3 py-1 bg-teal-100 text-teal-700 rounded-full text-sm font-medium">
           ⬆️ Priority
         </span>
       )}
 
       {/* Expiry Warning */}
       {daysUntilExpiry !== null && daysUntilExpiry > 0 && daysUntilExpiry <= 30 && (
-        <span className="inline-flex items-center gap-1 px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium">
+        <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium">
           <Clock className="h-4 w-4" />
           Expires in {daysUntilExpiry} days
         </span>
       )}
       
       {daysUntilExpiry !== null && daysUntilExpiry <= 0 && (
-        <span className="inline-flex items-center gap-1 px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">
+        <span className="inline-flex items-center gap-1 px-3 py-1 bg-rose-100 text-rose-700 rounded-full text-sm font-medium">
           <AlertCircle className="h-4 w-4" />
           Expired
         </span>

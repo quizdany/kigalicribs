@@ -125,7 +125,7 @@ async function initiateMoMoPayment(request: PaymentRequest): Promise<PaymentResp
         partyId: formatPhoneNumber(request.phoneNumber)
       },
       payerMessage: getPaymentMessage(request.purpose),
-      payeeNote: `TuraNeza - ${request.purpose}`
+      payeeNote: `TuraKGL - ${request.purpose}`
     }
 
     console.log('MoMo payment payload:', JSON.stringify(paymentPayload, null, 2))
@@ -443,7 +443,7 @@ function getPaymentMessage(purpose: PaymentPurpose): string {
     unlimited_contact_access: 'Unlimited Contact Access',
     contact_unlock: 'Unlock Property Contact'
   }
-  return messages[purpose] || 'TuraNeza Payment'
+  return messages[purpose] || 'TuraKGL Payment'
 }
 
 // Pricing configuration (in RWF)

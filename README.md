@@ -1,3 +1,13 @@
+# TuraKGL
+
+Homes for rent in Kigali, directly from property owners. Next.js + Supabase.
+
+## Setup for renter requests, owner inbox and operations queue
+
+1. Run `supabase-agent-requests.sql` once in the Supabase SQL editor.
+2. Set `SUPABASE_SERVICE_ROLE_KEY` in the server environment (already used by admin verification and listing expiry).
+3. Optional: set `OPENAI_API_KEY` and `OPENAI_MODEL` to activate the AI conversation on `/assistant`. Search and request forms work without it.
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

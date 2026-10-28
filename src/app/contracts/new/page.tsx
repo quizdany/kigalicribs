@@ -188,11 +188,11 @@ function NewContractContent() {
 
   if (step === 'preview' || step === 'sign') {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <nav className="bg-white shadow-sm border-b print:hidden">
+      <div className="tk-page min-h-[60vh] bg-gray-50">
+        <div className="tk-subbar print:hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <Link href="/" className="text-gray-900 font-semibold">TuraNeza</Link>
-            <div className="flex items-center gap-3">
+            <h1 className="font-semibold text-gray-900">Lease agreement</h1>
+            <div className="flex flex-wrap items-center gap-3">
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value as 'english' | 'kinyarwanda')}
@@ -215,11 +215,11 @@ function NewContractContent() {
               )}
               {step === 'sign' && (
                 <>
-                  <button onClick={handlePrint} className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
+                  <button onClick={handlePrint} className="tk-button flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
                     <Printer className="h-4 w-4" />
                     Print
                   </button>
-                  <button onClick={handleDownload} className="flex items-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800">
+                  <button onClick={handleDownload} className="tk-button flex items-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800">
                     <Download className="h-4 w-4" />
                     Download PDF
                   </button>
@@ -227,7 +227,7 @@ function NewContractContent() {
               )}
             </div>
           </div>
-        </nav>
+        </div>
 
         {/* Signature Status Banner - Only shown in sign mode */}
         {step === 'sign' && (
@@ -282,10 +282,10 @@ function NewContractContent() {
         )}
 
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <div ref={printRef} className="bg-white shadow-lg rounded-lg p-12 print:shadow-none">
+          <div ref={printRef} className="tk-surface bg-white shadow-lg rounded-lg p-12 print:shadow-none">
             {/* Header */}
             <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              <h1 className="tk-title text-3xl font-bold text-gray-900 mb-2">
                 {language === 'english' ? 'RESIDENTIAL LEASE AGREEMENT' : 'AMASEZERANO YO GUKODESHA INZU'}
               </h1>
               <p className="text-sm text-gray-600">
@@ -306,14 +306,14 @@ function NewContractContent() {
 
             {/* Parties */}
             <div className="mb-8">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">
+              <h2 className="tk-section-title text-xl font-bold text-gray-800 mb-4">
                 {language === 'english' ? 'PARTIES TO THE AGREEMENT' : 'ABANTU BAGIZE AMASEZERANO'}
               </h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="border border-gray-300 rounded-lg p-4">
                   <h3 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                    <Home className="h-5 w-5 text-green-600" />
+                    <Home className="h-5 w-5 text-emerald-600" />
                     {language === 'english' ? 'LANDLORD (Lessor)' : 'NYIR\'INZU (Uwukodesha)'}
                   </h3>
                   <div className="space-y-2 text-sm">
@@ -326,7 +326,7 @@ function NewContractContent() {
 
                 <div className="border border-gray-300 rounded-lg p-4">
                   <h3 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                    <User className="h-5 w-5 text-blue-600" />
+                    <User className="h-5 w-5 text-teal-600" />
                     {language === 'english' ? 'TENANT (Lessee)' : 'UKODESHA (Uwukodeshwa)'}
                   </h3>
                   <div className="space-y-2 text-sm">
@@ -342,7 +342,7 @@ function NewContractContent() {
 
             {/* Property Details */}
             <div className="mb-8">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">
+              <h2 className="tk-section-title text-xl font-bold text-gray-800 mb-4">
                 {language === 'english' ? 'PROPERTY DESCRIPTION' : 'IBISOBANURO BY\'INZU'}
               </h2>
               <div className="bg-gray-50 border border-gray-300 rounded-lg p-4">
@@ -358,7 +358,7 @@ function NewContractContent() {
 
             {/* Lease Terms */}
             <div className="mb-8">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">
+              <h2 className="tk-section-title text-xl font-bold text-gray-800 mb-4">
                 {language === 'english' ? 'LEASE TERMS' : 'AMATEGEKO Y\'UBUKODE'}
               </h2>
               <div className="space-y-3 text-sm">
@@ -374,7 +374,7 @@ function NewContractContent() {
 
             {/* Terms and Conditions */}
             <div className="mb-8">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">
+              <h2 className="tk-section-title text-xl font-bold text-gray-800 mb-4">
                 {language === 'english' ? 'TERMS AND CONDITIONS' : 'AMABWIRIZA N\'AMATEGEKO'}
               </h2>
               
@@ -680,9 +680,9 @@ function NewContractContent() {
                   <p className="text-sm">{language === 'english' ? 'ID:' : 'Indangamuntu:'} _____________________</p>
                 </div>
 
-                <div className="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-3">
-                  <div className="border-b-2 border-yellow-600 mb-2 h-12"></div>
-                  <p className="text-sm font-semibold text-yellow-900">{language === 'english' ? 'Public Notary Seal & Signature' : 'Kashe n\'Umwanzuro bya Notaire'}</p>
+                <div className="bg-amber-50 border-2 border-amber-300 rounded-lg p-3">
+                  <div className="border-b-2 border-amber-600 mb-2 h-12"></div>
+                  <p className="text-sm font-semibold text-amber-900">{language === 'english' ? 'Public Notary Seal & Signature' : 'Kashe n\'Umwanzuro bya Notaire'}</p>
                   <p className="text-sm mt-2">{language === 'english' ? 'Name:' : 'Izina:'} _____________________</p>
                   <p className="text-sm">{language === 'english' ? 'License No:' : 'Nomero y\'uruhushya:'} _____________________</p>
                 </div>
@@ -712,7 +712,7 @@ function NewContractContent() {
                 {isLandlord && signatures.landlordSigned && !signatures.tenantSigned && (
                   <button 
                     onClick={handleShareWithTenant}
-                    className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 flex items-center gap-2"
+                    className="tk-button px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 flex items-center gap-2"
                   >
                     <Mail className="h-5 w-5" />
                     {language === 'english' ? 'Share with Tenant' : 'Ohereza Ukodesha'}
@@ -722,11 +722,11 @@ function NewContractContent() {
                 {/* Show Print/Download only when both have signed */}
                 {signatures.landlordSigned && signatures.tenantSigned && (
                   <>
-                    <button onClick={handlePrint} className="px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 flex items-center gap-2">
+                    <button onClick={handlePrint} className="tk-button px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 flex items-center gap-2">
                       <Printer className="h-5 w-5" />
                       {language === 'english' ? 'Print Agreement' : 'Icapira Amasezerano'}
                     </button>
-                    <button onClick={handleDownload} className="px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 flex items-center gap-2">
+                    <button onClick={handleDownload} className="tk-button px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 flex items-center gap-2">
                       <Download className="h-5 w-5" />
                       {language === 'english' ? 'Download PDF' : 'Pakurura PDF'}
                     </button>
@@ -741,11 +741,11 @@ function NewContractContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="tk-page min-h-[60vh] bg-gray-50">
       {/* Share Modal */}
       {showShareModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+          <div className="tk-surface bg-white rounded-lg shadow-xl max-w-md w-full p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">
                 {language === 'english' ? 'Share with Tenant' : 'Sangiza Ukodesha'}
@@ -765,14 +765,14 @@ function NewContractContent() {
             <div className="space-y-3">
               <button
                 onClick={handleShareByEmail}
-                className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                className="tk-button w-full flex items-center justify-center gap-3 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
               >
                 <Mail className="h-5 w-5" />
                 <span>{language === 'english' ? 'Share via Email' : 'Sangiza kuri Email'}</span>
               </button>
               <button
                 onClick={handleShareByWhatsApp}
-                className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                className="tk-button w-full flex items-center justify-center gap-3 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
               >
                 <MessageCircle className="h-5 w-5" />
                 <span>{language === 'english' ? 'Share via WhatsApp' : 'Sangiza kuri WhatsApp'}</span>
@@ -782,16 +782,10 @@ function NewContractContent() {
         </div>
       )}
 
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <Link href="/" className="text-gray-900 font-semibold">TuraNeza</Link>
-          <Link href="/properties" className="text-sm text-gray-600 hover:text-gray-900">Back to properties</Link>
-        </div>
-      </nav>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Generate Lease Agreement</h1>
+          <h1 className="tk-title text-3xl font-bold text-gray-900 mb-2">Generate Lease Agreement</h1>
           <p className="text-gray-600">Fill in the details below to create a customized lease agreement</p>
           {property && (
             <div className="mt-4 bg-gray-50 border border-gray-200 rounded-lg p-4">
@@ -802,12 +796,12 @@ function NewContractContent() {
           )}
         </div>
 
-        <div className="bg-white shadow-lg rounded-lg p-8">
+        <div className="tk-surface bg-white shadow-lg rounded-lg p-8">
           {/* Landlord Information */}
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-4">
-              <Home className="h-6 w-6 text-green-600" />
-              <h2 className="text-xl font-bold text-gray-900">Landlord Information</h2>
+              <Home className="h-6 w-6 text-emerald-600" />
+              <h2 className="tk-section-title text-xl font-bold text-gray-900">Landlord Information</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -817,7 +811,7 @@ function NewContractContent() {
                   name="landlordName"
                   value={formData.landlordName}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="tk-field w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   required
                 />
               </div>
@@ -827,7 +821,7 @@ function NewContractContent() {
                   name="landlordIdType"
                   value={formData.landlordIdType}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="tk-field w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 >
                   <option value="national-id">National ID</option>
                   <option value="passport">Passport</option>
@@ -842,7 +836,7 @@ function NewContractContent() {
                   name="landlordId"
                   value={formData.landlordId}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="tk-field w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   required
                 />
               </div>
@@ -853,7 +847,7 @@ function NewContractContent() {
                   name="landlordPhone"
                   value={formData.landlordPhone}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="tk-field w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   required
                 />
               </div>
@@ -864,7 +858,7 @@ function NewContractContent() {
                   name="landlordEmail"
                   value={formData.landlordEmail}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="tk-field w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   required
                 />
               </div>
@@ -874,8 +868,8 @@ function NewContractContent() {
           {/* Tenant Information */}
           <div className="mb-8 pt-8 border-t">
             <div className="flex items-center gap-2 mb-4">
-              <User className="h-6 w-6 text-blue-600" />
-              <h2 className="text-xl font-bold text-gray-900">Tenant Information</h2>
+              <User className="h-6 w-6 text-teal-600" />
+              <h2 className="tk-section-title text-xl font-bold text-gray-900">Tenant Information</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -885,7 +879,7 @@ function NewContractContent() {
                   name="tenantName"
                   value={formData.tenantName}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="tk-field w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   required
                 />
               </div>
@@ -895,7 +889,7 @@ function NewContractContent() {
                   name="tenantIdType"
                   value={formData.tenantIdType}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="tk-field w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 >
                   <option value="national-id">National ID</option>
                   <option value="passport">Passport</option>
@@ -910,7 +904,7 @@ function NewContractContent() {
                   name="tenantId"
                   value={formData.tenantId}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="tk-field w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   required
                 />
               </div>
@@ -921,7 +915,7 @@ function NewContractContent() {
                   name="tenantPhone"
                   value={formData.tenantPhone}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="tk-field w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   required
                 />
               </div>
@@ -932,7 +926,7 @@ function NewContractContent() {
                   name="tenantEmail"
                   value={formData.tenantEmail}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="tk-field w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   required
                 />
               </div>
@@ -943,7 +937,7 @@ function NewContractContent() {
                   name="tenantOccupation"
                   value={formData.tenantOccupation}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="tk-field w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   required
                 />
               </div>
@@ -953,8 +947,8 @@ function NewContractContent() {
           {/* Lease Terms */}
           <div className="mb-8 pt-8 border-t">
             <div className="flex items-center gap-2 mb-4">
-              <Calendar className="h-6 w-6 text-purple-600" />
-              <h2 className="text-xl font-bold text-gray-900">Lease Terms</h2>
+              <Calendar className="h-6 w-6 text-teal-600" />
+              <h2 className="tk-section-title text-xl font-bold text-gray-900">Lease Terms</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -964,7 +958,7 @@ function NewContractContent() {
                   name="startDate"
                   value={formData.startDate}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="tk-field w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   required
                 />
               </div>
@@ -975,7 +969,7 @@ function NewContractContent() {
                   name="endDate"
                   value={formData.endDate}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="tk-field w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   required
                 />
               </div>
@@ -986,7 +980,7 @@ function NewContractContent() {
                   name="monthlyRent"
                   value={formData.monthlyRent}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="tk-field w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   required
                 />
               </div>
@@ -997,7 +991,7 @@ function NewContractContent() {
                   name="securityDeposit"
                   value={formData.securityDeposit}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="tk-field w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   required
                 />
               </div>
@@ -1007,7 +1001,7 @@ function NewContractContent() {
                   name="paymentDueDay"
                   value={formData.paymentDueDay}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="tk-field w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 >
                   {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
                     <option key={day} value={day}>{day}</option>
@@ -1020,8 +1014,8 @@ function NewContractContent() {
           {/* Additional Terms */}
           <div className="mb-8 pt-8 border-t">
             <div className="flex items-center gap-2 mb-4">
-              <FileSignature className="h-6 w-6 text-orange-600" />
-              <h2 className="text-xl font-bold text-gray-900">Additional Terms</h2>
+              <FileSignature className="h-6 w-6 text-amber-600" />
+              <h2 className="tk-section-title text-xl font-bold text-gray-900">Additional Terms</h2>
             </div>
             
             <div className="space-y-4">
@@ -1034,7 +1028,7 @@ function NewContractContent() {
                         type="checkbox"
                         checked={formData.utilitiesIncluded.includes(utility)}
                         onChange={() => handleUtilitiesChange(utility)}
-                        className="w-4 h-4 text-green-600 rounded focus:ring-green-500"
+                        className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500"
                       />
                       <span className="text-sm text-gray-700">{utility}</span>
                     </label>
@@ -1049,7 +1043,7 @@ function NewContractContent() {
                     name="maintenanceResponsibility"
                     value={formData.maintenanceResponsibility}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="tk-field w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   >
                     <option value="landlord">Landlord (major repairs only)</option>
                     <option value="tenant">Tenant (all repairs)</option>
@@ -1063,7 +1057,7 @@ function NewContractContent() {
                     name="petPolicy"
                     value={formData.petPolicy}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="tk-field w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   >
                     <option value="not-allowed">Not Allowed</option>
                     <option value="allowed">Allowed</option>
@@ -1080,7 +1074,7 @@ function NewContractContent() {
                   onChange={handleInputChange}
                   rows={4}
                   placeholder="Add any special terms, conditions, or clauses specific to this lease..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-transparent"
+                  className="tk-field w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-transparent"
                 />
               </div>
             </div>
@@ -1088,12 +1082,12 @@ function NewContractContent() {
 
           {/* Generate Button */}
           <div className="flex justify-end gap-4 pt-6 border-t">
-            <Link href="/properties" className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
+            <Link href="/properties" className="tk-button px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
               Cancel
             </Link>
             <button
               onClick={handleGenerateLease}
-              className="px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 flex items-center gap-2 font-semibold"
+              className="tk-button px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 flex items-center gap-2 font-semibold"
             >
               <FileText className="h-5 w-5" />
               Generate Lease Agreement
@@ -1117,7 +1111,7 @@ function getOrdinalSuffix(num: number): string {
 
 export default function NewContractPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>}>
+    <Suspense fallback={<div className="tk-page min-h-[60vh] bg-gray-50 flex items-center justify-center">Loading...</div>}>
       <NewContractContent />
     </Suspense>
   )

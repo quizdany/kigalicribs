@@ -71,14 +71,14 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold mb-6 text-center">
-          {isLogin ? 'Login to TuraNeza' : 'Sign Up for TuraNeza'}
+    <div className="tk-page min-h-[60vh] flex items-center justify-center bg-gray-50">
+      <div className="tk-surface w-full max-w-md p-8 bg-white rounded-lg shadow-md">
+        <h2 className="tk-section-title text-2xl font-bold mb-6 text-center">
+          {isLogin ? 'Login to TuraKGL' : 'Sign Up for TuraKGL'}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="p-3 text-sm text-red-600 bg-red-50 rounded-lg border border-red-200">
+            <div className="p-3 text-sm text-rose-600 bg-rose-50 rounded-lg border border-rose-200">
               {error}
             </div>
           )}
@@ -93,7 +93,7 @@ export default function AuthPage() {
                 value={formData.fullName}
                 onChange={handleChange}
                 placeholder="John Doe"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="tk-field w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 required
               />
             </div>
@@ -107,7 +107,7 @@ export default function AuthPage() {
               value={formData.email}
               onChange={handleChange}
               placeholder="you@example.com"
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="tk-field w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
               required
             />
             <p className="text-xs text-gray-500">We'll send a verification link to this email</p>
@@ -121,7 +121,7 @@ export default function AuthPage() {
               value={formData.password}
               onChange={handleChange}
               placeholder="••••••••"
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="tk-field w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
               minLength={6}
               required
             />
@@ -130,7 +130,7 @@ export default function AuthPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className={`w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold ${
+            className={`tk-button w-full py-2 px-4 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-semibold ${
               isLoading ? 'opacity-50 cursor-not-allowed' : ''
             }`}
           >
@@ -174,7 +174,7 @@ export default function AuthPage() {
         </form>
         <div className="mt-4 text-center">
           <button
-            className="text-blue-600 hover:underline"
+            className="text-emerald-600 hover:underline"
             onClick={() => setIsLogin(!isLogin)}
           >
             {isLogin ? "Don't have an account? Sign Up" : 'Already have an account? Login'}
