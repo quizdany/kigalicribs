@@ -79,8 +79,8 @@ export default function SiteHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 px-4 pt-3 print:hidden">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 rounded-2xl border border-white/60 bg-white/80 py-2 pl-4 pr-2 shadow-[0_8px_24px_rgb(18_46_40/8%)] backdrop-blur-xl">
+      <header className="sticky top-0 z-40 border-b border-white/60 bg-white/80 shadow-[0_8px_24px_rgb(18_46_40/8%)] backdrop-blur-xl print:hidden">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
           <Link href="/" className="flex shrink-0 items-center text-gray-900" aria-label="TuraKGL home">
             <img src="/images/turakgl-home-finder.svg" alt="" className="h-8 w-8" />
             <Wordmark className="ml-2 text-xl" />
