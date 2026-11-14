@@ -57,7 +57,9 @@ export default function SiteHeader() {
       if (mounted) setIsAdmin((data as { role?: string } | null)?.role === 'admin')
     }
     supabase.auth.getSession().then(({ data }) => { if (mounted) check(data.session?.user.id) })
-    const { data: subscription } = supabase.auth.onAuthStateChange((_event: any, session: any) => check(session?.user?.id))
+    // Defer the query: awaiting Supabase inside this callback deadlocks its auth lock,
+    // which left every later getSession() (and pages waiting on it) hanging.
+    const { data: subscription } = supabase.auth.onAuthStateChange((_event: any, session: any) => { setTimeout(() => check(session?.user?.id), 0) })
     return () => {
       mounted = false
       subscription?.subscription?.unsubscribe?.()
