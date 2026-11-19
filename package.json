@@ -6,7 +6,10 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "tsx --test tests/*.test.ts",
+    "knowledge:ingest": "tsx --env-file=.env.local scripts/ingest-knowledge.ts",
+    "knowledge:eval": "tsx --env-file-if-exists=.env.local scripts/eval-rag.ts"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",
@@ -32,6 +35,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.5.24",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   }
 }

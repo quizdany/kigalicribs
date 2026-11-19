@@ -8,6 +8,22 @@ Homes for rent in Kigali, directly from property owners. Next.js + Supabase.
 2. Set `SUPABASE_SERVICE_ROLE_KEY` in the server environment (already used by admin verification and listing expiry).
 3. Optional: set `OPENAI_API_KEY` and `OPENAI_MODEL` to activate the AI conversation on `/assistant`. Search and request forms work without it.
 
+## AI assistant (RAG)
+
+The assistant on `/assistant` uses two tools:
+
+- `search_properties` – live listings from Supabase
+- `search_knowledge` – RAG over the help, terms and privacy pages, with cited sources
+
+Retrieval combines pgvector and BM25 (reciprocal rank fusion) and falls back to BM25 if the vector store is unavailable. Details in [docs/RAG.md](docs/RAG.md).
+
+Setup:
+
+1. Run `supabase-knowledge-rag.sql` in Supabase.
+2. Set `OPENAI_API_KEY`, `OPENAI_MODEL` and `SUPABASE_SERVICE_ROLE_KEY` in `.env.local` (optional: `OPENAI_EMBEDDING_MODEL`).
+3. `npm run knowledge:ingest` – re-run after editing `src/lib/knowledge/sources.ts`.
+4. `npm run knowledge:eval` to check retrieval, `npm test` for tests.
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

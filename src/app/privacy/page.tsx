@@ -1,14 +1,9 @@
 import Link from 'next/link'
+import { privacySections } from '@/lib/knowledge/sources'
 
 export const metadata = { title: 'Privacy policy', description: 'What TuraKGL stores about renters and property owners, and why.' }
 
-const sections = [
-  ['What we store', 'Your account email and name, the listings you publish, the viewing requests, reports and support messages you send, which owner contacts you have unlocked, and the status of payments you make for listing upgrades or contact access.'],
-  ['What stays on your device', 'Your shortlist of saved homes is kept in your browser only. Clearing your browser data removes it.'],
-  ['Who sees your details', 'Owner phone numbers and emails are shown only to signed in renters who have unlocked that listing. Viewing requests are visible to you and to the owner of the property. TuraKGL staff can read requests and reports to review them.'],
-  ['Payments', 'Mobile money payments are processed by MTN MoMo or Airtel Money. We keep the payment reference and status, not your mobile money PIN.'],
-  ['Your choices', 'You can update or mark your listings as rented at any time from My properties. To delete your account and the data linked to it, send a support request from the assistant page.'],
-]
+const sections = privacySections.map(s => [s.title, s.body])
 
 export default function Privacy() {
   return (
