@@ -1,15 +1,9 @@
 import Link from 'next/link'
+import { termsSections } from '@/lib/knowledge/sources'
 
 export const metadata = { title: 'Terms of use', description: 'The rules for renters and property owners using TuraKGL.' }
 
-const sections = [
-  ['What TuraKGL does', 'TuraKGL lists homes for rent in Kigali and puts renters in touch with property owners. We are not a party to any lease, and we do not collect rent or deposits.'],
-  ['Owner listings', 'Owners must list only properties they own or are authorised to rent out, with accurate rent, photos and availability. Listings from brokers or agents posing as owners may be removed.'],
-  ['Renter conduct', 'Use owner contact details only to ask about the listed property. Do not resell or publish them.'],
-  ['Paid features', 'Listing upgrades and unlimited contact access are paid once through mobile money. The price is shown before you pay.'],
-  ['Before you pay rent', 'Confirm who you are dealing with, view the property where possible, and read the full rental terms. A listing or a viewing request is not a guarantee that a home is available.'],
-  ['Reporting problems', 'Use the report option on any listing for brokers, unavailable homes, incorrect details or suspected scams. Reports are reviewed by the TuraKGL team.'],
-]
+const sections = termsSections.map(s => [s.title, s.body])
 
 export default function Terms() {
   return (
